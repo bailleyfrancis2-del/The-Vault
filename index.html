@@ -95,7 +95,6 @@
 
         .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; }
         input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important; }
-        
         .sync-indicator { font-size: 13px; font-weight: bold; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid var(--border); color: #fff; text-align: center; margin-top: 10px; }
     </style>
 </head>
@@ -146,27 +145,34 @@
     window.vaultDB = db;
     window.firestore = { doc, setDoc, onSnapshot };
     
-    // 1. Initial Load from Cache
+    // Initial Load
     const cache = localStorage.getItem('vault_cache_bailey');
     if(cache) {
         window.mediaList = JSON.parse(cache);
         render();
     }
 
-    // 2. Cloud Listener (Strictly for initial sync only)
-    let firstSync = true;
+    // Cloud Listener
     window.firestore.onSnapshot(window.firestore.doc(db, "archives", "user_bailey"), (doc) => {
         if(doc.exists()) {
             const newList = doc.data().list || [];
             window.syncMsg = "CLOUD SYNCED";
             
-            // Only force a render if it's the very first time the app opens
-            if (firstSync) {
-                window.mediaList = newList;
-                localStorage.setItem('vault_cache_bailey', JSON.stringify(newList));
-                render();
-                firstSync = false;
-            }
+            // Only update data silently; don't trigger a full grid wipe
+            window.mediaList = newList;
+            localStorage.setItem('vault_cache_bailey', JSON.stringify(newList));
+            
+            // Silently sync the active buttons in the UI
+            newList.forEach(item => {
+                const card = document.querySelector(`[data-tmdbid="${item.tmdbId}"]`);
+                if (card) {
+                    const btns = card.querySelectorAll('.btn-status');
+                    btns.forEach(b => b.classList.remove('active-watch', 'active-pulse', 'active-done'));
+                    if (item.status === 'watching') card.querySelector('.watch-btn').classList.add('active-watch');
+                    if (item.status === 'pulse') card.querySelector('.pulse-btn').classList.add('active-pulse');
+                    if (item.status === 'watched') card.querySelector('.done-btn').classList.add('active-done');
+                }
+            });
         }
     });
 </script>
@@ -178,7 +184,6 @@
     let currentFilter = 'all';
     let isSearch = false;
 
-    // Save strictly to local + cloud without ever calling render()
     async function save() {
         localStorage.setItem('vault_cache_bailey', JSON.stringify(window.mediaList));
         await window.firestore.setDoc(window.firestore.doc(window.vaultDB, "archives", "user_bailey"), { list: window.mediaList });
@@ -188,27 +193,37 @@
         if(isSearch) return;
         const grid = document.getElementById('mainGrid');
         const filterStr = document.getElementById('filterInput').value.toLowerCase();
-        grid.innerHTML = '';
         
-        window.mediaList.forEach((item, idx) => {
-            const passF = (currentFilter === 'all') || (currentFilter === item.status) || (currentFilter === 'animated' && (item.isAnimated || item.isAnime));
-            if(item.name.toLowerCase().includes(filterStr) && passF) {
+        // If the grid is empty, do a full build. If not, only filter visibility.
+        if (grid.innerHTML === '') {
+            window.mediaList.forEach((item, idx) => {
                 const div = document.createElement('div');
                 div.className = 'item-card';
+                div.setAttribute('data-tmdbid', item.tmdbId);
                 div.innerHTML = `
                     <img class="poster" src="${item.poster}" onclick="openItem(${idx})">
                     <div class="title" onclick="openItem(${idx})">${item.name}</div>
                     <div class="controls">
-                        <button class="btn-status ${item.status==='watching'?'active-watch':''}" onclick="setStatus(${idx},'watching', this)">To Watch</button>
-                        <button class="btn-status ${item.status==='pulse'?'active-pulse':''}" onclick="setStatus(${idx},'pulse', this)">Pulse</button>
-                        <button class="btn-status ${item.status==='watched'?'active-done':''}" onclick="setStatus(${idx},'watched', this)">Done</button>
+                        <button class="btn-status watch-btn ${item.status==='watching'?'active-watch':''}" onclick="setStatus(${idx},'watching', this)">To Watch</button>
+                        <button class="btn-status pulse-btn ${item.status==='pulse'?'active-pulse':''}" onclick="setStatus(${idx},'pulse', this)">Pulse</button>
+                        <button class="btn-status done-btn ${item.status==='watched'?'active-done':''}" onclick="setStatus(${idx},'watched', this)">Done</button>
                     </div>`;
                 grid.appendChild(div);
+            });
+        }
+
+        // Handle filtering without wiping the grid
+        const cards = grid.querySelectorAll('.item-card');
+        window.mediaList.forEach((item, idx) => {
+            const card = document.querySelector(`[data-tmdbid="${item.tmdbId}"]`);
+            if (card) {
+                const passF = (currentFilter === 'all') || (currentFilter === item.status) || (currentFilter === 'animated' && (item.isAnimated || item.isAnime));
+                const passS = item.name.toLowerCase().includes(filterStr);
+                card.style.display = (passF && passS) ? 'flex' : 'none';
             }
         });
     }
 
-    // Surgical UI update - This is the flicker killer
     function setStatus(idx, s, btnEl) { 
         window.mediaList[idx].status = s; 
         save(); 
@@ -220,7 +235,6 @@
         if (s === 'watching') btnEl.classList.add('active-watch');
         else if (s === 'pulse') btnEl.classList.add('active-pulse');
         else if (s === 'watched') btnEl.classList.add('active-done');
-        // NO RENDER() CALL HERE.
     }
 
     async function performFullSearch() {
@@ -231,7 +245,7 @@
         const results = data.results.filter(i => i.media_type !== 'person');
         isSearch = true;
         document.getElementById('backBtn').style.display = 'block';
-        document.getElementById('pageTitle').innerText = "DISCOVERING...";
+        document.getElementById('pageTitle').innerText = "SEARCHING...";
         const grid = document.getElementById('mainGrid');
         grid.innerHTML = '';
         results.forEach(item => {
@@ -246,11 +260,11 @@
         if(!window.mediaList.some(v => v.tmdbId === item.id)) {
             window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`, type: item.media_type, tmdbId: item.id, isAnimated: item.genre_ids?.includes(16), checkedEpisodes: [] });
             save();
-            render();
+            location.reload(); // Hard refresh only on new add to reset the grid
         }
     }
 
-    function exitSearch() { isSearch = false; document.getElementById('backBtn').style.display='none'; document.getElementById('pageTitle').innerText="THE VAULT"; render(); }
+    function exitSearch() { isSearch = false; location.reload(); }
     
     function setFilter(f, btn) { 
         if(isSearch) exitSearch(); 
@@ -323,7 +337,7 @@
 
     function toggleEp(idx, id) { if(!window.mediaList[idx].checkedEpisodes) window.mediaList[idx].checkedEpisodes = []; const i = window.mediaList[idx].checkedEpisodes.indexOf(id); if(i > -1) window.mediaList[idx].checkedEpisodes.splice(i, 1); else { window.mediaList[idx].checkedEpisodes.push(id); if(window.mediaList[idx].status==='watching') window.mediaList[idx].status = 'pulse'; } save(); }
     function toggleTag(idx, p) { window.mediaList[idx][p] = !window.mediaList[idx][p]; save(); openItem(idx); }
-    function deleteItem(idx) { if(confirm("Delete?")) { window.mediaList.splice(idx, 1); save(); closeModal(); render(); } }
+    function deleteItem(idx) { if(confirm("Delete?")) { window.mediaList.splice(idx, 1); save(); location.reload(); } }
     function closeModal() { document.getElementById('modal').classList.remove('active'); }
 </script>
 </body>
