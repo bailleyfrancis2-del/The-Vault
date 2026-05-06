@@ -53,7 +53,6 @@
             background: rgba(255,255,255,0.03); border-radius: 20px;
             padding: 10px; border: 1px solid var(--border);
             display: flex; flex-direction: column; gap: 10px;
-            transition: transform 0.3s var(--glide);
         }
         
         .poster { width: 100%; aspect-ratio: 2/3; border-radius: 14px; object-fit: cover; background: #111; }
@@ -90,7 +89,7 @@
             background: rgba(0,0,0,0.95); backdrop-filter: blur(35px); border-top: 1px solid var(--border);
             display: flex; justify-content: space-around; align-items: center; padding-bottom: var(--safe-bottom); z-index: 5000;
         }
-        .nav-item { background: none; border: none; color: rgba(255,255,255,0.3); display: flex; flex-direction: column; align-items: center; font-size: 10px; flex: 1; transition: color 0.3s; }
+        .nav-item { background: none; border: none; color: rgba(255,255,255,0.3); display: flex; flex-direction: column; align-items: center; font-size: 10px; flex: 1; }
         .nav-item.active { color: var(--glow); }
         .nav-icon { width: 24px; height: 24px; background: currentColor; mask-size: contain; mask-repeat: no-repeat; -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; margin-bottom: 5px; }
 
@@ -155,17 +154,17 @@
         render();
     }
 
-    // THE CRITICAL FIX: Track local updates to avoid re-renders
-    window.lastLocalSave = 0;
+    // TRACK LOCAL ACTION TIME
+    window.lastLocalAction = 0;
 
     window.firestore.onSnapshot(window.firestore.doc(db, "archives", "user_bailey"), (doc) => {
         if(doc.exists()) {
             const newList = doc.data().list || [];
             
-            // Check if this update came from a remote device vs our own recent click
-            const isFreshRemoteUpdate = (Date.now() - window.lastLocalSave) > 3000;
+            // IF we did something locally in the last 5 seconds, IGNORE cloud updates
+            const isSelfSync = (Date.now() - window.lastLocalAction) < 5000;
             
-            if (isFreshRemoteUpdate && JSON.stringify(newList) !== JSON.stringify(window.mediaList)) {
+            if (!isSelfSync && JSON.stringify(newList) !== JSON.stringify(window.mediaList)) {
                 window.mediaList = newList;
                 localStorage.setItem('vault_cache_bailey', JSON.stringify(window.mediaList));
                 render();
@@ -184,7 +183,7 @@
     let isSearch = false;
 
     async function save() {
-        window.lastLocalSave = Date.now(); // Mark this as a local action
+        window.lastLocalAction = Date.now(); // SET THE BLOCKER
         localStorage.setItem('vault_cache_bailey', JSON.stringify(window.mediaList));
         await window.firestore.setDoc(window.firestore.doc(window.vaultDB, "archives", "user_bailey"), { list: window.mediaList });
     }
@@ -213,10 +212,10 @@
     }
 
     function setStatus(idx, s, btnEl) { 
+        window.lastLocalAction = Date.now(); // BLOCK THE FLICKER
         window.mediaList[idx].status = s; 
-        save(); // Triggers cloud update but marks it as local
+        save(); 
 
-        // UI update ONLY for the buttons clicked
         const controls = btnEl.parentElement;
         const btns = controls.querySelectorAll('.btn-status');
         btns.forEach(b => b.classList.remove('active-watch', 'active-pulse', 'active-done'));
@@ -224,6 +223,8 @@
         if (s === 'watching') btnEl.classList.add('active-watch');
         else if (s === 'pulse') btnEl.classList.add('active-pulse');
         else if (s === 'watched') btnEl.classList.add('active-done');
+        
+        // NO RENDER() CALL. NO REFRESH.
     }
 
     async function performFullSearch() {
@@ -246,6 +247,7 @@
     }
 
     function addItem(item) {
+        window.lastLocalAction = Date.now();
         if(!window.mediaList.some(v => v.tmdbId === item.id)) {
             window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`, type: item.media_type, tmdbId: item.id, isAnimated: item.genre_ids?.includes(16), checkedEpisodes: [] });
             save();
@@ -294,7 +296,7 @@
         const modal = document.getElementById('modal');
         const body = document.getElementById('modalBody');
         modal.classList.add('active');
-        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING...</div>';
+        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING MISSION LOGS...</div>';
         try {
             const res = await fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}?api_key=${tmdbKey}`);
             const data = await res.json();
@@ -325,9 +327,16 @@
         document.getElementById('epList').innerHTML = data.episodes.map(ep => `<div style="display:flex; gap:15px; margin-bottom:18px; border-bottom:1px solid #222; padding-bottom:12px; text-align:left;"><input type="checkbox" style="width:28px; height:28px; accent-color:var(--glow);" ${item.checkedEpisodes?.includes(ep.id)?'checked':''} onchange="toggleEp(${idx},${ep.id})"><div><strong>${ep.episode_number}. ${ep.name}</strong></div></div>`).join('');
     }
 
-    function toggleEp(idx, id) { if(!window.mediaList[idx].checkedEpisodes) window.mediaList[idx].checkedEpisodes = []; const i = window.mediaList[idx].checkedEpisodes.indexOf(id); if(i > -1) window.mediaList[idx].checkedEpisodes.splice(i, 1); else { window.mediaList[idx].checkedEpisodes.push(id); if(window.mediaList[idx].status==='watching') window.mediaList[idx].status = 'pulse'; } save(); }
-    function toggleTag(idx, p) { window.mediaList[idx][p] = !window.mediaList[idx][p]; save(); openItem(idx); }
-    function deleteItem(idx) { if(confirm("Delete?")) { window.mediaList.splice(idx, 1); save(); closeModal(); render(); } }
+    function toggleEp(idx, id) { 
+        window.lastLocalAction = Date.now();
+        if(!window.mediaList[idx].checkedEpisodes) window.mediaList[idx].checkedEpisodes = []; 
+        const i = window.mediaList[idx].checkedEpisodes.indexOf(id); 
+        if(i > -1) window.mediaList[idx].checkedEpisodes.splice(i, 1); 
+        else { window.mediaList[idx].checkedEpisodes.push(id); if(window.mediaList[idx].status==='watching') window.mediaList[idx].status = 'pulse'; } 
+        save(); 
+    }
+    function toggleTag(idx, p) { window.lastLocalAction = Date.now(); window.mediaList[idx][p] = !window.mediaList[idx][p]; save(); openItem(idx); }
+    function deleteItem(idx) { window.lastLocalAction = Date.now(); if(confirm("Delete?")) { window.mediaList.splice(idx, 1); save(); closeModal(); render(); } }
     function closeModal() { document.getElementById('modal').classList.remove('active'); }
 </script>
 </body>
