@@ -53,6 +53,7 @@
             background: rgba(255,255,255,0.03); border-radius: 20px;
             padding: 10px; border: 1px solid var(--border);
             display: flex; flex-direction: column; gap: 10px;
+            transition: transform 0.3s var(--glide);
         }
         
         .poster { width: 100%; aspect-ratio: 2/3; border-radius: 14px; object-fit: cover; background: #111; }
@@ -154,11 +155,17 @@
         render();
     }
 
+    // THE CRITICAL FIX: Track local updates to avoid re-renders
+    window.lastLocalSave = 0;
+
     window.firestore.onSnapshot(window.firestore.doc(db, "archives", "user_bailey"), (doc) => {
         if(doc.exists()) {
             const newList = doc.data().list || [];
-            // ONLY re-render if something actually changed in the background
-            if (JSON.stringify(newList) !== JSON.stringify(window.mediaList)) {
+            
+            // Check if this update came from a remote device vs our own recent click
+            const isFreshRemoteUpdate = (Date.now() - window.lastLocalSave) > 3000;
+            
+            if (isFreshRemoteUpdate && JSON.stringify(newList) !== JSON.stringify(window.mediaList)) {
                 window.mediaList = newList;
                 localStorage.setItem('vault_cache_bailey', JSON.stringify(window.mediaList));
                 render();
@@ -177,6 +184,7 @@
     let isSearch = false;
 
     async function save() {
+        window.lastLocalSave = Date.now(); // Mark this as a local action
         localStorage.setItem('vault_cache_bailey', JSON.stringify(window.mediaList));
         await window.firestore.setDoc(window.firestore.doc(window.vaultDB, "archives", "user_bailey"), { list: window.mediaList });
     }
@@ -204,12 +212,11 @@
         });
     }
 
-    // THE FIX: Only update the buttons, don't call render()
     function setStatus(idx, s, btnEl) { 
         window.mediaList[idx].status = s; 
-        save(); 
+        save(); // Triggers cloud update but marks it as local
 
-        // Update the buttons visually right now
+        // UI update ONLY for the buttons clicked
         const controls = btnEl.parentElement;
         const btns = controls.querySelectorAll('.btn-status');
         btns.forEach(b => b.classList.remove('active-watch', 'active-pulse', 'active-done'));
@@ -217,19 +224,17 @@
         if (s === 'watching') btnEl.classList.add('active-watch');
         else if (s === 'pulse') btnEl.classList.add('active-pulse');
         else if (s === 'watched') btnEl.classList.add('active-done');
-        
-        // Notice: NO render() call here.
     }
 
     async function performFullSearch() {
         const q = document.getElementById('showInput').value;
         if(!q || !tmdbKey) return;
-        const res = await fetch(`https://api.themoviedb.org/3/search?api_key=${tmdbKey}&query=${encodeURIComponent(q)}&include_adult=false`);
+        const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(q)}&include_adult=false`);
         const data = await res.json();
-        const results = data.results || [];
+        const results = data.results.filter(i => i.media_type !== 'person');
         isSearch = true;
         document.getElementById('backBtn').style.display = 'block';
-        document.getElementById('pageTitle').innerText = "SEARCHING...";
+        document.getElementById('pageTitle').innerText = "DISCOVERING...";
         const grid = document.getElementById('mainGrid');
         grid.innerHTML = '';
         results.forEach(item => {
@@ -242,7 +247,7 @@
 
     function addItem(item) {
         if(!window.mediaList.some(v => v.tmdbId === item.id)) {
-            window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`, type: item.media_type || 'movie', tmdbId: item.id, isAnimated: item.genre_ids?.includes(16), checkedEpisodes: [] });
+            window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`, type: item.media_type, tmdbId: item.id, isAnimated: item.genre_ids?.includes(16), checkedEpisodes: [] });
             save();
             render();
         }
@@ -289,7 +294,7 @@
         const modal = document.getElementById('modal');
         const body = document.getElementById('modalBody');
         modal.classList.add('active');
-        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING MISSION LOGS...</div>';
+        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING...</div>';
         try {
             const res = await fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}?api_key=${tmdbKey}`);
             const data = await res.json();
