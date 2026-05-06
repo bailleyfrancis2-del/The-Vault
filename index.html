@@ -14,7 +14,6 @@
             --accent: #ffcc00; 
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
-            /* Ultra-smooth slow glide */
             --bezier: cubic-bezier(0.22, 1, 0.36, 1); 
         }
 
@@ -39,6 +38,7 @@
             -webkit-overflow-scrolling: touch;
         }
 
+        /* Responsive Grid */
         .media-grid {
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -58,34 +58,39 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
 
-        .btn-main { 
-            background: var(--glow); color: #05162d; border: none; 
-            padding: 12px 20px; border-radius: 14px; font-weight: bold; 
-            cursor: pointer; transition: all 0.4s var(--bezier);
-            font-size: 14px;
-        }
-        .btn-main:active { transform: scale(0.95); opacity: 0.9; }
-
+        /* --- THE SMOOTH ENTRY ANIMATION --- */
         .item-card {
             background: rgba(255,255,255,0.03); border-radius: 20px;
             padding: 10px; border: 1px solid var(--border);
             display: flex; flex-direction: column; gap: 10px;
-            transition: transform 0.5s var(--bezier);
+            transition: all 0.8s var(--bezier);
+            animation: glideIn 0.9s var(--bezier) backwards;
+            will-change: transform, opacity;
         }
+
+        @keyframes glideIn {
+            from { opacity: 0; transform: translate3d(0, 30px, 0); }
+            to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+
+        .item-card:active { transform: scale(0.94); }
         
         .poster { width: 100%; aspect-ratio: 2/3; border-radius: 14px; object-fit: cover; background: #111; }
         .title { font-size: 0.85em; font-weight: 600; text-align: center; min-height: 2.4em; color: rgba(255,255,255,0.9); }
 
-        /* Updated Buttons to match Desktop labels */
+        /* --- DESKTOP STYLE BUTTONS --- */
+        .controls { display: flex; gap: 4px; width: 100%; }
         .btn-status { 
             flex: 1; font-size: 8px; padding: 10px 0; border-radius: 9px; 
             background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: rgba(255,255,255,0.4);
-            text-transform: uppercase; font-weight: 800; transition: 0.4s var(--bezier);
+            text-transform: uppercase; font-weight: 800; transition: all 0.4s var(--bezier);
+            white-space: nowrap;
         }
         .active-watch { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(255,204,0,0.1) !important; box-shadow: 0 0 10px rgba(255,204,0,0.2); }
         .active-pulse { border-color: var(--glow) !important; color: var(--glow) !important; background: rgba(120,169,255,0.1) !important; box-shadow: 0 0 10px rgba(120,169,255,0.2); }
         .active-done { border-color: #4caf50 !important; color: #4caf50 !important; background: rgba(76,175,80,0.1) !important; box-shadow: 0 0 10px rgba(76,175,80,0.2); }
 
+        /* --- UI ELEMENTS --- */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: calc(75px + var(--safe-bottom));
@@ -94,46 +99,25 @@
             display: flex; justify-content: space-around; align-items: center;
             padding-bottom: var(--safe-bottom); z-index: 5000;
         }
-        .nav-item { 
-            background: none; border: none; color: rgba(255,255,255,0.3); 
-            display: flex; flex-direction: column; align-items: center; font-size: 10px; flex: 1;
-            transition: color 0.4s var(--bezier);
-        }
+        .nav-item { background: none; border: none; color: rgba(255,255,255,0.3); display: flex; flex-direction: column; align-items: center; font-size: 10px; flex: 1; }
         .nav-item.active { color: var(--glow); }
         .nav-icon { width: 24px; height: 24px; background: currentColor; mask-size: contain; mask-repeat: no-repeat; -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; margin-bottom: 5px; }
 
-        /* MODAL - Slower, more elegant "Decelerate" glide */
         .modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
             z-index: 9000; display: none; align-items: center; justify-content: center;
             opacity: 0; transition: opacity 0.8s var(--bezier);
         }
         .modal.active { display: flex; opacity: 1; }
-        
         .modal-content { 
             width: 92%; max-width: 450px; max-height: 82vh; background: #0a111f; 
-            border: 1px solid var(--border); border-radius: 30px;
-            padding: 30px; overflow-y: auto; 
-            transform: scale(0.92) translate3d(0, 40px, 0); 
-            transition: transform 0.8s var(--bezier);
-            box-shadow: 0 35px 90px rgba(0,0,0,0.95);
+            border: 1px solid var(--border); border-radius: 30px; padding: 30px; overflow-y: auto; 
+            transform: scale(0.92) translate3d(0, 40px, 0); transition: transform 0.8s var(--bezier);
         }
         .modal.active .modal-content { transform: scale(1) translate3d(0, 0, 0); }
 
-        .modal-header { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 25px; text-align: center; }
-        .modal-poster { width: 140px; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        .modal-info h3 { margin: 0; color: var(--glow); font-size: 1.5em; letter-spacing: 1px; }
-        .modal-info p { font-size: 0.9em; line-height: 1.6; opacity: 0.7; margin-top: 15px; }
-
-        .modal-actions { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-top: 25px; }
-        .btn-action { 
-            width: 100%; padding: 18px; border-radius: 16px; border: none; 
-            font-weight: 800; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;
-            cursor: pointer; transition: 0.4s var(--bezier);
-        }
-        .btn-toon { background: var(--accent); color: #000; }
-        .btn-delete { background: rgba(255, 68, 68, 0.05); color: #ff4444; border: 1px solid rgba(255, 68, 68, 0.3); }
-
+        .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; transition: 0.4s var(--bezier); font-size: 14px; }
+        input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important; }
         #syncStatus { position: fixed; top: calc(var(--safe-top) + 15px); left: 20px; font-size: 9px; color: var(--glow); z-index: 6000; font-weight: bold; }
     </style>
 </head>
@@ -145,11 +129,11 @@
     <div class="scroll-view">
         <div class="card">
             <h2 id="pageTitle" style="margin: 0 0 15px 0; font-size: 1.4em; letter-spacing: 4px; font-weight: 300; text-align: center;">THE VAULT</h2>
-            <div class="search-row">
+            <div class="search-row" style="display:flex; gap:10px; margin-bottom:15px;">
                 <input type="text" id="showInput" placeholder="Initialize Entry..." onkeydown="if(event.key==='Enter') performFullSearch()">
                 <button class="btn-main" onclick="performFullSearch()">ENGAGE</button>
             </div>
-            <input type="text" id="filterInput" style="height:42px; background:rgba(0,0,0,0.3);" placeholder="Search Archive..." onkeyup="render()">
+            <input type="text" id="filterInput" style="width:100%; height:42px; background:rgba(0,0,0,0.3);" placeholder="Search Archive..." onkeyup="render()">
         </div>
 
         <button id="backBtn" class="btn-main" style="display:none; width:100%; margin-bottom:20px; padding:18px;" onclick="exitSearch()">← RETURN TO ARCHIVE</button>
@@ -217,7 +201,11 @@
             if(item.name.toLowerCase().includes(filterStr) && passF) {
                 const div = document.createElement('div');
                 div.className = 'item-card';
+                // Delay each card's animation slightly for a "wave" effect
+                div.style.animationDelay = `${idx * 0.03}s`;
+                
                 let progressUI = (item.type === 'tv' && item.totalEpisodes) ? `<div class="progress-container"><div class="progress-fill" style="width:${((item.checkedEpisodes?.length || 0) / item.totalEpisodes) * 100}%"></div></div>` : '';
+                
                 div.innerHTML = `
                     <div class="poster-container" onclick="openItem(${idx})"><img class="poster" src="${item.poster || ''}"></div>
                     <div class="info" onclick="openItem(${idx})"><strong>${item.name}</strong>${progressUI}</div>
@@ -238,13 +226,11 @@
         const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(q)}&include_adult=false`);
         const data = await res.json();
         const results = data.results.filter(i => i.media_type !== 'person');
-        
         isSearch = true;
         document.getElementById('backBtn').style.display = 'block';
         document.getElementById('pageTitle').innerText = "DISCOVERING...";
         const grid = document.getElementById('mainGrid');
         grid.innerHTML = '';
-
         results.forEach(item => {
             const already = window.mediaList.some(v => v.tmdbId === item.id);
             const div = document.createElement('div');
@@ -272,42 +258,27 @@
         }
     }
 
-    function setStatus(idx, s) { window.mediaList[idx].status = s; save(); }
+    function setStatus(idx, s) { window.mediaList[idx].status = s; save(); render(); }
     function exitSearch() { isSearch = false; document.getElementById('backBtn').style.display='none'; document.getElementById('pageTitle').innerText="THE VAULT"; document.getElementById('showInput').value=''; render(); }
-    
-    function setFilter(f, btn) {
-        if(isSearch) exitSearch();
-        currentFilter = f;
-        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        render();
-    }
-
+    function setFilter(f, btn) { if(isSearch) exitSearch(); currentFilter = f; document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(); }
     async function openItem(idx) {
         const item = window.mediaList[idx];
         const modal = document.getElementById('modal');
         const body = document.getElementById('modalBody');
         modal.classList.add('active');
-        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING LOGS...</div>';
-        
+        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING MISSION LOGS...</div>';
         try {
             const res = await fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}?api_key=${tmdbKey}`);
             const data = await res.json();
-            
             body.innerHTML = `
-                <div class="modal-header">
-                    <img src="${item.poster}" class="modal-poster">
-                    <div class="modal-info">
-                        <h3>${item.name}</h3>
-                        <p>${data.overview || 'Mission summary unavailable.'}</p>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn-action btn-toon" onclick="toggleTag(${idx}, 'isAnimated')">${item.isAnimated?'UNTAG ANIMATED':'TAG AS ANIMATED'}</button>
-                    <button class="btn-action btn-delete" onclick="deleteItem(${idx})">ERASE RECORD</button>
-                </div>
-                <div id="epArea"></div>
-            `;
+                <div style="display:flex; flex-direction:column; align-items:center; text-align:center;">
+                    <img src="${item.poster}" style="width:140px; border-radius:18px; margin-bottom:20px;">
+                    <h3 style="color:var(--glow); margin:0;">${item.name}</h3>
+                    <p style="font-size:0.9em; line-height:1.6; opacity:0.7; margin:15px 0;">${data.overview || 'Mission summary unavailable.'}</p>
+                    <button class="btn-main" style="background:var(--accent); width:100%; margin-bottom:10px;" onclick="toggleTag(${idx}, 'isAnimated')">${item.isAnimated?'REMOVE TOON TAG':'TAG AS TOON'}</button>
+                    <button class="btn-main" style="background:rgba(255, 68, 68, 0.1); color:#ff4444; border:1px solid rgba(255, 68, 68, 0.3); width:100%;" onclick="deleteItem(${idx})">ERASE RECORD</button>
+                    <div id="epArea" style="width:100%;"></div>
+                </div>`;
             if(item.type === 'tv') loadEpisodes(idx);
         } catch(e) { body.innerHTML = 'Encryption Error.'; }
     }
@@ -316,32 +287,17 @@
         const item = window.mediaList[idx];
         const res = await fetch(`https://api.themoviedb.org/3/tv/${item.tmdbId}?api_key=${tmdbKey}`);
         const data = await res.json();
-        let html = `<select class="btn-main" style="width:100%; background:#000; color:#fff; height:50px; margin:20px 0 15px 0; border:1px solid var(--border);" onchange="fetchSeason(${idx}, this.value)">
-            <option>SELECT MISSION PHASE (SEASON)</option>${data.seasons.map(s=>`<option value="${s.season_number}">${s.name}</option>`).join('')}</select>
-            <div id="epList"></div>`;
-        document.getElementById('epArea').innerHTML = html;
+        document.getElementById('epArea').innerHTML = `<select class="btn-main" style="width:100%; background:#000; color:#fff; height:50px; margin:20px 0 15px 0;" onchange="fetchSeason(${idx}, this.value)"><option>SELECT PHASE (SEASON)</option>${data.seasons.map(s=>`<option value="${s.season_number}">${s.name}</option>`).join('')}</select><div id="epList"></div>`;
     }
 
     async function fetchSeason(idx, sNum) {
         const item = window.mediaList[idx];
         const res = await fetch(`https://api.themoviedb.org/3/tv/${item.tmdbId}/season/${sNum}?api_key=${tmdbKey}`);
         const data = await res.json();
-        document.getElementById('epList').innerHTML = data.episodes.map(ep => `
-            <div style="display:flex; gap:15px; margin-bottom:18px; border-bottom:1px solid #222; padding-bottom:12px; align-items: flex-start;">
-                <input type="checkbox" style="width:28px; height:28px; accent-color:var(--glow); border-radius:6px;" ${item.checkedEpisodes?.includes(ep.id)?'checked':''} onchange="toggleEp(${idx},${ep.id})">
-                <div style="font-size:13px;"><strong>${ep.episode_number}. ${ep.name}</strong><br><span style="opacity:0.5; line-height:1.4; font-size:11px;">${ep.overview || ''}</span></div>
-            </div>
-        `).join('');
+        document.getElementById('epList').innerHTML = data.episodes.map(ep => `<div style="display:flex; gap:15px; margin-bottom:18px; border-bottom:1px solid #222; padding-bottom:12px; text-align:left;"><input type="checkbox" style="width:26px; height:26px; accent-color:var(--glow);" ${item.checkedEpisodes?.includes(ep.id)?'checked':''} onchange="toggleEp(${idx},${ep.id})"><div><strong>${ep.episode_number}. ${ep.name}</strong><br><span style="opacity:0.5; font-size:11px;">${ep.overview || ''}</span></div></div>`).join('');
     }
 
-    function toggleEp(idx, id) {
-        if(!window.mediaList[idx].checkedEpisodes) window.mediaList[idx].checkedEpisodes = [];
-        const i = window.mediaList[idx].checkedEpisodes.indexOf(id);
-        if(i > -1) window.mediaList[idx].checkedEpisodes.splice(i, 1);
-        else { window.mediaList[idx].checkedEpisodes.push(id); if(window.mediaList[idx].status==='watching') window.mediaList[idx].status = 'pulse'; }
-        save();
-    }
-
+    function toggleEp(idx, id) { if(!window.mediaList[idx].checkedEpisodes) window.mediaList[idx].checkedEpisodes = []; const i = window.mediaList[idx].checkedEpisodes.indexOf(id); if(i > -1) window.mediaList[idx].checkedEpisodes.splice(i, 1); else { window.mediaList[idx].checkedEpisodes.push(id); if(window.mediaList[idx].status==='watching') window.mediaList[idx].status = 'pulse'; } save(); }
     function toggleTag(idx, p) { window.mediaList[idx][p] = !window.mediaList[idx][p]; save(); openItem(idx); }
     function deleteItem(idx) { if(confirm("Confirm deletion?")) { window.mediaList.splice(idx, 1); save(); closeModal(); } }
     function closeModal() { document.getElementById('modal').classList.remove('active'); }
