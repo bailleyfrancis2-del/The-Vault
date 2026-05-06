@@ -191,17 +191,32 @@
             if(item.name.toLowerCase().includes(filterStr) && passF) {
                 const div = document.createElement('div');
                 div.className = 'item-card';
+                div.setAttribute('data-id', idx);
                 div.innerHTML = `
                     <img class="poster" src="${item.poster}" onclick="openItem(${idx})">
                     <div class="title" onclick="openItem(${idx})">${item.name}</div>
                     <div class="controls">
-                        <button class="btn-status ${item.status==='watching'?'active-watch':''}" onclick="setStatus(${idx},'watching')">To Watch</button>
-                        <button class="btn-status ${item.status==='pulse'?'active-pulse':''}" onclick="setStatus(${idx},'pulse')">Pulse</button>
-                        <button class="btn-status ${item.status==='watched'?'active-done':''}" onclick="setStatus(${idx},'watched')">Done</button>
+                        <button class="btn-status ${item.status==='watching'?'active-watch':''}" onclick="setStatus(${idx},'watching', this)">To Watch</button>
+                        <button class="btn-status ${item.status==='pulse'?'active-pulse':''}" onclick="setStatus(${idx},'pulse', this)">Pulse</button>
+                        <button class="btn-status ${item.status==='watched'?'active-done':''}" onclick="setStatus(${idx},'watched', this)">Done</button>
                     </div>`;
                 grid.appendChild(div);
             }
         });
+    }
+
+    function setStatus(idx, s, btnEl) { 
+        window.mediaList[idx].status = s; 
+        save(); 
+
+        // Targeted UI update to prevent full grid flash
+        const controls = btnEl.parentElement;
+        const btns = controls.querySelectorAll('.btn-status');
+        btns.forEach(b => b.classList.remove('active-watch', 'active-pulse', 'active-done'));
+        
+        if (s === 'watching') btnEl.classList.add('active-watch');
+        else if (s === 'pulse') btnEl.classList.add('active-pulse');
+        else if (s === 'watched') btnEl.classList.add('active-done');
     }
 
     async function performFullSearch() {
@@ -231,7 +246,6 @@
         }
     }
 
-    function setStatus(idx, s) { window.mediaList[idx].status = s; save(); render(); }
     function exitSearch() { isSearch = false; document.getElementById('backBtn').style.display='none'; document.getElementById('pageTitle').innerText="THE VAULT"; render(); }
     function setFilter(f, btn) { if(isSearch) exitSearch(); currentFilter = f; document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(); }
     
