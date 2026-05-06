@@ -8,14 +8,14 @@
     <title>The Vault</title>
     <style>
         :root {
-            --glass: rgba(10, 15, 25, 0.96);
+            --glass: rgba(10, 15, 25, 0.97);
             --border: rgba(120, 169, 255, 0.3);
             --glow: #78a9ff;
             --accent: #ffcc00; 
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
-            /* Smoother, slower quintic curve for that premium feel */
-            --bezier: cubic-bezier(0.23, 1, 0.32, 1); 
+            /* Ultra-smooth slow glide */
+            --bezier: cubic-bezier(0.22, 1, 0.36, 1); 
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -52,7 +52,7 @@
         }
 
         .card {
-            background: var(--glass); backdrop-filter: blur(30px);
+            background: var(--glass); backdrop-filter: blur(35px);
             border: 1px solid var(--border); border-radius: 24px;
             padding: 20px; margin-bottom: 20px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
@@ -61,7 +61,7 @@
         .btn-main { 
             background: var(--glow); color: #05162d; border: none; 
             padding: 12px 20px; border-radius: 14px; font-weight: bold; 
-            cursor: pointer; transition: all 0.3s var(--bezier);
+            cursor: pointer; transition: all 0.4s var(--bezier);
             font-size: 14px;
         }
         .btn-main:active { transform: scale(0.95); opacity: 0.9; }
@@ -72,21 +72,20 @@
             display: flex; flex-direction: column; gap: 10px;
             transition: transform 0.5s var(--bezier);
         }
-        .item-card:active { transform: scale(0.94); }
         
         .poster { width: 100%; aspect-ratio: 2/3; border-radius: 14px; object-fit: cover; background: #111; }
         .title { font-size: 0.85em; font-weight: 600; text-align: center; min-height: 2.4em; color: rgba(255,255,255,0.9); }
 
+        /* Updated Buttons to match Desktop labels */
         .btn-status { 
-            flex: 1; font-size: 10px; padding: 10px 0; border-radius: 9px; 
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: rgba(255,255,255,0.5);
-            text-transform: uppercase; font-weight: 800; transition: 0.3s;
+            flex: 1; font-size: 8px; padding: 10px 0; border-radius: 9px; 
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: rgba(255,255,255,0.4);
+            text-transform: uppercase; font-weight: 800; transition: 0.4s var(--bezier);
         }
-        .active-watch { border-color: var(--accent); color: var(--accent); background: rgba(255,204,0,0.15); }
-        .active-pulse { border-color: var(--glow); color: var(--glow); background: rgba(120,169,255,0.15); }
-        .active-done { border-color: #4caf50; color: #4caf50; background: rgba(76,175,80,0.15); }
+        .active-watch { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(255,204,0,0.1) !important; box-shadow: 0 0 10px rgba(255,204,0,0.2); }
+        .active-pulse { border-color: var(--glow) !important; color: var(--glow) !important; background: rgba(120,169,255,0.1) !important; box-shadow: 0 0 10px rgba(120,169,255,0.2); }
+        .active-done { border-color: #4caf50 !important; color: #4caf50 !important; background: rgba(76,175,80,0.1) !important; box-shadow: 0 0 10px rgba(76,175,80,0.2); }
 
-        /* Navigation - Labels updated to match Desktop */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: calc(75px + var(--safe-bottom));
@@ -96,45 +95,44 @@
             padding-bottom: var(--safe-bottom); z-index: 5000;
         }
         .nav-item { 
-            background: none; border: none; color: rgba(255,255,255,0.35); 
+            background: none; border: none; color: rgba(255,255,255,0.3); 
             display: flex; flex-direction: column; align-items: center; font-size: 10px; flex: 1;
-            transition: color 0.3s ease;
+            transition: color 0.4s var(--bezier);
         }
         .nav-item.active { color: var(--glow); }
         .nav-icon { width: 24px; height: 24px; background: currentColor; mask-size: contain; mask-repeat: no-repeat; -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; margin-bottom: 5px; }
 
-        /* MODAL - Slower, smoother glided pop */
+        /* MODAL - Slower, more elegant "Decelerate" glide */
         .modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
             z-index: 9000; display: none; align-items: center; justify-content: center;
-            opacity: 0; transition: opacity 0.5s ease;
+            opacity: 0; transition: opacity 0.8s var(--bezier);
         }
         .modal.active { display: flex; opacity: 1; }
         
         .modal-content { 
-            width: 90%; max-width: 450px; max-height: 80vh; background: #0a111f; 
-            border: 1px solid var(--border); border-radius: 28px;
+            width: 92%; max-width: 450px; max-height: 82vh; background: #0a111f; 
+            border: 1px solid var(--border); border-radius: 30px;
             padding: 30px; overflow-y: auto; 
-            transform: scale(0.9) translate3d(0, 30px, 0); 
-            transition: transform 0.6s var(--bezier);
-            box-shadow: 0 30px 80px rgba(0,0,0,0.9);
+            transform: scale(0.92) translate3d(0, 40px, 0); 
+            transition: transform 0.8s var(--bezier);
+            box-shadow: 0 35px 90px rgba(0,0,0,0.95);
         }
         .modal.active .modal-content { transform: scale(1) translate3d(0, 0, 0); }
 
         .modal-header { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 25px; text-align: center; }
         .modal-poster { width: 140px; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .modal-info h3 { margin: 0; color: var(--glow); font-size: 1.5em; letter-spacing: 1px; }
-        .modal-info p { font-size: 0.9em; line-height: 1.6; opacity: 0.75; margin-top: 12px; }
+        .modal-info p { font-size: 0.9em; line-height: 1.6; opacity: 0.7; margin-top: 15px; }
 
-        .modal-actions { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-top: 20px; }
+        .modal-actions { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-top: 25px; }
         .btn-action { 
             width: 100%; padding: 18px; border-radius: 16px; border: none; 
-            font-weight: 800; font-size: 14px; letter-spacing: 1.5px; text-transform: uppercase;
-            cursor: pointer; transition: 0.3s var(--bezier);
+            font-weight: 800; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;
+            cursor: pointer; transition: 0.4s var(--bezier);
         }
         .btn-toon { background: var(--accent); color: #000; }
-        .btn-delete { background: rgba(255, 68, 68, 0.1); color: #ff4444; border: 1px solid rgba(255, 68, 68, 0.3); }
-        .btn-action:active { transform: scale(0.97); opacity: 0.8; }
+        .btn-delete { background: rgba(255, 68, 68, 0.05); color: #ff4444; border: 1px solid rgba(255, 68, 68, 0.3); }
 
         #syncStatus { position: fixed; top: calc(var(--safe-top) + 15px); left: 20px; font-size: 9px; color: var(--glow); z-index: 6000; font-weight: bold; }
     </style>
@@ -151,10 +149,10 @@
                 <input type="text" id="showInput" placeholder="Initialize Entry..." onkeydown="if(event.key==='Enter') performFullSearch()">
                 <button class="btn-main" onclick="performFullSearch()">ENGAGE</button>
             </div>
-            <input type="text" id="filterInput" style="height:40px; background:rgba(0,0,0,0.3);" placeholder="Search Archive..." onkeyup="render()">
+            <input type="text" id="filterInput" style="height:42px; background:rgba(0,0,0,0.3);" placeholder="Search Archive..." onkeyup="render()">
         </div>
 
-        <button id="backBtn" class="btn-main" style="display:none; width:100%; margin-bottom:20px; padding:15px;" onclick="exitSearch()">← RETURN TO ARCHIVE</button>
+        <button id="backBtn" class="btn-main" style="display:none; width:100%; margin-bottom:20px; padding:18px;" onclick="exitSearch()">← RETURN TO ARCHIVE</button>
         <div class="media-grid" id="mainGrid"></div>
     </div>
 </div>
@@ -224,7 +222,7 @@
                     <div class="poster-container" onclick="openItem(${idx})"><img class="poster" src="${item.poster || ''}"></div>
                     <div class="info" onclick="openItem(${idx})"><strong>${item.name}</strong>${progressUI}</div>
                     <div class="controls">
-                        <button class="btn-status ${item.status==='watching'?'active-watch':''}" onclick="setStatus(${idx},'watching')">Watch</button>
+                        <button class="btn-status ${item.status==='watching'?'active-watch':''}" onclick="setStatus(${idx},'watching')">To Watch</button>
                         <button class="btn-status ${item.status==='pulse'?'active-pulse':''}" onclick="setStatus(${idx},'pulse')">Pulse</button>
                         <button class="btn-status ${item.status==='watched'?'active-done':''}" onclick="setStatus(${idx},'watched')">Done</button>
                     </div>
@@ -290,7 +288,7 @@
         const modal = document.getElementById('modal');
         const body = document.getElementById('modalBody');
         modal.classList.add('active');
-        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING MISSION LOGS...</div>';
+        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING LOGS...</div>';
         
         try {
             const res = await fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}?api_key=${tmdbKey}`);
