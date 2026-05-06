@@ -94,12 +94,14 @@
 
         .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; }
         input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important; }
-        #syncStatus { position: fixed; top: calc(var(--safe-top) + 15px); left: 20px; font-size: 9px; color: var(--glow); z-index: 6000; font-weight: bold; }
+        
+        /* Unified Settings Style */
+        .settings-row { margin-bottom: 20px; }
+        .settings-label { font-size: 11px; color: var(--glow); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .sync-indicator { font-size: 13px; font-weight: bold; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
-
-<div id="syncStatus">INITIALIZING...</div>
 
 <div class="app-container">
     <div class="scroll-view">
@@ -121,7 +123,7 @@
     <button class="nav-item" onclick="setFilter('watching', this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:clock-bold.svg')"></div>To Watch</button>
     <button class="nav-item" onclick="setFilter('pulse', this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:activity-bold.svg')"></div>Pulse</button>
     <button class="nav-item" onclick="setFilter('animated', this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:rocket-launch-bold.svg')"></div>Animated</button>
-    <button class="nav-item" onclick="openSettings()"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:gear-bold.svg')"></div>Settings</button>
+    <button class="nav-item" onclick="openSystemPanel()"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:gear-bold.svg')"></div>Settings</button>
 </div>
 
 <div id="modal" class="modal" onclick="if(event.target===this) closeModal()">
@@ -146,20 +148,18 @@
     window.vaultDB = db;
     window.firestore = { doc, setDoc, onSnapshot };
     
-    // --- LOAD CACHE FIRST ---
     const cache = localStorage.getItem('vault_cache_bailey');
     if(cache) {
         window.mediaList = JSON.parse(cache);
-        document.getElementById('syncStatus').innerText = "LOADED FROM CACHE";
         render();
     }
 
-    // --- THEN CONNECT CLOUD ---
     window.firestore.onSnapshot(window.firestore.doc(db, "archives", "user_bailey"), (doc) => {
         if(doc.exists()) {
             window.mediaList = doc.data().list || [];
             localStorage.setItem('vault_cache_bailey', JSON.stringify(window.mediaList));
-            document.getElementById('syncStatus').innerText = "CLOUD SYNCED";
+            window.syncMsg = "CLOUD SYNCED";
+            updateSyncDisplay();
             render();
         }
     });
@@ -167,6 +167,7 @@
 
 <script>
     window.mediaList = window.mediaList || [];
+    window.syncMsg = "INITIALIZING...";
     let tmdbKey = localStorage.getItem('tmdbKey') || '';
     let currentFilter = 'all';
     let isSearch = false;
@@ -229,12 +230,46 @@
     function exitSearch() { isSearch = false; document.getElementById('backBtn').style.display='none'; document.getElementById('pageTitle').innerText="THE VAULT"; render(); }
     function setFilter(f, btn) { if(isSearch) exitSearch(); currentFilter = f; document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(); }
     
+    function openSystemPanel() {
+        const modal = document.getElementById('modal');
+        const body = document.getElementById('modalBody');
+        modal.classList.add('active');
+        body.innerHTML = `
+            <div style="text-align:center;">
+                <h3 style="color:var(--glow); letter-spacing:3px;">SYSTEM SETTINGS</h3>
+                <div class="settings-row">
+                    <span class="settings-label">Cloud Status</span>
+                    <div id="syncIndicator" class="sync-indicator">${window.syncMsg}</div>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-label">TMDB Gateway Key</span>
+                    <input type="text" id="tmdbInput" style="width:100%;" value="${tmdbKey}" placeholder="Paste Key...">
+                </div>
+                <button class="btn-main" style="width:100%; margin-bottom:10px;" onclick="saveSystem()">SAVE CHANGES</button>
+                <button class="btn-main" style="width:100%; background:transparent; color:#888; border:1px solid #333;" onclick="closeModal()">CANCEL</button>
+            </div>
+        `;
+    }
+
+    function saveSystem() {
+        const val = document.getElementById('tmdbInput').value;
+        tmdbKey = val;
+        localStorage.setItem('tmdbKey', val);
+        closeModal();
+        location.reload();
+    }
+
+    function updateSyncDisplay() {
+        const el = document.getElementById('syncIndicator');
+        if(el) el.innerText = window.syncMsg;
+    }
+
     async function openItem(idx) {
         const item = window.mediaList[idx];
         const modal = document.getElementById('modal');
         const body = document.getElementById('modalBody');
         modal.classList.add('active');
-        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING LOGS...</div>';
+        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING...</div>';
         try {
             const res = await fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}?api_key=${tmdbKey}`);
             const data = await res.json();
@@ -269,7 +304,6 @@
     function toggleTag(idx, p) { window.mediaList[idx][p] = !window.mediaList[idx][p]; save(); openItem(idx); }
     function deleteItem(idx) { if(confirm("Delete?")) { window.mediaList.splice(idx, 1); save(); closeModal(); } }
     function closeModal() { document.getElementById('modal').classList.remove('active'); }
-    function openSettings() { const k = prompt("Key:", tmdbKey); if(k) { tmdbKey = k; localStorage.setItem('tmdbKey', k); location.reload(); } }
 </script>
 </body>
 </html>
