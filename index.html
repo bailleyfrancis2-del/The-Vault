@@ -14,7 +14,7 @@
             --accent: #ffcc00; 
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
-            --glide: cubic-bezier(0.22, 1, 0.36, 1); /* High-end slow glide */
+            --glide: cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -33,10 +33,7 @@
             padding-bottom: calc(75px + var(--safe-bottom));
         }
 
-        .scroll-view {
-            flex: 1; overflow-y: auto; padding: 20px;
-            -webkit-overflow-scrolling: touch;
-        }
+        .scroll-view { flex: 1; overflow-y: auto; padding: 20px; -webkit-overflow-scrolling: touch; }
 
         .media-grid {
             display: grid; 
@@ -50,74 +47,59 @@
             .bottom-nav { width: 500px; left: 50% !important; transform: translateX(-50%); border-radius: 40px; bottom: 25px !important; }
         }
 
-        .card {
-            background: var(--glass); backdrop-filter: blur(35px);
-            border: 1px solid var(--border); border-radius: 24px;
-            padding: 20px; margin-bottom: 20px;
-        }
+        .card { background: var(--glass); backdrop-filter: blur(35px); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 20px; }
 
-        /* --- INSTANT LOAD FOR CARDS --- */
         .item-card {
             background: rgba(255,255,255,0.03); border-radius: 20px;
             padding: 10px; border: 1px solid var(--border);
             display: flex; flex-direction: column; gap: 10px;
-            transition: transform 0.3s var(--glide);
         }
-        .item-card:active { transform: scale(0.96); }
         
         .poster { width: 100%; aspect-ratio: 2/3; border-radius: 14px; object-fit: cover; background: #111; }
         .title { font-size: 0.85em; font-weight: 600; text-align: center; min-height: 2.4em; color: rgba(255,255,255,0.9); }
 
-        /* --- DESKTOP LABELS --- */
         .controls { display: flex; gap: 4px; width: 100%; }
         .btn-status { 
             flex: 1; font-size: 8px; padding: 10px 0; border-radius: 9px; 
             background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: rgba(255,255,255,0.4);
-            text-transform: uppercase; font-weight: 800; transition: all 0.3s ease;
-            white-space: nowrap;
+            text-transform: uppercase; font-weight: 800; white-space: nowrap;
         }
         .active-watch { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(255,204,0,0.1) !important; }
         .active-pulse { border-color: var(--glow) !important; color: var(--glow) !important; background: rgba(120,169,255,0.1) !important; }
         .active-done { border-color: #4caf50 !important; color: #4caf50 !important; background: rgba(76,175,80,0.1) !important; }
 
-        /* --- ULTRA SMOOTH MODAL GLIDE --- */
         .modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
             z-index: 9000; display: none; align-items: center; justify-content: center;
             opacity: 0; transition: opacity 0.8s var(--glide);
         }
         .modal.active { display: flex; opacity: 1; }
-        
         .modal-content { 
             width: 92%; max-width: 450px; max-height: 82vh; background: #0a111f; 
             border: 1px solid var(--border); border-radius: 30px; padding: 30px; overflow-y: auto; 
             transform: scale(0.9) translate3d(0, 50px, 0); 
-            transition: transform 1.0s var(--glide); /* The slow glide you wanted */
-            box-shadow: 0 40px 100px rgba(0,0,0,0.9);
+            transition: transform 1.0s var(--glide);
         }
         .modal.active .modal-content { transform: scale(1) translate3d(0, 0, 0); }
 
-        /* Navigation */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: calc(75px + var(--safe-bottom));
-            background: rgba(0,0,0,0.95); backdrop-filter: blur(35px);
-            border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around; align-items: center;
-            padding-bottom: var(--safe-bottom); z-index: 5000;
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(35px); border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; align-items: center; padding-bottom: var(--safe-bottom); z-index: 5000;
         }
         .nav-item { background: none; border: none; color: rgba(255,255,255,0.3); display: flex; flex-direction: column; align-items: center; font-size: 10px; flex: 1; }
         .nav-item.active { color: var(--glow); }
         .nav-icon { width: 24px; height: 24px; background: currentColor; mask-size: contain; mask-repeat: no-repeat; -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; margin-bottom: 5px; }
 
-        .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; }
         input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important; }
         #syncStatus { position: fixed; top: calc(var(--safe-top) + 15px); left: 20px; font-size: 9px; color: var(--glow); z-index: 6000; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="syncStatus">SYSTEM AUTHENTICATED</div>
+<div id="syncStatus">INITIALIZING...</div>
 
 <div class="app-container">
     <div class="scroll-view">
@@ -129,7 +111,6 @@
             </div>
             <input type="text" id="filterInput" style="width:100%; height:42px; background:rgba(0,0,0,0.3);" placeholder="Search Archive..." onkeyup="render()">
         </div>
-
         <button id="backBtn" class="btn-main" style="display:none; width:100%; margin-bottom:20px; padding:18px;" onclick="exitSearch()">← RETURN TO ARCHIVE</button>
         <div class="media-grid" id="mainGrid"></div>
     </div>
@@ -165,9 +146,19 @@
     window.vaultDB = db;
     window.firestore = { doc, setDoc, onSnapshot };
     
+    // --- LOAD CACHE FIRST ---
+    const cache = localStorage.getItem('vault_cache_bailey');
+    if(cache) {
+        window.mediaList = JSON.parse(cache);
+        document.getElementById('syncStatus').innerText = "LOADED FROM CACHE";
+        render();
+    }
+
+    // --- THEN CONNECT CLOUD ---
     window.firestore.onSnapshot(window.firestore.doc(db, "archives", "user_bailey"), (doc) => {
         if(doc.exists()) {
             window.mediaList = doc.data().list || [];
+            localStorage.setItem('vault_cache_bailey', JSON.stringify(window.mediaList));
             document.getElementById('syncStatus').innerText = "CLOUD SYNCED";
             render();
         }
@@ -175,12 +166,13 @@
 </script>
 
 <script>
-    window.mediaList = [];
+    window.mediaList = window.mediaList || [];
     let tmdbKey = localStorage.getItem('tmdbKey') || '';
     let currentFilter = 'all';
     let isSearch = false;
 
     async function save() {
+        localStorage.setItem('vault_cache_bailey', JSON.stringify(window.mediaList));
         await window.firestore.setDoc(window.firestore.doc(window.vaultDB, "archives", "user_bailey"), { list: window.mediaList });
     }
 
@@ -242,7 +234,7 @@
         const modal = document.getElementById('modal');
         const body = document.getElementById('modalBody');
         modal.classList.add('active');
-        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING MISSION LOGS...</div>';
+        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING LOGS...</div>';
         try {
             const res = await fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}?api_key=${tmdbKey}`);
             const data = await res.json();
