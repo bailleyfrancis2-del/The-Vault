@@ -108,7 +108,7 @@
                 <input type="text" id="showInput" placeholder="Initialize Entry..." onkeydown="if(event.key==='Enter') performFullSearch()">
                 <button class="btn-main" onclick="performFullSearch()">ENGAGE</button>
             </div>
-            <input type="text" id="filterInput" style="width:100%; height:42px; background:rgba(0,0,0,0.3);" placeholder="Search Archive..." onkeyup="render()">
+            <input type="text" id="filterInput" style="width:100%; height:42px; background:rgba(0,0,0,0.3);" placeholder="Search Archive..." onkeyup="applyFilters()">
         </div>
         <button id="backBtn" class="btn-main" style="display:none; width:100%; margin-bottom:20px; padding:18px;" onclick="exitSearch()">← RETURN TO ARCHIVE</button>
         <div class="media-grid" id="mainGrid"></div>
@@ -145,32 +145,28 @@
     window.vaultDB = db;
     window.firestore = { doc, setDoc, onSnapshot };
     
-    // Initial Load
     const cache = localStorage.getItem('vault_cache_bailey');
     if(cache) {
         window.mediaList = JSON.parse(cache);
         render();
     }
 
-    // Cloud Listener
+    // CLOUD SYNC: ONLY updates the data object, NEVER triggers render()
     window.firestore.onSnapshot(window.firestore.doc(db, "archives", "user_bailey"), (doc) => {
         if(doc.exists()) {
-            const newList = doc.data().list || [];
+            window.mediaList = doc.data().list || [];
+            localStorage.setItem('vault_cache_bailey', JSON.stringify(window.mediaList));
             window.syncMsg = "CLOUD SYNCED";
             
-            // Only update data silently; don't trigger a full grid wipe
-            window.mediaList = newList;
-            localStorage.setItem('vault_cache_bailey', JSON.stringify(newList));
-            
-            // Silently sync the active buttons in the UI
-            newList.forEach(item => {
-                const card = document.querySelector(`[data-tmdbid="${item.tmdbId}"]`);
+            // Silently sync button highlights if another device changes them
+            window.mediaList.forEach(item => {
+                const card = document.querySelector(`[data-id="${item.tmdbId}"]`);
                 if (card) {
                     const btns = card.querySelectorAll('.btn-status');
                     btns.forEach(b => b.classList.remove('active-watch', 'active-pulse', 'active-done'));
-                    if (item.status === 'watching') card.querySelector('.watch-btn').classList.add('active-watch');
-                    if (item.status === 'pulse') card.querySelector('.pulse-btn').classList.add('active-pulse');
-                    if (item.status === 'watched') card.querySelector('.done-btn').classList.add('active-done');
+                    if (item.status === 'watching') card.querySelector('.w-btn').classList.add('active-watch');
+                    if (item.status === 'pulse') card.querySelector('.p-btn').classList.add('active-pulse');
+                    if (item.status === 'watched') card.querySelector('.d-btn').classList.add('active-done');
                 }
             });
         }
@@ -192,30 +188,29 @@
     function render() {
         if(isSearch) return;
         const grid = document.getElementById('mainGrid');
-        const filterStr = document.getElementById('filterInput').value.toLowerCase();
+        grid.innerHTML = '';
         
-        // If the grid is empty, do a full build. If not, only filter visibility.
-        if (grid.innerHTML === '') {
-            window.mediaList.forEach((item, idx) => {
-                const div = document.createElement('div');
-                div.className = 'item-card';
-                div.setAttribute('data-tmdbid', item.tmdbId);
-                div.innerHTML = `
-                    <img class="poster" src="${item.poster}" onclick="openItem(${idx})">
-                    <div class="title" onclick="openItem(${idx})">${item.name}</div>
-                    <div class="controls">
-                        <button class="btn-status watch-btn ${item.status==='watching'?'active-watch':''}" onclick="setStatus(${idx},'watching', this)">To Watch</button>
-                        <button class="btn-status pulse-btn ${item.status==='pulse'?'active-pulse':''}" onclick="setStatus(${idx},'pulse', this)">Pulse</button>
-                        <button class="btn-status done-btn ${item.status==='watched'?'active-done':''}" onclick="setStatus(${idx},'watched', this)">Done</button>
-                    </div>`;
-                grid.appendChild(div);
-            });
-        }
-
-        // Handle filtering without wiping the grid
-        const cards = grid.querySelectorAll('.item-card');
         window.mediaList.forEach((item, idx) => {
-            const card = document.querySelector(`[data-tmdbid="${item.tmdbId}"]`);
+            const div = document.createElement('div');
+            div.className = 'item-card';
+            div.setAttribute('data-id', item.tmdbId);
+            div.innerHTML = `
+                <img class="poster" src="${item.poster}" onclick="openItem(${idx})">
+                <div class="title" onclick="openItem(${idx})">${item.name}</div>
+                <div class="controls">
+                    <button class="btn-status w-btn ${item.status==='watching'?'active-watch':''}" onclick="setStatus(${idx},'watching', this)">To Watch</button>
+                    <button class="btn-status p-btn ${item.status==='pulse'?'active-pulse':''}" onclick="setStatus(${idx},'pulse', this)">Pulse</button>
+                    <button class="btn-status d-btn ${item.status==='watched'?'active-done':''}" onclick="setStatus(${idx},'watched', this)">Done</button>
+                </div>`;
+            grid.appendChild(div);
+        });
+        applyFilters();
+    }
+
+    function applyFilters() {
+        const filterStr = document.getElementById('filterInput').value.toLowerCase();
+        window.mediaList.forEach(item => {
+            const card = document.querySelector(`[data-id="${item.tmdbId}"]`);
             if (card) {
                 const passF = (currentFilter === 'all') || (currentFilter === item.status) || (currentFilter === 'animated' && (item.isAnimated || item.isAnime));
                 const passS = item.name.toLowerCase().includes(filterStr);
@@ -235,6 +230,8 @@
         if (s === 'watching') btnEl.classList.add('active-watch');
         else if (s === 'pulse') btnEl.classList.add('active-pulse');
         else if (s === 'watched') btnEl.classList.add('active-done');
+        
+        // NO RENDER. NO REFRESH. JUST CSS.
     }
 
     async function performFullSearch() {
@@ -245,13 +242,12 @@
         const results = data.results.filter(i => i.media_type !== 'person');
         isSearch = true;
         document.getElementById('backBtn').style.display = 'block';
-        document.getElementById('pageTitle').innerText = "SEARCHING...";
         const grid = document.getElementById('mainGrid');
         grid.innerHTML = '';
         results.forEach(item => {
             const div = document.createElement('div');
             div.className = 'item-card';
-            div.innerHTML = `<img class="poster" src="https://image.tmdb.org/t/p/w500${item.poster_path}"><div class="title">${item.title || item.name}</div><button class="btn-main" style="width:100%; font-size:11px;" onclick='addItem(${JSON.stringify(item).replace(/'/g, "")})'>ENGAGE</button>`;
+            div.innerHTML = `<img class="poster" src="https://image.tmdb.org/t/p/w500${item.poster_path}"><div class="title">${item.title || item.name}</div><button class="btn-main" style="width:100%;" onclick='addItem(${JSON.stringify(item).replace(/'/g, "")})'>ENGAGE</button>`;
             grid.appendChild(div);
         });
     }
@@ -260,19 +256,12 @@
         if(!window.mediaList.some(v => v.tmdbId === item.id)) {
             window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`, type: item.media_type, tmdbId: item.id, isAnimated: item.genre_ids?.includes(16), checkedEpisodes: [] });
             save();
-            location.reload(); // Hard refresh only on new add to reset the grid
+            exitSearch();
         }
     }
 
-    function exitSearch() { isSearch = false; location.reload(); }
-    
-    function setFilter(f, btn) { 
-        if(isSearch) exitSearch(); 
-        currentFilter = f; 
-        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); 
-        btn.classList.add('active'); 
-        render(); 
-    }
+    function exitSearch() { isSearch = false; document.getElementById('backBtn').style.display='none'; render(); }
+    function setFilter(f, btn) { if(isSearch) exitSearch(); currentFilter = f; document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); btn.classList.add('active'); applyFilters(); }
     
     function openSystemPanel() {
         const modal = document.getElementById('modal');
@@ -281,23 +270,15 @@
         body.innerHTML = `
             <div style="text-align:center;">
                 <h3 style="color:var(--glow); letter-spacing:3px;">SYSTEM SETTINGS</h3>
-                <div id="syncIndicator" class="sync-indicator">${window.syncMsg}</div>
-                <div style="margin: 20px 0;">
-                    <span style="font-size: 11px; color: var(--glow); letter-spacing: 2px; text-transform: uppercase;">TMDB Gateway Key</span>
-                    <input type="text" id="tmdbInput" style="width:100%; margin-top:10px;" value="${tmdbKey}" placeholder="Paste Key...">
-                </div>
-                <button class="btn-main" style="width:100%; margin-bottom:10px;" onclick="saveSystem()">SAVE CHANGES</button>
+                <div class="sync-indicator">${window.syncMsg}</div>
+                <input type="text" id="tmdbInput" style="width:100%; margin:20px 0;" value="${tmdbKey}" placeholder="TMDB Key...">
+                <button class="btn-main" style="width:100%; margin-bottom:10px;" onclick="saveSystem()">SAVE</button>
                 <button class="btn-main" style="width:100%; background:transparent; color:#888; border:1px solid #333;" onclick="closeModal()">CANCEL</button>
-            </div>
-        `;
+            </div>`;
     }
 
-    function saveSystem() {
-        const val = document.getElementById('tmdbInput').value;
-        tmdbKey = val;
-        localStorage.setItem('tmdbKey', val);
-        closeModal();
-    }
+    function saveSystem() { tmdbKey = document.getElementById('tmdbInput').value; localStorage.setItem('tmdbKey', tmdbKey); closeModal(); }
+    function closeModal() { document.getElementById('modal').classList.remove('active'); }
 
     async function openItem(idx) {
         const item = window.mediaList[idx];
@@ -312,7 +293,7 @@
                 <div style="display:flex; flex-direction:column; align-items:center; text-align:center;">
                     <img src="${item.poster}" style="width:140px; border-radius:18px; margin-bottom:20px;">
                     <h3 style="color:var(--glow); margin:0;">${item.name}</h3>
-                    <p style="font-size:0.9em; line-height:1.6; opacity:0.7; margin:15px 0;">${data.overview || 'Summary unavailable.'}</p>
+                    <p style="font-size:0.9em; line-height:1.6; opacity:0.7; margin:15px 0;">${data.overview || 'No log entry.'}</p>
                     <button class="btn-main" style="background:var(--accent); width:100%; margin-bottom:10px;" onclick="toggleTag(${idx}, 'isAnimated')">${item.isAnimated?'REMOVE TOON TAG':'TAG AS TOON'}</button>
                     <button class="btn-main" style="background:rgba(255, 68, 68, 0.1); color:#ff4444; border:1px solid rgba(255, 68, 68, 0.3); width:100%;" onclick="deleteItem(${idx})">ERASE RECORD</button>
                     <div id="epArea" style="width:100%;"></div>
@@ -337,8 +318,7 @@
 
     function toggleEp(idx, id) { if(!window.mediaList[idx].checkedEpisodes) window.mediaList[idx].checkedEpisodes = []; const i = window.mediaList[idx].checkedEpisodes.indexOf(id); if(i > -1) window.mediaList[idx].checkedEpisodes.splice(i, 1); else { window.mediaList[idx].checkedEpisodes.push(id); if(window.mediaList[idx].status==='watching') window.mediaList[idx].status = 'pulse'; } save(); }
     function toggleTag(idx, p) { window.mediaList[idx][p] = !window.mediaList[idx][p]; save(); openItem(idx); }
-    function deleteItem(idx) { if(confirm("Delete?")) { window.mediaList.splice(idx, 1); save(); location.reload(); } }
-    function closeModal() { document.getElementById('modal').classList.remove('active'); }
+    function deleteItem(idx) { if(confirm("Delete?")) { window.mediaList.splice(idx, 1); save(); exitSearch(); } }
 </script>
 </body>
 </html>
