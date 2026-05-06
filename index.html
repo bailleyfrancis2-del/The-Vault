@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>The Vault: Cloud</title>
+    <style>
+        :root {
+            --glass: rgba(0, 0, 0, 0.7);
+            --border: rgba(120, 169, 255, 0.4);
+            --glow: #78a9ff;
+            --accent: #ffcc00; 
+            --sidebar-width: 70px;
+            --sidebar-expanded: 220px;
+            --main-max-width: 1100px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body { 
+            margin: 0; padding: 0; min-height: 100vh; display: flex;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: #050a15; 
+            background-image: url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2022&auto=format&fit=crop'); 
+            background-size: cover; background-position: center; background-attachment: fixed;
+            color: #fff; overflow-x: hidden;
+        }
+
+        @keyframes fadeInSmooth { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: scale(1); } }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            position: fixed; left: 0; top: 0; bottom: 0; width: var(--sidebar-width);
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(30px);
+            border-right: 1px solid var(--border); transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden; z-index: 4000; display: flex; flex-direction: column;
+        }
+        .sidebar:hover { width: var(--sidebar-expanded); }
+        .sidebar-header { width: var(--sidebar-width); height: 70px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .nav-icon { width: 24px; height: 18px; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+        .nav-icon span { display: block; width: 100%; height: 2px; background: var(--glow); border-radius: 2px; transition: all 0.3s ease; box-shadow: 0 0 8px var(--glow); }
+        .sidebar:hover .nav-icon span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+        .sidebar:hover .nav-icon span:nth-child(2) { opacity: 0; }
+        .sidebar:hover .nav-icon span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+        .sidebar-btn {
+            width: 100%; display: flex; align-items: center; background: transparent; border: none; 
+            color: rgba(255, 255, 255, 0.5); padding: 18px 0; cursor: pointer; transition: 0.3s; 
+            font-weight: 600; font-size: 0.8em; text-transform: uppercase; letter-spacing: 2px; 
+            white-space: nowrap; position: relative;
+        }
+        .sidebar-btn .icon-box { width: var(--sidebar-width); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .icon-svg { width: 22px; height: 22px; background-color: currentColor; mask-size: contain; mask-repeat: no-repeat; mask-position: center; -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; transition: 0.3s; }
+        
+        .icon-all { -webkit-mask-image: url('https://api.iconify.design/ph:stack-simple.svg'); }
+        .icon-watch { -webkit-mask-image: url('https://api.iconify.design/ph:clock-countdown.svg'); }
+        .icon-pulse { -webkit-mask-image: url('https://api.iconify.design/ph:activity-bold.svg'); }
+        .icon-done { -webkit-mask-image: url('https://api.iconify.design/ph:check-circle.svg'); }
+        .icon-movie { -webkit-mask-image: url('https://api.iconify.design/ph:film-strip.svg'); }
+        .icon-tv { -webkit-mask-image: url('https://api.iconify.design/ph:television.svg'); }
+        .icon-animated { -webkit-mask-image: url('https://api.iconify.design/ph:rocket-launch.svg'); }
+        .icon-anime { -webkit-mask-image: url('https://api.iconify.design/ph:ghost.svg'); }
+        .icon-dice { -webkit-mask-image: url('https://api.iconify.design/ph:dice-five.svg'); }
+        .icon-export { -webkit-mask-image: url('https://api.iconify.design/ph:export.svg'); }
+        .icon-import { -webkit-mask-image: url('https://api.iconify.design/ph:import.svg'); }
+        .icon-key { -webkit-mask-image: url('https://api.iconify.design/ph:key.svg'); }
+        .icon-user { -webkit-mask-image: url('https://api.iconify.design/ph:user-circle.svg'); }
+
+        .sidebar-btn span.label { opacity: 0; transition: opacity 0.2s; visibility: hidden; }
+        .sidebar:hover .sidebar-btn span.label { opacity: 1; visibility: visible; }
+        .sidebar-btn:hover, .sidebar-btn.active { color: var(--glow) !important; background: rgba(120, 169, 255, 0.1); }
+        .sidebar-btn:hover .icon-svg, .sidebar-btn.active .icon-svg { filter: drop-shadow(0 0 10px var(--glow)); }
+
+        /* --- USER HUB --- */
+        .user-hub {
+            position: fixed; top: 25px; right: 25px; width: 60px; height: 60px;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(30px);
+            border: 1px solid var(--border); border-radius: 30px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden; z-index: 5000; display: flex; flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .user-hub:hover { width: 220px; border-radius: 20px; height: auto; padding-bottom: 15px; }
+        .user-header { height: 60px; width: 100%; display: flex; align-items: center; padding-left: 17px; flex-shrink: 0; cursor: pointer; }
+        .current-user-name { margin-left: 15px; font-weight: bold; color: var(--glow); text-transform: uppercase; letter-spacing: 1px; font-size: 0.8em; opacity: 0; transition: 0.2s; white-space: nowrap; }
+        .user-hub:hover .current-user-name { opacity: 1; }
+        .user-list { padding: 0 10px; display: flex; flex-direction: column; gap: 5px; }
+        .user-item { 
+            padding: 10px 15px; border-radius: 10px; cursor: pointer; font-size: 0.75em; 
+            text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.5);
+            transition: 0.3s; display: flex; justify-content: space-between; align-items: center;
+        }
+        .user-item:hover { background: rgba(120, 169, 255, 0.1); color: #fff; }
+        .user-item.active { color: var(--glow); border-left: 2px solid var(--glow); background: rgba(120, 169, 255, 0.05); }
+        .add-user-btn { margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; text-align: center; color: var(--accent); cursor: pointer; font-size: 0.7em; font-weight: bold; }
+
+        /* --- CLOUD STATUS --- */
+        #syncStatus { position: fixed; bottom: 20px; right: 20px; font-size: 0.7em; letter-spacing: 1px; color: var(--glow); opacity: 0.6; z-index: 5000; }
+
+        /* --- UI PANELS --- */
+        .main-wrapper { margin-left: var(--sidebar-width); width: 100%; padding: 40px; display: flex; flex-direction: column; align-items: center; transition: margin-left 0.3s ease; }
+        .command-deck, .container { width: 100%; max-width: var(--main-max-width); background: var(--glass); backdrop-filter: blur(30px); border: 1px solid var(--border); border-radius: 24px; animation: fadeInSmooth 1s forwards; }
+        .command-deck { padding: 30px 40px; margin-bottom: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 15px; position: relative; z-index: 3000; }
+        .container { padding: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); z-index: 1000; position: relative; min-height: 400px; }
+        h1 { text-align: center; letter-spacing: 8px; text-shadow: 0 0 20px var(--glow); text-transform: uppercase; margin-bottom: 30px; font-weight: 300; margin-top: 0; }
+        
+        .input-group { display: flex; gap: 12px; width: 100%; position: relative; }
+        input[type="text"], input[type="date"], select { background: rgba(0, 0, 0, 0.7); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 12px; outline: none; transition: 0.3s; font-family: inherit; }
+        input#showInput { flex: 1; }
+        button#add-btn { background: var(--glow); color: #05162d; border: none; padding: 0 40px; cursor: pointer; font-weight: 700; border-radius: 12px; transition: 0.3s; white-space: nowrap; }
+        button#add-btn:hover { background: #fff; box-shadow: 0 0 20px var(--glow); transform: scale(1.02); }
+
+        #autocomplete-list { position: absolute; top: 55px; left: 0; width: calc(100% - 150px); background: rgba(5, 10, 25, 0.98); border: 1px solid var(--border); border-radius: 12px; z-index: 5000; max-height: 300px; overflow-y: auto; padding: 0; list-style: none; display: none; }
+
+        ul#showList { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
+        #showList li { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); padding: 15px; border-radius: 20px; display: flex; flex-direction: column; gap: 12px; align-items: center; transition: 0.3s; position: relative; animation: fadeInSmooth 0.5s ease-out; }
+        #showList li:hover { transform: translateY(-8px); border-color: var(--glow); box-shadow: 0 15px 30px rgba(0,0,0,0.8); }
+
+        .poster-container { width: 100%; aspect-ratio: 2/3; cursor: pointer; overflow: hidden; border-radius: 12px; position: relative; }
+        .poster { width: 100%; height: 100%; object-fit: cover; background: #111; display: block; transition: 0.4s; }
+        
+        .save-search-btn { position: absolute; bottom: 10px; left: 10px; right: 10px; background: var(--glow); color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; opacity: 0; transition: 0.3s; transform: translateY(10px); }
+        .save-search-btn.added { background: #4caf50 !important; color: #fff !important; opacity: 1 !important; transform: translateY(0) !important; }
+        #showList li:hover .save-search-btn { opacity: 1; transform: translateY(0); }
+
+        .info { width: 100%; text-align: center; cursor: pointer; }
+        .info strong { font-size: 1.05em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.6em; transition: 0.3s; }
+        .info .date-tag { font-size: 0.75em; color: var(--glow); opacity: 0.8; margin-top: 5px; display: block; }
+
+        .progress-container { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--glow); box-shadow: 0 0 10px var(--glow); transition: width 0.5s ease; }
+
+        .controls { display: flex; flex-wrap: wrap; gap: 4px; width: 100%; justify-content: center; margin-top: 5px; }
+        .state-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: rgba(255,255,255,0.4); font-size: 0.6em; padding: 8px 4px; cursor: pointer; border-radius: 6px; text-transform: uppercase; font-weight: bold; transition: 0.3s; flex: 1 1 30%; }
+        .state-btn.active-watch { color: var(--accent) !important; border-color: var(--accent); background: rgba(255, 204, 0, 0.1); }
+        .state-btn.active-pulse { color: var(--glow) !important; border-color: var(--glow); background: rgba(120, 169, 255, 0.1); }
+        .state-btn.active-done { color: #4caf50 !important; border-color: #4caf50; background: rgba(76, 175, 80, 0.1); }
+        .delete-btn { background: rgba(255, 68, 68, 0.05); border: 1px solid rgba(255, 68, 68, 0.2); color: #ff4444; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; border-radius: 8px; cursor: pointer; transition: 0.3s; margin-left: 4px; }
+
+        .search-options-grid { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 5px; }
+        .search-option-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .search-option-row label { font-size: 0.65em; color: var(--glow); text-transform: uppercase; letter-spacing: 1px; }
+        .search-option-row select, .search-option-row input { font-size: 0.75em; padding: 5px; border-radius: 6px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border); width: 110px; }
+
+        .back-btn { display: none; margin: 0 auto 20px auto; background: rgba(255,255,255,0.1); border: 1px solid var(--border); color: #fff; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 0.8em; letter-spacing: 1px; transition: 0.3s; }
+        .back-btn:hover { background: var(--glow); color: #000; }
+
+        /* --- MODAL --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0); backdrop-filter: blur(0px); z-index: 6000; display: none; justify-content: center; align-items: center; padding: 20px; transition: 0.3s; }
+        .modal-overlay.active { display: flex; background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(15px); }
+        .modal-content { background: rgba(5, 22, 45, 0.98); border: 1px solid var(--border); border-radius: 24px; max-width: 850px; width: 100%; max-height: 85vh; position: relative; overflow-y: auto; padding: 40px; box-shadow: 0 0 50px rgba(120, 169, 255, 0.2); opacity: 0; transform: scale(1.05); transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .modal-overlay.active .modal-content { opacity: 1; transform: scale(1); }
+        .modal-overlay.closing { background: rgba(0, 0, 0, 0) !important; backdrop-filter: blur(0px) !important; }
+        .modal-overlay.closing .modal-content { opacity: 0; transform: scale(0.95); transition: 0.3s; }
+        .modal-inner { display: flex; gap: 30px; align-items: flex-start; }
+        .modal-poster { width: 240px; border-radius: 12px; flex-shrink: 0; }
+        .modal-text { flex-grow: 1; color: rgba(255,255,255,0.9); min-width: 0; }
+        .modal-text h2 { margin: 0 0 20px 0; font-size: 2em; font-weight: 300; color: var(--glow); text-shadow: 0 0 10px var(--glow); }
+        .trailer-btn { display: inline-block; padding: 10px 20px; border: 1px solid var(--accent); color: var(--accent); text-decoration: none; font-weight: bold; border-radius: 8px; font-size: 0.8em; text-transform: uppercase; transition: 0.3s; box-shadow: 0 0 10px rgba(255,204,0,0.2); background: none; cursor: pointer; }
+        
+        .season-hub { margin-top: 30px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 15px; padding: 15px; }
+        .season-select { width: 100%; margin-bottom: 15px; border-color: var(--glow); }
+        .episode-list { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; padding-right: 10px; }
+        .episode-item { padding: 12px; background: rgba(255,255,255,0.05); border-radius: 10px; border: 1px solid rgba(120, 169, 255, 0.1); display: flex; gap: 15px; align-items: flex-start; }
+        .ep-check { width: 20px; height: 20px; cursor: pointer; accent-color: var(--glow); flex-shrink: 0; }
+
+        .search-box { width: 100%; background: rgba(255,255,255,0.05); border: none; border-bottom: 1px solid var(--border); color: var(--glow); padding: 12px; text-align: center; outline: none; font-style: italic; border-radius: 8px; transition: 0.3s; font-family: inherit; }
+    </style>
+</head>
+<body>
+
+<div id="syncStatus">SYSTEM OFFLINE</div>
+
+<div class="user-hub" id="userHub">
+    <div class="user-header">
+        <div class="icon-svg icon-user" style="width:26px; height:26px; color:var(--glow); filter:drop-shadow(0 0 5px var(--glow));"></div>
+        <span class="current-user-name" id="displayUserName">BAILEY</span>
+    </div>
+    <div class="user-list" id="userList"></div>
+    <div class="add-user-btn" onclick="createNewProfile()">+ NEW PROFILE</div>
+</div>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header"><div class="nav-icon"><span></span><span></span><span></span></div></div>
+    <div class="sidebar-nav">
+        <button class="sidebar-btn active" id="btn-all" onclick="setFilter('all', this)"><div class="icon-box"><div class="icon-svg icon-all"></div></div><span class="label">All Vault</span></button>
+        <button class="sidebar-btn" id="btn-watching" onclick="setFilter('watching', this)"><div class="icon-box"><div class="icon-svg icon-watch"></div></div><span class="label">To Watch</span></button>
+        <button class="sidebar-btn" id="btn-pulse" onclick="setFilter('pulse', this)"><div class="icon-box"><div class="icon-svg icon-pulse"></div></div><span class="label">Pulse</span></button>
+        <button class="sidebar-btn" id="btn-watched" onclick="setFilter('watched', this)"><div class="icon-box"><div class="icon-svg icon-done"></div></div><span class="label">Watched</span></button>
+        <button class="sidebar-btn" id="btn-movie" onclick="setFilter('movie', this)"><div class="icon-box"><div class="icon-svg icon-movie"></div></div><span class="label">Movies</span></button>
+        <button class="sidebar-btn" id="btn-tv" onclick="setFilter('tv', this)"><div class="icon-box"><div class="icon-svg icon-tv"></div></div><span class="label">TV Shows</span></button>
+        <button class="sidebar-btn" id="btn-animated" onclick="setFilter('animated', this)"><div class="icon-box"><div class="icon-svg icon-animated"></div></div><span class="label">Animated</span></button>
+        <button class="sidebar-btn" id="btn-anime" onclick="setFilter('anime', this)"><div class="icon-box"><div class="icon-svg icon-anime"></div></div><span class="label">Anime</span></button>
+        <div style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1);">
+            <button class="sidebar-btn" onclick="pickRandom()" style="color: var(--accent);"><div class="icon-box"><div class="icon-svg icon-dice"></div></div><span class="label">Surprise Me</span></button>
+            <button class="sidebar-btn" onclick="exportData()"><div class="icon-box"><div class="icon-svg icon-export"></div></div><span class="label">Export</span></button>
+            <button class="sidebar-btn" onclick="document.getElementById('importFile').click()"><div class="icon-box"><div class="icon-svg icon-import"></div></div><span class="label">Import</span></button>
+            <button class="sidebar-btn" onclick="openKeyModal()"><div class="icon-box"><div class="icon-svg icon-key"></div></div><span class="label">API Settings</span></button>
+            <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+        </div>
+    </div>
+</div>
+
+<div class="main-wrapper">
+    <div class="command-deck">
+        <div class="input-group">
+            <input type="text" id="showInput" placeholder="Initialize Entry..." autocomplete="off">
+            <button id="add-btn" onclick="performFullSearch()">ENGAGE</button>
+            <ul id="autocomplete-list"></ul>
+        </div>
+        <input type="text" id="searchInput" class="search-box" placeholder="Filter current view..." onkeyup="render()">
+    </div>
+    <div class="container">
+        <button id="backToVault" class="back-btn" onclick="exitSearchMode()">← BACK TO ARCHIVE</button>
+        <h1 id="pageTitle">THE VAULT</h1>
+        <ul id="showList"></ul>
+    </div>
+</div>
+
+<div id="detailsModal" class="modal-overlay" onclick="if(event.target === this) closeModal()">
+    <div class="modal-content" id="modalBody"></div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAf9NqhQ8iGoVWeCCCoZChF1RKY-HER678",
+        authDomain: "the-vault-41656.firebaseapp.com",
+        projectId: "the-vault-41656",
+        storageBucket: "the-vault-41656.firebasestorage.app",
+        messagingSenderId: "8990033543",
+        appId: "1:8990033543:web:1579e3987a69f9ffcd1a22"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Global variables accessible by legacy functions
+    window.vaultDB = db;
+    window.firestore = { doc, setDoc, onSnapshot, getDoc };
+
+    // Kickoff
+    initUserSystem();
+</script>
+
+<script>
+    let users = JSON.parse(localStorage.getItem('vaultUsers')) || [{ name: 'BAILEY', id: 'user_bailey' }];
+    let activeUserId = localStorage.getItem('activeVaultUser') || 'user_bailey';
+    let mediaList = [];
+    let tmdbKey = localStorage.getItem('tmdbKey') || '';
+    let currentFilter = 'all';
+    let searchResults = [];
+    let isSearchMode = false;
+    let unsubscribe = null;
+
+    async function initUserSystem() {
+        const listEl = document.getElementById('userList');
+        listEl.innerHTML = '';
+        users.forEach(user => {
+            const div = document.createElement('div');
+            div.className = `user-item ${user.id === activeUserId ? 'active' : ''}`;
+            div.innerHTML = `<span>${user.name}</span>${user.id !== 'user_bailey' ? `<span onclick="deleteProfile(event, '${user.id}')" style="color:#ff4444;">×</span>` : ''}`;
+            div.onclick = () => switchProfile(user.id);
+            listEl.appendChild(div);
+            if(user.id === activeUserId) document.getElementById('displayUserName').innerText = user.name;
+        });
+        setupCloudSync();
+    }
+
+    // This connects to Firestore for the active user
+    async function setupCloudSync() {
+        if (unsubscribe) unsubscribe();
+        const status = document.getElementById('syncStatus');
+        status.innerText = "CONNECTING...";
+
+        // Reference to the user's document in the cloud
+        const userDocRef = window.firestore.doc(window.vaultDB, "archives", activeUserId);
+
+        // Listen for real-time changes
+        unsubscribe = window.firestore.onSnapshot(userDocRef, (doc) => {
+            if (doc.exists()) {
+                mediaList = doc.data().list || [];
+                status.innerText = "CLOUD SYNCED";
+                render();
+            } else {
+                // If cloud is empty, check local storage for migration
+                const local = JSON.parse(localStorage.getItem('sgcData_' + activeUserId)) || [];
+                if (local.length > 0) {
+                    mediaList = local;
+                    saveMediaList(); // Upload to cloud
+                } else {
+                    mediaList = [];
+                    render();
+                }
+                status.innerText = "CLOUD READY";
+            }
+        }, (error) => {
+            status.innerText = "SYNC ERROR - CHECK FIRESTORE RULES";
+            console.error(error);
+        });
+    }
+
+    async function saveMediaList() {
+        if (!window.vaultDB) return;
+        const userDocRef = window.firestore.doc(window.vaultDB, "archives", activeUserId);
+        try {
+            await window.firestore.setDoc(userDocRef, { list: mediaList });
+            // Also keep a local backup just in case
+            localStorage.setItem('sgcData_' + activeUserId, JSON.stringify(mediaList));
+        } catch (e) {
+            console.error("Cloud Save Failed", e);
+        }
+    }
+
+    function switchProfile(id) { 
+        activeUserId = id; 
+        localStorage.setItem('activeVaultUser', id); 
+        exitSearchMode(); 
+        initUserSystem(); 
+    }
+
+    function createNewProfile() { 
+        const n = prompt("Profile Name:").toUpperCase(); 
+        if(!n) return; 
+        const id = 'user_'+Date.now(); 
+        users.push({name:n, id}); 
+        localStorage.setItem('vaultUsers', JSON.stringify(users)); 
+        switchProfile(id); 
+    }
+
+    function deleteProfile(e, id) { 
+        e.stopPropagation(); 
+        if(!confirm("Erase cloud data?")) return; 
+        users=users.filter(u=>u.id!==id); 
+        localStorage.setItem('vaultUsers', JSON.stringify(users)); 
+        if(activeUserId===id) switchProfile('user_bailey'); else initUserSystem(); 
+    }
+
+    // --- SEARCH & CORE LOGIC ---
+    const inputEl = document.getElementById('showInput');
+    const dropdownEl = document.getElementById('autocomplete-list');
+    let typingTimer;
+
+    inputEl.addEventListener('input', () => {
+        clearTimeout(typingTimer);
+        const q = inputEl.value.trim();
+        if (q.length < 2) { dropdownEl.style.display = 'none'; return; }
+        typingTimer = setTimeout(() => fetchDropdown(q), 300); 
+    });
+
+    async function fetchDropdown(q) {
+        if(!tmdbKey) return;
+        try {
+            const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(q)}&include_adult=false`);
+            const data = await res.json();
+            dropdownEl.innerHTML = ''; dropdownEl.style.display = 'block';
+            data.results.slice(0, 6).forEach(item => {
+                if (!item.title && !item.name) return;
+                const li = document.createElement('li');
+                li.className = 'suggestion-item';
+                li.style = "padding:12px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between;";
+                li.innerHTML = `<span><strong>${item.title || item.name}</strong></span><span style="font-size:0.7em; color:var(--glow);">${(item.media_type||'').toUpperCase()}</span>`;
+                li.onclick = () => { addFromTMDB(item, '', 'watching', false, false); dropdownEl.style.display='none'; inputEl.value=''; };
+                dropdownEl.appendChild(li);
+            });
+        } catch(e){}
+    }
+
+    async function performFullSearch() {
+        const q = inputEl.value.trim();
+        if(!q || !tmdbKey) return;
+        dropdownEl.style.display = 'none';
+        try {
+            const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(q)}&include_adult=false`);
+            const data = await res.json();
+            searchResults = data.results.filter(i => i.media_type === 'movie' || i.media_type === 'tv');
+            isSearchMode = true;
+            document.getElementById('pageTitle').innerText = "SEARCH RESULTS";
+            document.getElementById('backToVault').style.display = 'block';
+            renderSearchResults();
+        } catch(e){}
+    }
+
+    function renderSearchResults() {
+        const listEl = document.getElementById('showList');
+        listEl.innerHTML = '';
+        searchResults.forEach(item => {
+            const li = document.createElement('li');
+            const poster = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : '';
+            const itemId = item.id;
+            const already = mediaList.some(v => v.tmdbId === itemId);
+            const isAnime = item.genre_ids?.includes(16) && (item.origin_country?.includes('JP'));
+            const isAnimated = item.genre_ids?.includes(16) && !isAnime;
+
+            li.innerHTML = `
+                <div class="poster-container">
+                    <img class="poster" src="${poster || ''}">
+                    <button id="save-btn-${itemId}" class="save-search-btn ${already ? 'added' : ''}" 
+                        onclick='processSearchAdd(${itemId}, ${JSON.stringify(item).replace(/'/g, "")})'>
+                        ${already ? 'IN VAULT' : 'SAVE TO VAULT'}
+                    </button>
+                </div>
+                <div class="info"><strong>${item.title || item.name}</strong></div>
+                <div class="search-options-grid">
+                    <div class="search-option-row"><label>Status</label><select id="status-${itemId}"><option value="watching">To Watch</option><option value="pulse">Pulse</option><option value="watched">Watched</option></select></div>
+                    <div class="search-option-row"><label>Type</label><select id="type-${itemId}"><option value="standard">Live Action</option><option value="animated" ${isAnimated ? 'selected' : ''}>Animated</option><option value="anime" ${isAnime ? 'selected' : ''}>Anime</option></select></div>
+                    <div class="search-option-row"><label>Date</label><input type="date" id="date-${itemId}"></div>
+                </div>`;
+            listEl.appendChild(li);
+        });
+    }
+
+    function processSearchAdd(id, item) {
+        const s = document.getElementById(`status-${id}`).value;
+        const type = document.getElementById(`type-${id}`).value;
+        addFromTMDB(item, document.getElementById(`date-${id}`).value, s, type === 'anime', type === 'animated');
+    }
+
+    function addFromTMDB(item, d, s='watching', a=false, animated=false) {
+        if (!mediaList.some(v => v.tmdbId === item.id)) {
+            const poster = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : '';
+            mediaList.unshift({ name: item.title || item.name, status: s, poster: poster, type: item.media_type, tmdbId: item.id, watchDate: d || '', isAnime: a, isAnimated: animated, checkedEpisodes: [] });
+            saveMediaList();
+        }
+        if (isSearchMode) {
+            const btn = document.getElementById(`save-btn-${item.id}`);
+            if (btn) { btn.innerText = "ADDED"; btn.classList.add('added'); }
+        } else { render(); }
+    }
+
+    function render() {
+        if(isSearchMode) return;
+        const listEl = document.getElementById('showList');
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        listEl.innerHTML = '';
+        mediaList.forEach((item, index) => {
+            let pass = (currentFilter === 'all') || (currentFilter === item.status) || (currentFilter === item.type) || (currentFilter === 'anime' && item.isAnime) || (currentFilter === 'animated' && item.isAnimated);
+            if (item.name.toLowerCase().includes(searchTerm) && pass) {
+                const li = document.createElement('li');
+                li.id = `item-${index}`;
+                let dateDisplay = (item.watchDate) ? `<span class="date-tag">WATCHED: ${new Date(item.watchDate).toLocaleDateString('en-AU')}</span>` : '';
+                let progressUI = (item.type === 'tv' && item.totalEpisodes) ? `<div class="progress-container"><div class="progress-fill" style="width:${((item.checkedEpisodes?.length || 0) / item.totalEpisodes) * 100}%"></div></div>` : '';
+                li.innerHTML = `
+                    <div class="poster-container" onclick="openModal(${index})"><img class="poster" src="${item.poster || ''}"></div>
+                    <div class="info" onclick="openModal(${index})"><strong>${item.name}</strong>${dateDisplay}${progressUI}</div>
+                    <div class="controls">
+                        <button class="state-btn ${item.status === 'watching' ? 'active-watch' : ''}" onclick="setStatus(${index}, 'watching')">To Watch</button>
+                        <button class="state-btn ${item.status === 'pulse' ? 'active-pulse' : ''}" onclick="setStatus(${index}, 'pulse')">Pulse</button>
+                        <button class="state-btn ${item.status === 'watched' ? 'active-done' : ''}" onclick="setStatus(${index}, 'watched')">Watched</button>
+                        <button class="delete-btn" onclick="deleteItem(${index})">✕</button>
+                    </div>`;
+                listEl.appendChild(li);
+            }
+        });
+    }
+
+    function setStatus(idx, s) { mediaList[idx].status = s; saveMediaList(); render(); }
+    function deleteItem(idx) { mediaList.splice(idx, 1); saveMediaList(); render(); }
+    function exitSearchMode() { isSearchMode = false; document.getElementById('backToVault').style.display='none'; document.getElementById('pageTitle').innerText="THE VAULT"; render(); }
+    function openKeyModal() {
+        const body = document.getElementById('modalBody');
+        const overlay = document.getElementById('detailsModal');
+        overlay.style.display = 'flex';
+        setTimeout(() => overlay.classList.add('active'), 10);
+        body.innerHTML = `<button style="position:absolute; top:20px; right:25px; color:#fff; font-size:1.8em; background:none; border:none; cursor:pointer;" onclick="closeModal()">✕</button><div style="padding:40px;"><h2 style="color:var(--glow);">API KEY SETTINGS</h2><input type="text" id="keyInput" value="${tmdbKey}" style="width:100%; background:rgba(0,0,0,0.5); border:1px solid var(--border); color:#fff; padding:15px; border-radius:12px; margin-bottom:20px;"><button class="trailer-btn" onclick="saveKey()">SAVE KEY</button></div>`;
+    }
+    function saveKey() { tmdbKey = document.getElementById('keyInput').value.trim(); localStorage.setItem('tmdbKey', tmdbKey); closeModal(); }
+    function closeModal() { const overlay = document.getElementById('detailsModal'); overlay.classList.add('closing'); setTimeout(() => { overlay.classList.remove('active', 'closing'); overlay.style.display = 'none'; }, 300); }
+    function setFilter(f, btn) { if(isSearchMode) exitSearchMode(); currentFilter = f; document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); const titles = {'all':'THE VAULT', 'watching':'TO WATCH', 'pulse':'PULSE', 'watched':'WATCHED', 'movie':'MOVIES', 'tv':'TV SHOWS', 'animated':'ANIMATED ARCHIVE', 'anime':'ANIME ARCHIVE'}; document.getElementById('pageTitle').innerText = titles[f] || 'THE VAULT'; render(); }
+    
+    async function openModal(index) {
+        const item = mediaList[index];
+        const body = document.getElementById('modalBody');
+        const overlay = document.getElementById('detailsModal');
+        overlay.style.display = 'flex';
+        setTimeout(() => overlay.classList.add('active'), 10);
+        body.innerHTML = '<div style="padding:100px; text-align:center; color:var(--glow); font-weight:600;">Retrieving Archive...</div>';
+        try {
+            const res = await fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}?api_key=${tmdbKey}`);
+            const data = await res.json();
+            if (item.type === 'tv') { item.totalEpisodes = data.number_of_episodes; saveMediaList(); }
+            let tvExtras = '';
+            if (item.type === 'tv') {
+                const seasons = data.seasons || [];
+                let seasonOptions = seasons.map(s => `<option value="${s.season_number}">${s.name}</option>`).join('');
+                tvExtras = `<div class="season-hub"><select class="season-select" onchange="fetchEpisodes(${index}, this.value)"><option value="">-- MISSION LOGS --</option>${seasonOptions}</select><div id="episodeDisplay" class="episode-list"></div></div>`;
+            }
+            body.innerHTML = `<button style="position:absolute; top:20px; right:25px; color:#fff; font-size:1.8em; background:none; border:none; cursor:pointer; z-index:10;" onclick="closeModal()">✕</button><div class="modal-inner"><img src="${item.poster}" class="modal-poster"><div class="modal-text"><h2>${item.name}</h2><p>${data.overview || ''}</p><div class="modal-actions" style="gap:10px; display:flex;"><a href="https://www.youtube.com/results?search_query=${encodeURIComponent(item.name + ' trailer')}" target="_blank" class="trailer-btn">▶ TRAILER</a><button class="trailer-btn" style="border-color:var(--glow); color:var(--glow);" onclick="toggleTag(${index}, 'isAnime')">${item.isAnime ? 'UNTAG ANIME' : 'TAG AS ANIME'}</button><button class="trailer-btn" style="border-color:var(--accent); color:var(--accent);" onclick="toggleTag(${index}, 'isAnimated')">${item.isAnimated ? 'UNTAG ANIMATED' : 'TAG AS ANIMATED'}</button></div><div style="margin-top:25px; padding-top:15px; border-top:1px solid rgba(255,255,255,0.1);"><input type="date" value="${item.watchDate || ''}" onchange="updateDate(${index}, this.value)" style="width:180px;"></div>${tvExtras}</div></div>`;
+        } catch(e){ body.innerHTML = `<div>Historical Records Restricted.</div>`; }
+    }
+
+    async function fetchEpisodes(idx, seasonNum) {
+        const item = mediaList[idx];
+        const display = document.getElementById('episodeDisplay');
+        if (!seasonNum) { display.innerHTML = ''; return; }
+        display.innerHTML = '<div style="padding:20px; text-align:center; font-size:0.8em; color:var(--glow);">Loading...</div>';
+        try {
+            const res = await fetch(`https://api.themoviedb.org/3/tv/${item.tmdbId}/season/${seasonNum}?api_key=${tmdbKey}`);
+            const data = await res.json();
+            display.innerHTML = data.episodes.map(ep => `<div class="episode-item"><input type="checkbox" class="ep-check" ${item.checkedEpisodes?.includes(ep.id) ? 'checked' : ''} onchange="toggleEp(${idx}, ${ep.id})"><div class="ep-info"><strong>${ep.episode_number}. ${ep.name}</strong><span>${ep.air_date || ''}</span><p>${ep.overview || ''}</p></div></div>`).join('');
+        } catch(e) {}
+    }
+
+    function toggleEp(idx, epId) {
+        const item = mediaList[idx];
+        if(!item.checkedEpisodes) item.checkedEpisodes = [];
+        const epIdx = item.checkedEpisodes.indexOf(epId);
+        if (epIdx > -1) item.checkedEpisodes.splice(epIdx, 1);
+        else { item.checkedEpisodes.push(epId); if (item.status === 'watching') item.status = 'pulse'; }
+        saveMediaList(); render(); 
+    }
+
+    function toggleTag(idx, prop) { mediaList[idx][prop] = !mediaList[idx][prop]; if(prop==='isAnime'&&mediaList[idx].isAnime) mediaList[idx].isAnimated=false; if(prop==='isAnimated'&&mediaList[idx].isAnimated) mediaList[idx].isAnime=false; saveMediaList(); openModal(idx); render(); }
+    function updateDate(idx, d) { mediaList[idx].watchDate = d; saveMediaList(); render(); }
+    function pickRandom() { const filtered = mediaList.filter(i => (currentFilter==='all')||(currentFilter===i.status)||(currentFilter===i.type)); if(!filtered.length) return; const sel = filtered[Math.floor(Math.random()*filtered.length)]; openModal(mediaList.indexOf(sel)); }
+    function exportData() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mediaList)); const a = document.createElement('a'); a.setAttribute("href", dataStr); a.setAttribute("download", `vault_${activeUserId}.json`); a.click(); }
+    function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (e) => { try { const imp = JSON.parse(e.target.result); if(Array.isArray(imp)) { mediaList = imp; saveMediaList(); render(); alert("Sync Complete."); } } catch(err){} }; r.readAsText(f); }
+
+</script>
+</body>
+</html>
