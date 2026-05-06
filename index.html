@@ -53,7 +53,6 @@
             background: rgba(255,255,255,0.03); border-radius: 20px;
             padding: 10px; border: 1px solid var(--border);
             display: flex; flex-direction: column; gap: 10px;
-            transition: transform 0.3s var(--glide);
         }
         
         .poster { width: 100%; aspect-ratio: 2/3; border-radius: 14px; object-fit: cover; background: #111; }
@@ -158,6 +157,7 @@
     window.firestore.onSnapshot(window.firestore.doc(db, "archives", "user_bailey"), (doc) => {
         if(doc.exists()) {
             const newList = doc.data().list || [];
+            // ONLY re-render if something actually changed in the background
             if (JSON.stringify(newList) !== JSON.stringify(window.mediaList)) {
                 window.mediaList = newList;
                 localStorage.setItem('vault_cache_bailey', JSON.stringify(window.mediaList));
@@ -191,7 +191,6 @@
             if(item.name.toLowerCase().includes(filterStr) && passF) {
                 const div = document.createElement('div');
                 div.className = 'item-card';
-                div.setAttribute('data-id', idx);
                 div.innerHTML = `
                     <img class="poster" src="${item.poster}" onclick="openItem(${idx})">
                     <div class="title" onclick="openItem(${idx})">${item.name}</div>
@@ -205,11 +204,12 @@
         });
     }
 
+    // THE FIX: Only update the buttons, don't call render()
     function setStatus(idx, s, btnEl) { 
         window.mediaList[idx].status = s; 
         save(); 
 
-        // Targeted UI update to prevent full grid flash
+        // Update the buttons visually right now
         const controls = btnEl.parentElement;
         const btns = controls.querySelectorAll('.btn-status');
         btns.forEach(b => b.classList.remove('active-watch', 'active-pulse', 'active-done'));
@@ -217,17 +217,19 @@
         if (s === 'watching') btnEl.classList.add('active-watch');
         else if (s === 'pulse') btnEl.classList.add('active-pulse');
         else if (s === 'watched') btnEl.classList.add('active-done');
+        
+        // Notice: NO render() call here.
     }
 
     async function performFullSearch() {
         const q = document.getElementById('showInput').value;
         if(!q || !tmdbKey) return;
-        const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(q)}&include_adult=false`);
+        const res = await fetch(`https://api.themoviedb.org/3/search?api_key=${tmdbKey}&query=${encodeURIComponent(q)}&include_adult=false`);
         const data = await res.json();
-        const results = data.results.filter(i => i.media_type !== 'person');
+        const results = data.results || [];
         isSearch = true;
         document.getElementById('backBtn').style.display = 'block';
-        document.getElementById('pageTitle').innerText = "DISCOVERING...";
+        document.getElementById('pageTitle').innerText = "SEARCHING...";
         const grid = document.getElementById('mainGrid');
         grid.innerHTML = '';
         results.forEach(item => {
@@ -240,7 +242,7 @@
 
     function addItem(item) {
         if(!window.mediaList.some(v => v.tmdbId === item.id)) {
-            window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`, type: item.media_type, tmdbId: item.id, isAnimated: item.genre_ids?.includes(16), checkedEpisodes: [] });
+            window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`, type: item.media_type || 'movie', tmdbId: item.id, isAnimated: item.genre_ids?.includes(16), checkedEpisodes: [] });
             save();
             render();
         }
@@ -318,7 +320,7 @@
         document.getElementById('epList').innerHTML = data.episodes.map(ep => `<div style="display:flex; gap:15px; margin-bottom:18px; border-bottom:1px solid #222; padding-bottom:12px; text-align:left;"><input type="checkbox" style="width:28px; height:28px; accent-color:var(--glow);" ${item.checkedEpisodes?.includes(ep.id)?'checked':''} onchange="toggleEp(${idx},${ep.id})"><div><strong>${ep.episode_number}. ${ep.name}</strong></div></div>`).join('');
     }
 
-    function toggleEp(idx, id) { if(!window.mediaList[idx].checkedEpisodes) window.mediaList[idx].checkedEpisodes = []; const i = window.mediaList[idx].checkedEpisodes.indexOf(id); if(i > -1) window.mediaList[idx].checkedEpisodes.splice(i, 1); else { window.mediaList[idx].checkedEpisodes.push(id); if(window.mediaList[idx].status==='watching') window.mediaList[idx].status = 'pulse'; } save(); render(); }
+    function toggleEp(idx, id) { if(!window.mediaList[idx].checkedEpisodes) window.mediaList[idx].checkedEpisodes = []; const i = window.mediaList[idx].checkedEpisodes.indexOf(id); if(i > -1) window.mediaList[idx].checkedEpisodes.splice(i, 1); else { window.mediaList[idx].checkedEpisodes.push(id); if(window.mediaList[idx].status==='watching') window.mediaList[idx].status = 'pulse'; } save(); }
     function toggleTag(idx, p) { window.mediaList[idx][p] = !window.mediaList[idx][p]; save(); openItem(idx); }
     function deleteItem(idx) { if(confirm("Delete?")) { window.mediaList.splice(idx, 1); save(); closeModal(); render(); } }
     function closeModal() { document.getElementById('modal').classList.remove('active'); }
