@@ -53,7 +53,6 @@
             background: rgba(255,255,255,0.03); border-radius: 20px;
             padding: 10px; border: 1px solid var(--border);
             display: flex; flex-direction: column; gap: 10px;
-            transition: opacity 0.3s ease;
         }
         
         .poster { width: 100%; aspect-ratio: 2/3; border-radius: 14px; object-fit: cover; background: #111; cursor: pointer; }
@@ -130,7 +129,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAf9NqhQ8iGoVWeCCCoZChF1RKY-HER678",
@@ -144,43 +143,27 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     window.vaultDB = db;
-    window.firestore = { doc, setDoc, onSnapshot };
+    window.firestore = { doc, setDoc, getDoc };
     
-    // Initial Load
-    const cache = localStorage.getItem('vault_cache_bailey');
-    if(cache) {
-        window.mediaList = JSON.parse(cache);
-        render();
-    }
-
-    // CLOUD SYNC: This listener is now restricted. 
-    // It will ONLY rebuild the grid if the count of items changes (someone added a new show on another device).
-    window.firestore.onSnapshot(window.firestore.doc(db, "archives", "user_bailey"), (doc) => {
-        if(doc.exists()) {
-            const newList = doc.data().list || [];
-            window.syncMsg = "CLOUD SYNCED";
-            
-            const countChanged = newList.length !== window.mediaList.length;
-            window.mediaList = newList;
-            localStorage.setItem('vault_cache_bailey', JSON.stringify(newList));
-            
-            if (countChanged) {
-                render();
-            } else {
-                // Silently update button states without a grid wipe
-                newList.forEach(item => {
-                    const card = document.querySelector(`[data-id="${item.tmdbId}"]`);
-                    if (card) {
-                        const btns = card.querySelectorAll('.btn-status');
-                        btns.forEach(b => b.classList.remove('active-watch', 'active-pulse', 'active-done'));
-                        if (item.status === 'watching') card.querySelector('.w-btn').classList.add('active-watch');
-                        if (item.status === 'pulse') card.querySelector('.p-btn').classList.add('active-pulse');
-                        if (item.status === 'watched') card.querySelector('.d-btn').classList.add('active-done');
-                    }
-                });
-            }
+    // ONE-TIME SYNC ON OPEN
+    async function init() {
+        const cache = localStorage.getItem('vault_cache_bailey');
+        if(cache) {
+            window.mediaList = JSON.parse(cache);
+            render();
         }
-    });
+
+        try {
+            const snap = await window.firestore.getDoc(window.firestore.doc(db, "archives", "user_bailey"));
+            if(snap.exists()) {
+                window.mediaList = snap.data().list || [];
+                localStorage.setItem('vault_cache_bailey', JSON.stringify(window.mediaList));
+                window.syncMsg = "CLOUD SYNCED";
+                render();
+            }
+        } catch(e) { window.syncMsg = "OFFLINE MODE"; }
+    }
+    init();
 </script>
 
 <script>
@@ -192,7 +175,8 @@
 
     async function save() {
         localStorage.setItem('vault_cache_bailey', JSON.stringify(window.mediaList));
-        await window.firestore.setDoc(window.firestore.doc(window.vaultDB, "archives", "user_bailey"), { list: window.mediaList });
+        // Silent background save
+        window.firestore.setDoc(window.firestore.doc(window.vaultDB, "archives", "user_bailey"), { list: window.mediaList });
     }
 
     function render() {
@@ -219,8 +203,6 @@
 
     function applyFilters() {
         const filterStr = document.getElementById('filterInput').value.toLowerCase();
-        const cards = document.querySelectorAll('.item-card');
-        
         window.mediaList.forEach(item => {
             const card = document.querySelector(`[data-id="${item.tmdbId}"]`);
             if (card) {
@@ -243,11 +225,7 @@
         else if (s === 'pulse') btnEl.classList.add('active-pulse');
         else if (s === 'watched') btnEl.classList.add('active-done');
         
-        // CRITICAL: We do NOT call render() here. 
-        // We only call applyFilters() if you're in a filtered view and want it to disappear.
-        if (currentFilter !== 'all') {
-            setTimeout(applyFilters, 500); // Small delay so you see the button change before it vanishes
-        }
+        // NO RENDER. NO REFRESH. JUST UI UPDATE.
     }
 
     async function performFullSearch() {
@@ -278,6 +256,7 @@
 
     function exitSearch() { isSearch = false; document.getElementById('backBtn').style.display='none'; render(); }
     function setFilter(f, btn) { if(isSearch) exitSearch(); currentFilter = f; document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); btn.classList.add('active'); applyFilters(); }
+    
     function openSystemPanel() {
         const modal = document.getElementById('modal');
         const body = document.getElementById('modalBody');
@@ -307,7 +286,7 @@
                 <div style="display:flex; flex-direction:column; align-items:center; text-align:center;">
                     <img src="${item.poster}" style="width:140px; border-radius:18px; margin-bottom:20px;">
                     <h3 style="color:var(--glow); margin:0;">${item.name}</h3>
-                    <p style="font-size:0.9em; line-height:1.6; opacity:0.7; margin:15px 0;">${data.overview || 'No log entry.'}</p>
+                    <p style="font-size:0.9em; line-height:1.6; opacity:0.7; margin:15px 0;">${data.overview || 'No entry.'}</p>
                     <button class="btn-main" style="background:var(--accent); width:100%; margin-bottom:10px;" onclick="toggleTag(${idx}, 'isAnimated')">${item.isAnimated?'REMOVE TOON TAG':'TAG AS TOON'}</button>
                     <button class="btn-main" style="background:rgba(255, 68, 68, 0.1); color:#ff4444; border:1px solid rgba(255, 68, 68, 0.3); width:100%;" onclick="deleteItem(${idx})">ERASE RECORD</button>
                     <div id="epArea" style="width:100%;"></div>
