@@ -53,6 +53,7 @@
             background: rgba(255,255,255,0.03); border-radius: 20px;
             padding: 10px; border: 1px solid var(--border);
             display: flex; flex-direction: column; gap: 10px;
+            transition: opacity 0.3s ease;
         }
         
         .poster { width: 100%; aspect-ratio: 2/3; border-radius: 14px; object-fit: cover; background: #111; cursor: pointer; }
@@ -145,30 +146,39 @@
     window.vaultDB = db;
     window.firestore = { doc, setDoc, onSnapshot };
     
+    // Initial Load
     const cache = localStorage.getItem('vault_cache_bailey');
     if(cache) {
         window.mediaList = JSON.parse(cache);
         render();
     }
 
-    // CLOUD SYNC: ONLY updates the data object, NEVER triggers render()
+    // CLOUD SYNC: This listener is now restricted. 
+    // It will ONLY rebuild the grid if the count of items changes (someone added a new show on another device).
     window.firestore.onSnapshot(window.firestore.doc(db, "archives", "user_bailey"), (doc) => {
         if(doc.exists()) {
-            window.mediaList = doc.data().list || [];
-            localStorage.setItem('vault_cache_bailey', JSON.stringify(window.mediaList));
+            const newList = doc.data().list || [];
             window.syncMsg = "CLOUD SYNCED";
             
-            // Silently sync button highlights if another device changes them
-            window.mediaList.forEach(item => {
-                const card = document.querySelector(`[data-id="${item.tmdbId}"]`);
-                if (card) {
-                    const btns = card.querySelectorAll('.btn-status');
-                    btns.forEach(b => b.classList.remove('active-watch', 'active-pulse', 'active-done'));
-                    if (item.status === 'watching') card.querySelector('.w-btn').classList.add('active-watch');
-                    if (item.status === 'pulse') card.querySelector('.p-btn').classList.add('active-pulse');
-                    if (item.status === 'watched') card.querySelector('.d-btn').classList.add('active-done');
-                }
-            });
+            const countChanged = newList.length !== window.mediaList.length;
+            window.mediaList = newList;
+            localStorage.setItem('vault_cache_bailey', JSON.stringify(newList));
+            
+            if (countChanged) {
+                render();
+            } else {
+                // Silently update button states without a grid wipe
+                newList.forEach(item => {
+                    const card = document.querySelector(`[data-id="${item.tmdbId}"]`);
+                    if (card) {
+                        const btns = card.querySelectorAll('.btn-status');
+                        btns.forEach(b => b.classList.remove('active-watch', 'active-pulse', 'active-done'));
+                        if (item.status === 'watching') card.querySelector('.w-btn').classList.add('active-watch');
+                        if (item.status === 'pulse') card.querySelector('.p-btn').classList.add('active-pulse');
+                        if (item.status === 'watched') card.querySelector('.d-btn').classList.add('active-done');
+                    }
+                });
+            }
         }
     });
 </script>
@@ -209,6 +219,8 @@
 
     function applyFilters() {
         const filterStr = document.getElementById('filterInput').value.toLowerCase();
+        const cards = document.querySelectorAll('.item-card');
+        
         window.mediaList.forEach(item => {
             const card = document.querySelector(`[data-id="${item.tmdbId}"]`);
             if (card) {
@@ -231,7 +243,11 @@
         else if (s === 'pulse') btnEl.classList.add('active-pulse');
         else if (s === 'watched') btnEl.classList.add('active-done');
         
-        // NO RENDER. NO REFRESH. JUST CSS.
+        // CRITICAL: We do NOT call render() here. 
+        // We only call applyFilters() if you're in a filtered view and want it to disappear.
+        if (currentFilter !== 'all') {
+            setTimeout(applyFilters, 500); // Small delay so you see the button change before it vanishes
+        }
     }
 
     async function performFullSearch() {
@@ -262,7 +278,6 @@
 
     function exitSearch() { isSearch = false; document.getElementById('backBtn').style.display='none'; render(); }
     function setFilter(f, btn) { if(isSearch) exitSearch(); currentFilter = f; document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); btn.classList.add('active'); applyFilters(); }
-    
     function openSystemPanel() {
         const modal = document.getElementById('modal');
         const body = document.getElementById('modalBody');
@@ -276,7 +291,6 @@
                 <button class="btn-main" style="width:100%; background:transparent; color:#888; border:1px solid #333;" onclick="closeModal()">CANCEL</button>
             </div>`;
     }
-
     function saveSystem() { tmdbKey = document.getElementById('tmdbInput').value; localStorage.setItem('tmdbKey', tmdbKey); closeModal(); }
     function closeModal() { document.getElementById('modal').classList.remove('active'); }
 
@@ -316,7 +330,13 @@
         document.getElementById('epList').innerHTML = data.episodes.map(ep => `<div style="display:flex; gap:15px; margin-bottom:18px; border-bottom:1px solid #222; padding-bottom:12px; text-align:left;"><input type="checkbox" style="width:28px; height:28px; accent-color:var(--glow);" ${item.checkedEpisodes?.includes(ep.id)?'checked':''} onchange="toggleEp(${idx},${ep.id})"><div><strong>${ep.episode_number}. ${ep.name}</strong></div></div>`).join('');
     }
 
-    function toggleEp(idx, id) { if(!window.mediaList[idx].checkedEpisodes) window.mediaList[idx].checkedEpisodes = []; const i = window.mediaList[idx].checkedEpisodes.indexOf(id); if(i > -1) window.mediaList[idx].checkedEpisodes.splice(i, 1); else { window.mediaList[idx].checkedEpisodes.push(id); if(window.mediaList[idx].status==='watching') window.mediaList[idx].status = 'pulse'; } save(); }
+    function toggleEp(idx, id) { 
+        if(!window.mediaList[idx].checkedEpisodes) window.mediaList[idx].checkedEpisodes = []; 
+        const i = window.mediaList[idx].checkedEpisodes.indexOf(id); 
+        if(i > -1) window.mediaList[idx].checkedEpisodes.splice(i, 1); 
+        else { window.mediaList[idx].checkedEpisodes.push(id); if(window.mediaList[idx].status==='watching') window.mediaList[idx].status = 'pulse'; } 
+        save(); 
+    }
     function toggleTag(idx, p) { window.mediaList[idx][p] = !window.mediaList[idx][p]; save(); openItem(idx); }
     function deleteItem(idx) { if(confirm("Delete?")) { window.mediaList.splice(idx, 1); save(); exitSearch(); } }
 </script>
