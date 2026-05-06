@@ -14,7 +14,8 @@
             --accent: #ffcc00; 
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
-            --bezier: cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy "Pop" Curve */
+            /* Smoother, slower quintic curve for that premium feel */
+            --bezier: cubic-bezier(0.23, 1, 0.32, 1); 
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -38,7 +39,6 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        /* Responsive Grid */
         .media-grid {
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -48,7 +48,7 @@
         @media (min-width: 800px) {
             .media-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
             .app-container { padding-bottom: 20px; }
-            .bottom-nav { width: 450px; left: 50% !important; transform: translateX(-50%); border-radius: 40px; bottom: 25px !important; }
+            .bottom-nav { width: 500px; left: 50% !important; transform: translateX(-50%); border-radius: 40px; bottom: 25px !important; }
         }
 
         .card {
@@ -58,42 +58,35 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
 
-        input { 
-            flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); 
-            color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important;
-            transition: all 0.3s ease;
-        }
-
         .btn-main { 
             background: var(--glow); color: #05162d; border: none; 
             padding: 12px 20px; border-radius: 14px; font-weight: bold; 
-            cursor: pointer; transition: all 0.2s ease;
+            cursor: pointer; transition: all 0.3s var(--bezier);
             font-size: 14px;
         }
         .btn-main:active { transform: scale(0.95); opacity: 0.9; }
 
-        /* Item Cards */
         .item-card {
             background: rgba(255,255,255,0.03); border-radius: 20px;
             padding: 10px; border: 1px solid var(--border);
             display: flex; flex-direction: column; gap: 10px;
-            transition: transform 0.3s var(--bezier);
+            transition: transform 0.5s var(--bezier);
         }
         .item-card:active { transform: scale(0.94); }
         
-        .poster { width: 100%; aspect-ratio: 2/3; border-radius: 14px; object-fit: cover; background: #111; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+        .poster { width: 100%; aspect-ratio: 2/3; border-radius: 14px; object-fit: cover; background: #111; }
         .title { font-size: 0.85em; font-weight: 600; text-align: center; min-height: 2.4em; color: rgba(255,255,255,0.9); }
 
         .btn-status { 
             flex: 1; font-size: 10px; padding: 10px 0; border-radius: 9px; 
             background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: rgba(255,255,255,0.5);
-            text-transform: uppercase; font-weight: 800;
+            text-transform: uppercase; font-weight: 800; transition: 0.3s;
         }
         .active-watch { border-color: var(--accent); color: var(--accent); background: rgba(255,204,0,0.15); }
         .active-pulse { border-color: var(--glow); color: var(--glow); background: rgba(120,169,255,0.15); }
         .active-done { border-color: #4caf50; color: #4caf50; background: rgba(76,175,80,0.15); }
 
-        /* Navigation */
+        /* Navigation - Labels updated to match Desktop */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: calc(75px + var(--safe-bottom));
@@ -105,42 +98,43 @@
         .nav-item { 
             background: none; border: none; color: rgba(255,255,255,0.35); 
             display: flex; flex-direction: column; align-items: center; font-size: 10px; flex: 1;
+            transition: color 0.3s ease;
         }
         .nav-item.active { color: var(--glow); }
         .nav-icon { width: 24px; height: 24px; background: currentColor; mask-size: contain; mask-repeat: no-repeat; -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; margin-bottom: 5px; }
 
-        /* MODAL POLISH - Smooth "Pop" */
+        /* MODAL - Slower, smoother glided pop */
         .modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
             z-index: 9000; display: none; align-items: center; justify-content: center;
-            opacity: 0; transition: opacity 0.3s ease;
+            opacity: 0; transition: opacity 0.5s ease;
         }
         .modal.active { display: flex; opacity: 1; }
         
         .modal-content { 
             width: 90%; max-width: 450px; max-height: 80vh; background: #0a111f; 
             border: 1px solid var(--border); border-radius: 28px;
-            padding: 25px; overflow-y: auto; 
-            transform: scale(0.8) translate3d(0, 50px, 0); 
-            transition: transform 0.4s var(--bezier);
-            box-shadow: 0 30px 70px rgba(0,0,0,0.8);
+            padding: 30px; overflow-y: auto; 
+            transform: scale(0.9) translate3d(0, 30px, 0); 
+            transition: transform 0.6s var(--bezier);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.9);
         }
         .modal.active .modal-content { transform: scale(1) translate3d(0, 0, 0); }
 
-        .modal-header { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 20px; text-align: center; }
+        .modal-header { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 25px; text-align: center; }
         .modal-poster { width: 140px; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .modal-info h3 { margin: 0; color: var(--glow); font-size: 1.5em; letter-spacing: 1px; }
         .modal-info p { font-size: 0.9em; line-height: 1.6; opacity: 0.75; margin-top: 12px; }
 
-        /* Larger Action Buttons */
-        .modal-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 20px; }
+        .modal-actions { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-top: 20px; }
         .btn-action { 
-            width: 100%; padding: 16px; border-radius: 16px; border: none; 
-            font-weight: 800; font-size: 14px; letter-spacing: 1px; text-transform: uppercase;
-            cursor: pointer; transition: 0.2s ease;
+            width: 100%; padding: 18px; border-radius: 16px; border: none; 
+            font-weight: 800; font-size: 14px; letter-spacing: 1.5px; text-transform: uppercase;
+            cursor: pointer; transition: 0.3s var(--bezier);
         }
         .btn-toon { background: var(--accent); color: #000; }
-        .btn-delete { background: rgba(255, 68, 68, 0.2); color: #ff4444; border: 1px solid rgba(255, 68, 68, 0.4); }
+        .btn-delete { background: rgba(255, 68, 68, 0.1); color: #ff4444; border: 1px solid rgba(255, 68, 68, 0.3); }
+        .btn-action:active { transform: scale(0.97); opacity: 0.8; }
 
         #syncStatus { position: fixed; top: calc(var(--safe-top) + 15px); left: 20px; font-size: 9px; color: var(--glow); z-index: 6000; font-weight: bold; }
     </style>
@@ -154,10 +148,10 @@
         <div class="card">
             <h2 id="pageTitle" style="margin: 0 0 15px 0; font-size: 1.4em; letter-spacing: 4px; font-weight: 300; text-align: center;">THE VAULT</h2>
             <div class="search-row">
-                <input type="text" id="showInput" placeholder="Initialize New Entry..." onkeydown="if(event.key==='Enter') performFullSearch()">
+                <input type="text" id="showInput" placeholder="Initialize Entry..." onkeydown="if(event.key==='Enter') performFullSearch()">
                 <button class="btn-main" onclick="performFullSearch()">ENGAGE</button>
             </div>
-            <input type="text" id="filterInput" style="height:40px;" placeholder="Search Archive..." onkeyup="render()">
+            <input type="text" id="filterInput" style="height:40px; background:rgba(0,0,0,0.3);" placeholder="Search Archive..." onkeyup="render()">
         </div>
 
         <button id="backBtn" class="btn-main" style="display:none; width:100%; margin-bottom:20px; padding:15px;" onclick="exitSearch()">← RETURN TO ARCHIVE</button>
@@ -166,11 +160,11 @@
 </div>
 
 <div class="bottom-nav">
-    <button class="nav-item active" onclick="setFilter('all', this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:stack-bold.svg')"></div>Vault</button>
-    <button class="nav-item" onclick="setFilter('watching', this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:clock-bold.svg')"></div>Watch</button>
+    <button class="nav-item active" onclick="setFilter('all', this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:stack-bold.svg')"></div>All Vault</button>
+    <button class="nav-item" onclick="setFilter('watching', this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:clock-bold.svg')"></div>To Watch</button>
     <button class="nav-item" onclick="setFilter('pulse', this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:activity-bold.svg')"></div>Pulse</button>
-    <button class="nav-item" onclick="setFilter('animated', this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:rocket-launch-bold.svg')"></div>Toons</button>
-    <button class="nav-item" onclick="openSettings()"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:gear-bold.svg')"></div>Setup</button>
+    <button class="nav-item" onclick="setFilter('animated', this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:rocket-launch-bold.svg')"></div>Animated</button>
+    <button class="nav-item" onclick="openSettings()"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:gear-bold.svg')"></div>Settings</button>
 </div>
 
 <div id="modal" class="modal" onclick="if(event.target===this) closeModal()">
@@ -296,7 +290,7 @@
         const modal = document.getElementById('modal');
         const body = document.getElementById('modalBody');
         modal.classList.add('active');
-        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING LOGS...</div>';
+        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING MISSION LOGS...</div>';
         
         try {
             const res = await fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}?api_key=${tmdbKey}`);
@@ -336,7 +330,7 @@
         const data = await res.json();
         document.getElementById('epList').innerHTML = data.episodes.map(ep => `
             <div style="display:flex; gap:15px; margin-bottom:18px; border-bottom:1px solid #222; padding-bottom:12px; align-items: flex-start;">
-                <input type="checkbox" style="width:28px; height:28px; accent-color:var(--glow);" ${item.checkedEpisodes?.includes(ep.id)?'checked':''} onchange="toggleEp(${idx},${ep.id})">
+                <input type="checkbox" style="width:28px; height:28px; accent-color:var(--glow); border-radius:6px;" ${item.checkedEpisodes?.includes(ep.id)?'checked':''} onchange="toggleEp(${idx},${ep.id})">
                 <div style="font-size:13px;"><strong>${ep.episode_number}. ${ep.name}</strong><br><span style="opacity:0.5; line-height:1.4; font-size:11px;">${ep.overview || ''}</span></div>
             </div>
         `).join('');
