@@ -53,6 +53,7 @@
             background: rgba(255,255,255,0.03); border-radius: 20px;
             padding: 10px; border: 1px solid var(--border);
             display: flex; flex-direction: column; gap: 10px;
+            transition: transform 0.3s var(--glide);
         }
         
         .poster { width: 100%; aspect-ratio: 2/3; border-radius: 14px; object-fit: cover; background: #111; }
@@ -63,6 +64,7 @@
             flex: 1; font-size: 8px; padding: 10px 0; border-radius: 9px; 
             background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: rgba(255,255,255,0.4);
             text-transform: uppercase; font-weight: 800; white-space: nowrap;
+            transition: all 0.3s ease;
         }
         .active-watch { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(255,204,0,0.1) !important; }
         .active-pulse { border-color: var(--glow) !important; color: var(--glow) !important; background: rgba(120,169,255,0.1) !important; }
@@ -88,17 +90,16 @@
             background: rgba(0,0,0,0.95); backdrop-filter: blur(35px); border-top: 1px solid var(--border);
             display: flex; justify-content: space-around; align-items: center; padding-bottom: var(--safe-bottom); z-index: 5000;
         }
-        .nav-item { background: none; border: none; color: rgba(255,255,255,0.3); display: flex; flex-direction: column; align-items: center; font-size: 10px; flex: 1; }
+        .nav-item { background: none; border: none; color: rgba(255,255,255,0.3); display: flex; flex-direction: column; align-items: center; font-size: 10px; flex: 1; transition: color 0.3s; }
         .nav-item.active { color: var(--glow); }
         .nav-icon { width: 24px; height: 24px; background: currentColor; mask-size: contain; mask-repeat: no-repeat; -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; margin-bottom: 5px; }
 
-        .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; }
+        .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important; }
         
-        /* Unified Settings Style */
         .settings-row { margin-bottom: 20px; }
         .settings-label { font-size: 11px; color: var(--glow); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        .sync-indicator { font-size: 13px; font-weight: bold; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid var(--border); }
+        .sync-indicator { font-size: 13px; font-weight: bold; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid var(--border); color: #fff; }
     </style>
 </head>
 <body>
@@ -156,11 +157,14 @@
 
     window.firestore.onSnapshot(window.firestore.doc(db, "archives", "user_bailey"), (doc) => {
         if(doc.exists()) {
-            window.mediaList = doc.data().list || [];
-            localStorage.setItem('vault_cache_bailey', JSON.stringify(window.mediaList));
+            const newList = doc.data().list || [];
+            if (JSON.stringify(newList) !== JSON.stringify(window.mediaList)) {
+                window.mediaList = newList;
+                localStorage.setItem('vault_cache_bailey', JSON.stringify(window.mediaList));
+                render();
+            }
             window.syncMsg = "CLOUD SYNCED";
             updateSyncDisplay();
-            render();
         }
     });
 </script>
@@ -223,6 +227,7 @@
         if(!window.mediaList.some(v => v.tmdbId === item.id)) {
             window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`, type: item.media_type, tmdbId: item.id, isAnimated: item.genre_ids?.includes(16), checkedEpisodes: [] });
             save();
+            render();
         }
     }
 
@@ -256,7 +261,6 @@
         tmdbKey = val;
         localStorage.setItem('tmdbKey', val);
         closeModal();
-        location.reload();
     }
 
     function updateSyncDisplay() {
@@ -269,7 +273,7 @@
         const modal = document.getElementById('modal');
         const body = document.getElementById('modalBody');
         modal.classList.add('active');
-        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING...</div>';
+        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING MISSION LOGS...</div>';
         try {
             const res = await fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}?api_key=${tmdbKey}`);
             const data = await res.json();
@@ -300,9 +304,9 @@
         document.getElementById('epList').innerHTML = data.episodes.map(ep => `<div style="display:flex; gap:15px; margin-bottom:18px; border-bottom:1px solid #222; padding-bottom:12px; text-align:left;"><input type="checkbox" style="width:28px; height:28px; accent-color:var(--glow);" ${item.checkedEpisodes?.includes(ep.id)?'checked':''} onchange="toggleEp(${idx},${ep.id})"><div><strong>${ep.episode_number}. ${ep.name}</strong></div></div>`).join('');
     }
 
-    function toggleEp(idx, id) { if(!window.mediaList[idx].checkedEpisodes) window.mediaList[idx].checkedEpisodes = []; const i = window.mediaList[idx].checkedEpisodes.indexOf(id); if(i > -1) window.mediaList[idx].checkedEpisodes.splice(i, 1); else { window.mediaList[idx].checkedEpisodes.push(id); if(window.mediaList[idx].status==='watching') window.mediaList[idx].status = 'pulse'; } save(); }
+    function toggleEp(idx, id) { if(!window.mediaList[idx].checkedEpisodes) window.mediaList[idx].checkedEpisodes = []; const i = window.mediaList[idx].checkedEpisodes.indexOf(id); if(i > -1) window.mediaList[idx].checkedEpisodes.splice(i, 1); else { window.mediaList[idx].checkedEpisodes.push(id); if(window.mediaList[idx].status==='watching') window.mediaList[idx].status = 'pulse'; } save(); render(); }
     function toggleTag(idx, p) { window.mediaList[idx][p] = !window.mediaList[idx][p]; save(); openItem(idx); }
-    function deleteItem(idx) { if(confirm("Delete?")) { window.mediaList.splice(idx, 1); save(); closeModal(); } }
+    function deleteItem(idx) { if(confirm("Delete?")) { window.mediaList.splice(idx, 1); save(); closeModal(); render(); } }
     function closeModal() { document.getElementById('modal').classList.remove('active'); }
 </script>
 </body>
