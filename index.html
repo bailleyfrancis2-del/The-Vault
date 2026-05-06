@@ -14,7 +14,7 @@
             --accent: #ffcc00; 
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
-            --bezier: cubic-bezier(0.22, 1, 0.36, 1); 
+            --glide: cubic-bezier(0.22, 1, 0.36, 1); /* High-end slow glide */
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -38,7 +38,6 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        /* Responsive Grid */
         .media-grid {
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -55,42 +54,50 @@
             background: var(--glass); backdrop-filter: blur(35px);
             border: 1px solid var(--border); border-radius: 24px;
             padding: 20px; margin-bottom: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
 
-        /* --- THE SMOOTH ENTRY ANIMATION --- */
+        /* --- INSTANT LOAD FOR CARDS --- */
         .item-card {
             background: rgba(255,255,255,0.03); border-radius: 20px;
             padding: 10px; border: 1px solid var(--border);
             display: flex; flex-direction: column; gap: 10px;
-            transition: all 0.8s var(--bezier);
-            animation: glideIn 0.9s var(--bezier) backwards;
-            will-change: transform, opacity;
+            transition: transform 0.3s var(--glide);
         }
-
-        @keyframes glideIn {
-            from { opacity: 0; transform: translate3d(0, 30px, 0); }
-            to { opacity: 1; transform: translate3d(0, 0, 0); }
-        }
-
-        .item-card:active { transform: scale(0.94); }
+        .item-card:active { transform: scale(0.96); }
         
         .poster { width: 100%; aspect-ratio: 2/3; border-radius: 14px; object-fit: cover; background: #111; }
         .title { font-size: 0.85em; font-weight: 600; text-align: center; min-height: 2.4em; color: rgba(255,255,255,0.9); }
 
-        /* --- DESKTOP STYLE BUTTONS --- */
+        /* --- DESKTOP LABELS --- */
         .controls { display: flex; gap: 4px; width: 100%; }
         .btn-status { 
             flex: 1; font-size: 8px; padding: 10px 0; border-radius: 9px; 
             background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: rgba(255,255,255,0.4);
-            text-transform: uppercase; font-weight: 800; transition: all 0.4s var(--bezier);
+            text-transform: uppercase; font-weight: 800; transition: all 0.3s ease;
             white-space: nowrap;
         }
-        .active-watch { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(255,204,0,0.1) !important; box-shadow: 0 0 10px rgba(255,204,0,0.2); }
-        .active-pulse { border-color: var(--glow) !important; color: var(--glow) !important; background: rgba(120,169,255,0.1) !important; box-shadow: 0 0 10px rgba(120,169,255,0.2); }
-        .active-done { border-color: #4caf50 !important; color: #4caf50 !important; background: rgba(76,175,80,0.1) !important; box-shadow: 0 0 10px rgba(76,175,80,0.2); }
+        .active-watch { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(255,204,0,0.1) !important; }
+        .active-pulse { border-color: var(--glow) !important; color: var(--glow) !important; background: rgba(120,169,255,0.1) !important; }
+        .active-done { border-color: #4caf50 !important; color: #4caf50 !important; background: rgba(76,175,80,0.1) !important; }
 
-        /* --- UI ELEMENTS --- */
+        /* --- ULTRA SMOOTH MODAL GLIDE --- */
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+            z-index: 9000; display: none; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.8s var(--glide);
+        }
+        .modal.active { display: flex; opacity: 1; }
+        
+        .modal-content { 
+            width: 92%; max-width: 450px; max-height: 82vh; background: #0a111f; 
+            border: 1px solid var(--border); border-radius: 30px; padding: 30px; overflow-y: auto; 
+            transform: scale(0.9) translate3d(0, 50px, 0); 
+            transition: transform 1.0s var(--glide); /* The slow glide you wanted */
+            box-shadow: 0 40px 100px rgba(0,0,0,0.9);
+        }
+        .modal.active .modal-content { transform: scale(1) translate3d(0, 0, 0); }
+
+        /* Navigation */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: calc(75px + var(--safe-bottom));
@@ -103,20 +110,7 @@
         .nav-item.active { color: var(--glow); }
         .nav-icon { width: 24px; height: 24px; background: currentColor; mask-size: contain; mask-repeat: no-repeat; -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; margin-bottom: 5px; }
 
-        .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
-            z-index: 9000; display: none; align-items: center; justify-content: center;
-            opacity: 0; transition: opacity 0.8s var(--bezier);
-        }
-        .modal.active { display: flex; opacity: 1; }
-        .modal-content { 
-            width: 92%; max-width: 450px; max-height: 82vh; background: #0a111f; 
-            border: 1px solid var(--border); border-radius: 30px; padding: 30px; overflow-y: auto; 
-            transform: scale(0.92) translate3d(0, 40px, 0); transition: transform 0.8s var(--bezier);
-        }
-        .modal.active .modal-content { transform: scale(1) translate3d(0, 0, 0); }
-
-        .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; transition: 0.4s var(--bezier); font-size: 14px; }
+        .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; font-size: 14px; }
         input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important; }
         #syncStatus { position: fixed; top: calc(var(--safe-top) + 15px); left: 20px; font-size: 9px; color: var(--glow); z-index: 6000; font-weight: bold; }
     </style>
@@ -195,26 +189,19 @@
         const grid = document.getElementById('mainGrid');
         const filterStr = document.getElementById('filterInput').value.toLowerCase();
         grid.innerHTML = '';
-
         window.mediaList.forEach((item, idx) => {
             const passF = (currentFilter === 'all') || (currentFilter === item.status) || (currentFilter === 'animated' && (item.isAnimated || item.isAnime));
             if(item.name.toLowerCase().includes(filterStr) && passF) {
                 const div = document.createElement('div');
                 div.className = 'item-card';
-                // Delay each card's animation slightly for a "wave" effect
-                div.style.animationDelay = `${idx * 0.03}s`;
-                
-                let progressUI = (item.type === 'tv' && item.totalEpisodes) ? `<div class="progress-container"><div class="progress-fill" style="width:${((item.checkedEpisodes?.length || 0) / item.totalEpisodes) * 100}%"></div></div>` : '';
-                
                 div.innerHTML = `
-                    <div class="poster-container" onclick="openItem(${idx})"><img class="poster" src="${item.poster || ''}"></div>
-                    <div class="info" onclick="openItem(${idx})"><strong>${item.name}</strong>${progressUI}</div>
+                    <img class="poster" src="${item.poster}" onclick="openItem(${idx})">
+                    <div class="title" onclick="openItem(${idx})">${item.name}</div>
                     <div class="controls">
                         <button class="btn-status ${item.status==='watching'?'active-watch':''}" onclick="setStatus(${idx},'watching')">To Watch</button>
                         <button class="btn-status ${item.status==='pulse'?'active-pulse':''}" onclick="setStatus(${idx},'pulse')">Pulse</button>
                         <button class="btn-status ${item.status==='watched'?'active-done':''}" onclick="setStatus(${idx},'watched')">Done</button>
-                    </div>
-                `;
+                    </div>`;
                 grid.appendChild(div);
             }
         });
@@ -232,35 +219,24 @@
         const grid = document.getElementById('mainGrid');
         grid.innerHTML = '';
         results.forEach(item => {
-            const already = window.mediaList.some(v => v.tmdbId === item.id);
             const div = document.createElement('div');
             div.className = 'item-card';
-            div.innerHTML = `
-                <img class="poster" src="https://image.tmdb.org/t/p/w500${item.poster_path}">
-                <div class="title">${item.title || item.name}</div>
-                <button class="btn-main" id="add-${item.id}" style="width:100%; font-size:11px;" onclick='addItem(${JSON.stringify(item).replace(/'/g, "")})'>
-                    ${already ? 'IN VAULT' : 'ENGAGE'}
-                </button>
-            `;
+            div.innerHTML = `<img class="poster" src="https://image.tmdb.org/t/p/w500${item.poster_path}"><div class="title">${item.title || item.name}</div><button class="btn-main" style="width:100%; font-size:11px;" onclick='addItem(${JSON.stringify(item).replace(/'/g, "")})'>ENGAGE</button>`;
             grid.appendChild(div);
         });
     }
 
     function addItem(item) {
         if(!window.mediaList.some(v => v.tmdbId === item.id)) {
-            window.mediaList.unshift({
-                name: item.title || item.name, status: 'watching', poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
-                type: item.media_type, tmdbId: item.id, isAnimated: item.genre_ids?.includes(16), checkedEpisodes: []
-            });
+            window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`, type: item.media_type, tmdbId: item.id, isAnimated: item.genre_ids?.includes(16), checkedEpisodes: [] });
             save();
-            const btn = document.getElementById(`add-${item.id}`);
-            if(btn) { btn.innerText = "SUCCESS"; btn.style.background = "#4caf50"; btn.style.color = "#fff"; }
         }
     }
 
     function setStatus(idx, s) { window.mediaList[idx].status = s; save(); render(); }
-    function exitSearch() { isSearch = false; document.getElementById('backBtn').style.display='none'; document.getElementById('pageTitle').innerText="THE VAULT"; document.getElementById('showInput').value=''; render(); }
+    function exitSearch() { isSearch = false; document.getElementById('backBtn').style.display='none'; document.getElementById('pageTitle').innerText="THE VAULT"; render(); }
     function setFilter(f, btn) { if(isSearch) exitSearch(); currentFilter = f; document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(); }
+    
     async function openItem(idx) {
         const item = window.mediaList[idx];
         const modal = document.getElementById('modal');
@@ -274,34 +250,34 @@
                 <div style="display:flex; flex-direction:column; align-items:center; text-align:center;">
                     <img src="${item.poster}" style="width:140px; border-radius:18px; margin-bottom:20px;">
                     <h3 style="color:var(--glow); margin:0;">${item.name}</h3>
-                    <p style="font-size:0.9em; line-height:1.6; opacity:0.7; margin:15px 0;">${data.overview || 'Mission summary unavailable.'}</p>
+                    <p style="font-size:0.9em; line-height:1.6; opacity:0.7; margin:15px 0;">${data.overview || 'Summary unavailable.'}</p>
                     <button class="btn-main" style="background:var(--accent); width:100%; margin-bottom:10px;" onclick="toggleTag(${idx}, 'isAnimated')">${item.isAnimated?'REMOVE TOON TAG':'TAG AS TOON'}</button>
                     <button class="btn-main" style="background:rgba(255, 68, 68, 0.1); color:#ff4444; border:1px solid rgba(255, 68, 68, 0.3); width:100%;" onclick="deleteItem(${idx})">ERASE RECORD</button>
                     <div id="epArea" style="width:100%;"></div>
                 </div>`;
             if(item.type === 'tv') loadEpisodes(idx);
-        } catch(e) { body.innerHTML = 'Encryption Error.'; }
+        } catch(e) { body.innerHTML = 'Error.'; }
     }
 
     async function loadEpisodes(idx) {
         const item = window.mediaList[idx];
         const res = await fetch(`https://api.themoviedb.org/3/tv/${item.tmdbId}?api_key=${tmdbKey}`);
         const data = await res.json();
-        document.getElementById('epArea').innerHTML = `<select class="btn-main" style="width:100%; background:#000; color:#fff; height:50px; margin:20px 0 15px 0;" onchange="fetchSeason(${idx}, this.value)"><option>SELECT PHASE (SEASON)</option>${data.seasons.map(s=>`<option value="${s.season_number}">${s.name}</option>`).join('')}</select><div id="epList"></div>`;
+        document.getElementById('epArea').innerHTML = `<select class="btn-main" style="width:100%; background:#000; color:#fff; height:50px; margin:20px 0 15px 0;" onchange="fetchSeason(${idx}, this.value)"><option>SELECT SEASON</option>${data.seasons.map(s=>`<option value="${s.season_number}">${s.name}</option>`).join('')}</select><div id="epList"></div>`;
     }
 
     async function fetchSeason(idx, sNum) {
         const item = window.mediaList[idx];
         const res = await fetch(`https://api.themoviedb.org/3/tv/${item.tmdbId}/season/${sNum}?api_key=${tmdbKey}`);
         const data = await res.json();
-        document.getElementById('epList').innerHTML = data.episodes.map(ep => `<div style="display:flex; gap:15px; margin-bottom:18px; border-bottom:1px solid #222; padding-bottom:12px; text-align:left;"><input type="checkbox" style="width:26px; height:26px; accent-color:var(--glow);" ${item.checkedEpisodes?.includes(ep.id)?'checked':''} onchange="toggleEp(${idx},${ep.id})"><div><strong>${ep.episode_number}. ${ep.name}</strong><br><span style="opacity:0.5; font-size:11px;">${ep.overview || ''}</span></div></div>`).join('');
+        document.getElementById('epList').innerHTML = data.episodes.map(ep => `<div style="display:flex; gap:15px; margin-bottom:18px; border-bottom:1px solid #222; padding-bottom:12px; text-align:left;"><input type="checkbox" style="width:28px; height:28px; accent-color:var(--glow);" ${item.checkedEpisodes?.includes(ep.id)?'checked':''} onchange="toggleEp(${idx},${ep.id})"><div><strong>${ep.episode_number}. ${ep.name}</strong></div></div>`).join('');
     }
 
     function toggleEp(idx, id) { if(!window.mediaList[idx].checkedEpisodes) window.mediaList[idx].checkedEpisodes = []; const i = window.mediaList[idx].checkedEpisodes.indexOf(id); if(i > -1) window.mediaList[idx].checkedEpisodes.splice(i, 1); else { window.mediaList[idx].checkedEpisodes.push(id); if(window.mediaList[idx].status==='watching') window.mediaList[idx].status = 'pulse'; } save(); }
     function toggleTag(idx, p) { window.mediaList[idx][p] = !window.mediaList[idx][p]; save(); openItem(idx); }
-    function deleteItem(idx) { if(confirm("Confirm deletion?")) { window.mediaList.splice(idx, 1); save(); closeModal(); } }
+    function deleteItem(idx) { if(confirm("Delete?")) { window.mediaList.splice(idx, 1); save(); closeModal(); } }
     function closeModal() { document.getElementById('modal').classList.remove('active'); }
-    function openSettings() { const k = prompt("TMDB Key:", tmdbKey); if(k) { tmdbKey = k; localStorage.setItem('tmdbKey', k); location.reload(); } }
+    function openSettings() { const k = prompt("Key:", tmdbKey); if(k) { tmdbKey = k; localStorage.setItem('tmdbKey', k); location.reload(); } }
 </script>
 </body>
 </html>
