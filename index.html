@@ -2,126 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>The Vault</title>
     <style>
-        :root {
-            --glass: rgba(10, 15, 25, 0.97);
-            --border: rgba(120, 169, 255, 0.3);
-            --glow: #78a9ff;
-            --accent: #ffcc00; 
-            --safe-top: env(safe-area-inset-top);
-            --safe-bottom: env(safe-area-inset-bottom);
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            margin: 0; font-family: sans-serif; background: #050a15; color: #fff; 
+            overflow-x: hidden;
         }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none !important; }
-        
-        html, body { 
-            margin: 0; padding: 0; height: 100%; width: 100%; 
-            overflow: hidden; position: fixed;
-            font-family: -apple-system, system-ui, sans-serif;
-            background: #050a15;
-            color: #fff;
+        .app-container { padding: 20px; padding-bottom: 100px; }
+        .card { background: rgba(10, 15, 25, 0.95); border: 1px solid rgba(120, 169, 255, 0.2); border-radius: 20px; padding: 20px; margin-bottom: 20px; }
+        .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .item-card { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 10px; border: 1px solid rgba(120,169,255,0.1); }
+        .poster { width: 100%; aspect-ratio: 2/3; border-radius: 10px; object-fit: cover; cursor: pointer; }
+        .title { font-size: 13px; text-align: center; margin: 8px 0; min-height: 32px; }
+        .controls { display: flex; gap: 4px; }
+        .pill { 
+            flex: 1; font-size: 9px; padding: 8px 0; border-radius: 6px; text-align: center;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(120,169,255,0.2); 
+            color: #888; cursor: pointer; text-transform: uppercase; font-weight: bold;
         }
-
-        /* Moving the background to a separate layer to stop re-render flicker */
-        body::before {
-            content: ""; position: fixed; inset: 0;
-            background: url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2022&auto=format&fit=crop') center/cover;
-            z-index: -1;
+        .active-w { border-color: #ffcc00; color: #ffcc00; background: rgba(255,204,0,0.1); }
+        .active-p { border-color: #78a9ff; color: #78a9ff; background: rgba(120,169,255,0.1); }
+        .active-d { border-color: #4caf50; color: #4caf50; background: rgba(76,175,80,0.1); }
+        .bottom-nav { 
+            position: fixed; bottom: 0; left: 0; right: 0; height: 70px; 
+            background: #000; border-top: 1px solid #222; display: flex; align-items: center; z-index: 100;
         }
-
-        .app-container {
-            height: 100%; display: flex; flex-direction: column;
-            padding-top: var(--safe-top);
-            padding-bottom: calc(75px + var(--safe-bottom));
-        }
-
-        .scroll-view { flex: 1; overflow-y: auto; padding: 20px; -webkit-overflow-scrolling: touch; }
-
-        .media-grid {
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 15px; width: 100%;
-        }
-
-        @media (min-width: 800px) {
-            .media-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
-            .bottom-nav { width: 500px; left: 50% !important; transform: translateX(-50%); border-radius: 40px; bottom: 25px !important; }
-        }
-
-        .card { background: var(--glass); backdrop-filter: blur(35px); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 20px; }
-
-        .item-card {
-            background: rgba(255,255,255,0.03); border-radius: 20px;
-            padding: 10px; border: 1px solid var(--border);
-            display: flex; flex-direction: column; gap: 10px;
-        }
-        
-        .poster { width: 100%; aspect-ratio: 2/3; border-radius: 14px; object-fit: cover; background: #111; cursor: pointer; }
-        .title { font-size: 0.85em; font-weight: 600; text-align: center; min-height: 2.4em; color: rgba(255,255,255,0.9); }
-
-        .controls { display: flex; gap: 4px; width: 100%; }
-        
-        /* Using SPAN instead of BUTTON to stop Chrome's refresh reflex */
-        .status-pill { 
-            flex: 1; font-size: 8px; padding: 10px 0; border-radius: 9px; 
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: rgba(255,255,255,0.4);
-            text-transform: uppercase; font-weight: 800; white-space: nowrap;
-            text-align: center; cursor: pointer; user-select: none;
-        }
-        .active-watch { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(255,204,0,0.1) !important; }
-        .active-pulse { border-color: var(--glow) !important; color: var(--glow) !important; background: rgba(120,169,255,0.1) !important; }
-        .active-done { border-color: #4caf50 !important; color: #4caf50 !important; background: rgba(76,175,80,0.1) !important; }
-
-        .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
-            z-index: 9000; display: none; align-items: center; justify-content: center;
-        }
-        .modal.active { display: flex; }
-        .modal-content { width: 92%; max-width: 450px; background: #0a111f; border: 1px solid var(--border); border-radius: 30px; padding: 30px; }
-
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: calc(75px + var(--safe-bottom));
-            background: rgba(0,0,0,0.95); backdrop-filter: blur(35px); border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around; align-items: center; padding-bottom: var(--safe-bottom); z-index: 5000;
-        }
-        .nav-item { background: none; border: none; color: rgba(255,255,255,0.3); display: flex; flex-direction: column; align-items: center; font-size: 10px; flex: 1; cursor: pointer; }
-        .nav-item.active { color: var(--glow); }
-        .nav-icon { width: 24px; height: 24px; background: currentColor; mask-size: contain; mask-repeat: no-repeat; -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; margin-bottom: 5px; }
-
-        .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; }
-        input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important; }
+        .nav-item { flex: 1; text-align: center; font-size: 11px; color: #555; cursor: pointer; }
+        .nav-item.active { color: #78a9ff; }
+        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
+        .btn-main { background: #78a9ff; color: #000; border: none; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <div class="scroll-view">
-        <div class="card">
-            <h2 style="margin: 0 0 15px 0; font-size: 1.4em; letter-spacing: 4px; font-weight: 300; text-align: center;">THE VAULT</h2>
-            <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <input type="text" id="showInput" placeholder="Initialize Entry...">
-                <div class="btn-main" onclick="performFullSearch()">ENGAGE</div>
-            </div>
-            <input type="text" id="filterInput" placeholder="Search Archive...">
-        </div>
-        <div class="media-grid" id="mainGrid"></div>
+    <div class="card">
+        <h2 style="text-align:center; letter-spacing:3px;">THE VAULT</h2>
+        <input type="text" id="qIn" placeholder="Search New...">
+        <button class="btn-main" onclick="search(); return false;">ENGAGE</button>
+        <input type="text" id="fIn" placeholder="Filter Archive..." onkeyup="filter(); return false;" style="margin-top:10px;">
     </div>
+    <div class="media-grid" id="grid"></div>
 </div>
 
 <div class="bottom-nav">
-    <div class="nav-item active" data-filter="all"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:stack-bold.svg')"></div>All</div>
-    <div class="nav-item" data-filter="watching"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:clock-bold.svg')"></div>Watch</div>
-    <div class="nav-item" data-filter="pulse"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:activity-bold.svg')"></div>Pulse</div>
-    <div class="nav-item" onclick="openSettings()"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:gear-bold.svg')"></div>Settings</div>
-</div>
-
-<div id="modal" class="modal">
-    <div class="modal-content" id="modalBody"></div>
+    <div class="nav-item active" onclick="setF('all', this)">ALL</div>
+    <div class="nav-item" onclick="setF('watching', this)">WATCH</div>
+    <div class="nav-item" onclick="setF('pulse', this)">PULSE</div>
+    <div class="nav-item" onclick="alert('Settings: Refresh page to update TMDB key in LocalStorage')">SET</div>
 </div>
 
 <script type="module">
@@ -139,120 +69,99 @@
 
     const app = initializeApp(config);
     const db = getFirestore(app);
-    window.db = db;
-    window.fLib = { doc, setDoc, getDoc };
 
-    async function load() {
-        const local = localStorage.getItem('v_cache');
-        if(local) { window.mediaList = JSON.parse(local); render(); }
+    window.saveCloud = async () => {
+        await setDoc(doc(db, "archives", "user_bailey"), { list: window.mediaList });
+    };
+
+    window.loadCloud = async () => {
         const snap = await getDoc(doc(db, "archives", "user_bailey"));
         if(snap.exists()) {
             window.mediaList = snap.data().list || [];
             localStorage.setItem('v_cache', JSON.stringify(window.mediaList));
             render();
         }
-    }
-    load();
+    };
+    
+    const local = localStorage.getItem('v_cache');
+    if(local) { window.mediaList = JSON.parse(local); render(); }
+    window.loadCloud();
 </script>
 
 <script>
     window.mediaList = [];
-    let tmdbKey = localStorage.getItem('tmdbKey') || '';
-    let currentFilter = 'all';
-
-    function triggerSave() {
-        localStorage.setItem('v_cache', JSON.stringify(window.mediaList));
-        // Silent async cloud save - no listeners to trigger a refresh
-        window.fLib.setDoc(window.fLib.doc(window.db, "archives", "user_bailey"), { list: window.mediaList });
-    }
+    let curF = 'all';
 
     function render() {
-        const grid = document.getElementById('mainGrid');
-        grid.innerHTML = '';
-        window.mediaList.forEach((item, idx) => {
-            const div = document.createElement('div');
-            div.className = 'item-card';
-            div.setAttribute('data-id', item.tmdbId);
-            div.innerHTML = `
-                <img class="poster" src="${item.poster}" onclick="openItem(${idx})">
+        const g = document.getElementById('grid');
+        g.innerHTML = '';
+        window.mediaList.forEach((item, i) => {
+            const d = document.createElement('div');
+            d.className = 'item-card';
+            d.setAttribute('data-s', item.status);
+            d.innerHTML = `
+                <img class="poster" src="${item.poster}">
                 <div class="title">${item.name}</div>
                 <div class="controls">
-                    <span class="status-pill w-btn ${item.status==='watching'?'active-watch':''}" onclick="setStatus(${idx},'watching', this)">To Watch</span>
-                    <span class="status-pill p-btn ${item.status==='pulse'?'active-pulse':''}" onclick="setStatus(${idx},'pulse', this)">Pulse</span>
-                    <span class="status-pill d-btn ${item.status==='watched'?'active-done':''}" onclick="setStatus(${idx},'watched', this)">Done</span>
+                    <div class="pill ${item.status==='watching'?'active-w':''}" onclick="setS(${i},'watching',this); return false;">WATCH</div>
+                    <div class="pill ${item.status==='pulse'?'active-p':''}" onclick="setS(${i},'pulse',this); return false;">PULSE</div>
+                    <div class="pill ${item.status==='watched'?'active-d':''}" onclick="setS(${i},'watched',this); return false;">DONE</div>
                 </div>`;
-            grid.appendChild(div);
+            g.appendChild(d);
         });
-        applyFilters();
+        filter();
     }
 
-    function setStatus(idx, s, el) {
+    function setS(idx, s, el) {
         window.mediaList[idx].status = s;
-        const btns = el.parentElement.querySelectorAll('.status-pill');
-        btns.forEach(b => b.classList.remove('active-watch', 'active-pulse', 'active-done'));
-        if(s==='watching') el.classList.add('active-watch');
-        if(s==='pulse') el.classList.add('active-pulse');
-        if(s==='watched') el.classList.add('active-done');
-        triggerSave();
+        localStorage.setItem('v_cache', JSON.stringify(window.mediaList));
+        
+        const ps = el.parentElement.querySelectorAll('.pill');
+        ps.forEach(p => p.classList.remove('active-w', 'active-p', 'active-d'));
+        if(s==='watching') el.classList.add('active-w');
+        if(s==='pulse') el.classList.add('active-p');
+        if(s==='watched') el.classList.add('active-d');
+        
+        window.saveCloud(); // Silent background call
+        return false;
     }
 
-    function applyFilters() {
-        const q = document.getElementById('filterInput').value.toLowerCase();
+    function filter() {
+        const q = document.getElementById('fIn').value.toLowerCase();
         document.querySelectorAll('.item-card').forEach((card, i) => {
             const item = window.mediaList[i];
-            const passF = currentFilter === 'all' || item.status === currentFilter;
-            const passQ = item.name.toLowerCase().includes(q);
-            card.style.display = (passF && passQ) ? 'flex' : 'none';
+            const show = (curF === 'all' || item.status === curF) && item.name.toLowerCase().includes(q);
+            card.style.display = show ? 'block' : 'none';
         });
     }
 
-    document.getElementById('filterInput').onkeyup = applyFilters;
-    
-    document.querySelectorAll('.nav-item[data-filter]').forEach(btn => {
-        btn.onclick = () => {
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentFilter = btn.dataset.filter;
-            applyFilters();
-        };
-    });
-
-    function openSettings() {
-        const modal = document.getElementById('modal');
-        modal.classList.add('active');
-        document.getElementById('modalBody').innerHTML = `
-            <div style="text-align:center;">
-                <h3>SETTINGS</h3>
-                <input type="text" id="kIn" style="width:100%;" value="${tmdbKey}" placeholder="TMDB Key">
-                <div class="btn-main" style="margin-top:10px;" onclick="saveK()">SAVE</div>
-            </div>`;
+    function setF(f, el) {
+        curF = f;
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        filter();
+        return false;
     }
 
-    window.saveK = () => {
-        tmdbKey = document.getElementById('kIn').value;
-        localStorage.setItem('tmdbKey', tmdbKey);
-        location.reload();
-    };
-
-    window.onclick = (e) => { if(e.target.id === 'modal') document.getElementById('modal').classList.remove('active'); };
-
-    async function performFullSearch() {
-        const q = document.getElementById('showInput').value;
-        if(!q || !tmdbKey) return;
-        const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(q)}`);
-        const data = await res.json();
-        const grid = document.getElementById('mainGrid');
-        grid.innerHTML = data.results.filter(i => i.poster_path).map(item => `
+    async function search() {
+        const q = document.getElementById('qIn').value;
+        const key = localStorage.getItem('tmdbKey');
+        if(!q || !key) return alert('Need Key in LocalStorage');
+        const r = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${key}&query=${q}`);
+        const d = await r.json();
+        const g = document.getElementById('grid');
+        g.innerHTML = d.results.filter(i => i.poster_path).map(item => `
             <div class="item-card">
                 <img class="poster" src="https://image.tmdb.org/t/p/w500${item.poster_path}">
                 <div class="title">${item.title || item.name}</div>
-                <div class="btn-main" onclick='addItem(${JSON.stringify(item).replace(/'/g, "")})'>ADD</div>
+                <button class="btn-main" onclick="add('${item.title || item.name}','https://image.tmdb.org/t/p/w500${item.poster_path}',${item.id}); return false;">ADD</button>
             </div>`).join('');
     }
 
-    window.addItem = (item) => {
-        window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`, type: item.media_type, tmdbId: item.id });
-        triggerSave();
+    window.add = (n, p, id) => {
+        window.mediaList.unshift({ name: n, poster: p, tmdbId: id, status: 'watching' });
+        localStorage.setItem('v_cache', JSON.stringify(window.mediaList));
+        window.saveCloud();
         render();
     };
 </script>
