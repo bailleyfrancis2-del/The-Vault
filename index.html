@@ -49,10 +49,10 @@
             border-radius: 22px;
             overflow: hidden;
             background: #070d1a;
-            touch-action: pan-y;
+            /* CRITICAL FOR IOS: Disables horizontal browser navigation gestures */
+            touch-action: pan-y; 
         }
 
-        /* The Tray (Background Buttons) */
         .action-tray {
             position: absolute;
             inset: 0;
@@ -69,10 +69,8 @@
             font-weight: 800;
             letter-spacing: 1px;
             text-transform: uppercase;
-            transition: opacity 0.2s;
         }
 
-        /* The Main Card (Front Layer) */
         .item-card {
             position: relative;
             z-index: 2;
@@ -82,9 +80,11 @@
             border: 1px solid var(--border);
             transition: transform 0.4s var(--glide);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            /* Prevents ghosting during swipe */
+            will-change: transform; 
         }
         
-        .poster { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
+        .poster { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; pointer-events: none; }
         
         .status-badge {
             position: absolute; top: 12px; right: 12px;
@@ -92,7 +92,6 @@
             box-shadow: 0 0 10px currentColor;
         }
 
-        /* Bottom Nav & Buttons */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: calc(75px + var(--safe-bottom));
@@ -234,25 +233,42 @@
         });
     }
 
-    // APPLE NEWS SWIPE ENGINE
+    // UPDATED CROSS-PLATFORM SWIPE ENGINE
     let x0 = 0, dx = 0, moved = false;
 
-    window.ts = (e, i) => { x0 = e.touches[0].clientX; moved = false; document.getElementById(`card-${i}`).style.transition = 'none'; };
+    window.ts = (e, i) => { 
+        x0 = e.touches[0].clientX; 
+        moved = false; 
+        document.getElementById(`card-${i}`).style.transition = 'none'; 
+    };
+
     window.tm = (e, i) => {
         dx = e.touches[0].clientX - x0;
-        if(Math.abs(dx) > 10) moved = true;
-        const card = document.getElementById(`card-${i}`);
-        // Resistance damping
-        const pos = dx > 0 ? Math.pow(dx, 0.85) : -Math.pow(Math.abs(dx), 0.85);
-        card.style.transform = `translateX(${dx}px)`;
+        
+        // Threshold to ignore tiny shakes
+        if(Math.abs(dx) > 5) {
+            moved = true;
+            // CRITICAL: Stop iOS from trying to use the edge-swipe back/forward
+            if (e.cancelable) e.preventDefault(); 
+            
+            const card = document.getElementById(`card-${i}`);
+            // Added damping so it feels "Liquid"
+            const dampenedX = dx > 0 ? Math.pow(dx, 0.95) : -Math.pow(Math.abs(dx), 0.95);
+            card.style.transform = `translateX(${dx}px)`;
+        }
     };
+
     window.te = (e, i) => {
         const card = document.getElementById(`card-${i}`);
         card.style.transition = 'transform 0.5s var(--glide)';
-        if(dx > 150) card.style.transform = `translateX(100%)`; // Snap Open Right
-        else if(dx < -150) card.style.transform = `translateX(-100%)`; // Snap Open Left
+        
+        // If swiped far enough, snap it to the edge to keep tray open
+        if(dx > 140) card.style.transform = `translateX(120%)`; 
+        else if(dx < -140) card.style.transform = `translateX(-120%)`;
         else card.style.transform = `translateX(0)`;
-        dx = 0;
+        
+        // Reset dx but keep moved true for the click handler
+        setTimeout(() => dx = 0, 100);
     };
 
     async function updateStatus(i, s) { window.mediaList[i].status = s; await save(); render(); }
@@ -260,6 +276,7 @@
     async function save() { localStorage.setItem('v_cache', JSON.stringify(window.mediaList)); await window.fLib.setDoc(window.fLib.doc(window.db, "archives", "user_bailey"), { list: window.mediaList }); }
 
     async function openItem(idx) {
+        if(moved) return;
         const item = window.mediaList[idx];
         const modal = document.getElementById('modal');
         const body = document.getElementById('modalBody');
@@ -277,8 +294,8 @@
                 <h3 style="margin:0 0 10px 0; color:var(--glow);">${item.name}</h3>
                 <p style="font-size:13px; opacity:0.7; line-height:1.5; margin-bottom:20px;">${data.overview}</p>
                 <div style="display:flex; gap:10px;">
-                    ${trailer ? `<a href="https://youtube.com/watch?v=${trailer.key}" target="_blank" class="btn-main" style="flex:1; background:#ff4444; color:#fff">TRAILER</a>` : ''}
-                    <a href="https://imdb.com/title/${imdbId || 'find?q='+item.name}" target="_blank" class="btn-main" style="flex:1; background:#f5c518; color:#000">IMDb</a>
+                    ${trailer ? `<a href="https://www.youtube.com/watch?v=${trailer.key}" target="_blank" class="btn-main" style="flex:1; background:#ff4444; color:#fff; text-decoration:none; display:flex; align-items:center; justify-content:center;">TRAILER</a>` : ''}
+                    <a href="https://imdb.com/title/${imdbId || 'find?q='+item.name}" target="_blank" class="btn-main" style="flex:1; background:#f5c518; color:#000; text-decoration:none; display:flex; align-items:center; justify-content:center;">IMDb</a>
                 </div>
             </div>`;
     }
