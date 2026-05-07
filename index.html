@@ -567,10 +567,15 @@
     window.attemptLogin = async function() {
         var username = document.getElementById('loginUsername').value.trim().toLowerCase().replace(/\s+/g, '_');
         var error    = document.getElementById('loginError');
+        var loginBtn = document.getElementById('loginBtn');
         error.textContent = '';
 
         if (!username) { error.textContent = 'Enter a username'; return; }
         if (currentPin.length !== 4) { error.textContent = 'Enter a 4-digit PIN'; return; }
+
+        // Immediate feedback
+        loginBtn.textContent = 'CONNECTING...';
+        loginBtn.disabled = true;
 
         var docId  = 'user_' + username;
         var docRef = window.fLib.doc(window.db, "archives", docId);
@@ -581,39 +586,46 @@
             if (loginMode === 'signup') {
                 if (snap.exists()) {
                     var existingData = snap.data();
-                    // Legacy account without PIN — migrate it
                     if (!existingData.pin) {
                         var displayName = document.getElementById('loginDisplayName').value.trim() || username;
                         await window.fLib.setDoc(docRef, { pin: currentPin, displayName: displayName }, { merge: true });
                         loginSuccess(username, displayName);
                         return;
                     }
-                    error.textContent = 'Username already taken'; return;
+                    error.textContent = 'Username already taken';
+                    loginBtn.textContent = 'CREATE ACCOUNT'; loginBtn.disabled = false;
+                    return;
                 }
                 var displayName = document.getElementById('loginDisplayName').value.trim() || username;
                 await window.fLib.setDoc(docRef, { pin: currentPin, displayName: displayName, list: [] });
                 loginSuccess(username, displayName);
             } else {
-                if (!snap.exists()) { error.textContent = 'User not found'; return; }
+                if (!snap.exists()) { error.textContent = 'User not found'; loginBtn.textContent = 'SIGN IN'; loginBtn.disabled = false; return; }
                 var data = snap.data();
-                // Legacy account without PIN — set their PIN on first sign-in
                 if (!data.pin) {
                     await window.fLib.setDoc(docRef, { pin: currentPin, displayName: data.displayName || username }, { merge: true });
                     loginSuccess(username, data.displayName || username);
                     return;
                 }
-                if (data.pin !== currentPin) { error.textContent = 'Incorrect PIN'; return; }
+                if (data.pin !== currentPin) { error.textContent = 'Incorrect PIN'; loginBtn.textContent = 'SIGN IN'; loginBtn.disabled = false; return; }
                 loginSuccess(username, data.displayName || username);
             }
         } catch(err) {
             error.textContent = 'Connection error — try again';
+            loginBtn.textContent = loginMode === 'signin' ? 'SIGN IN' : 'CREATE ACCOUNT';
+            loginBtn.disabled = false;
         }
     };
 
     function loginSuccess(username, displayName) {
         currentUser = { username: username, displayName: displayName };
         localStorage.setItem('v_last_user', username);
+        // Preload cache so vault renders instantly behind login screen
+        var cache = localStorage.getItem('v_cache_' + username);
+        if (cache) { window.mediaList = JSON.parse(cache); render(); }
         document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('loginBtn').textContent = loginMode === 'signin' ? 'SIGN IN' : 'CREATE ACCOUNT';
+        document.getElementById('loginBtn').disabled = false;
         startApp();
     }
 
