@@ -59,7 +59,7 @@
             text-transform: uppercase; font-weight: 800; white-space: nowrap;
         }
         .active-watch { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(255,204,0,0.1) !important; }
-        .active-pulse { border-color: var(--glow) !important; color: var(--glow) !important; background: rgba(120,169,255,0.1) !important; }
+        .active-pulse { border-color: var(--glow) !important; color: var(--glow) !important; background: rgba(120, 169, 255, 0.1) !important; }
         .active-done { border-color: #4caf50 !important; color: #4caf50 !important; background: rgba(76,175,80,0.1) !important; }
 
         .modal {
@@ -107,35 +107,38 @@
         
         input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important; }
 
-        /* LIQUID GLASS SCROLL BUTTON - CENTERED FOR ANDROID */
+        /* LIQUID GLASS SCROLL BUTTON - MASK FIX */
         #scrollTopBtn {
             position: fixed;
             bottom: calc(90px + var(--safe-bottom));
             right: 20px;
-            width: 55px;
-            height: 55px;
+            width: 58px;
+            height: 58px;
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid rgba(120, 169, 255, 0.4);
-            color: var(--glow);
-            border-radius: 18px;
-            display: grid;
-            place-items: center; /* Stronger centering for Android */
             z-index: 4000;
             opacity: 0;
             pointer-events: none;
             transition: all 0.5s var(--glide);
             transform: translateY(30px) scale(0.7);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 0 10px rgba(120, 169, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        #scrollTopBtn svg { 
-            width: 32px; 
-            height: 32px; 
-            fill: currentColor; 
-            /* Manually nudging the arrow up slightly to compensate for Android padding quirks */
-            transform: translateY(-2px); 
+        /* The Actual Arrow Shape */
+        .arrow-shape {
+            width: 32px;
+            height: 32px;
+            background-color: var(--glow);
+            mask: url('https://api.iconify.design/ph:caret-double-up-bold.svg') no-repeat center;
+            -webkit-mask: url('https://api.iconify.design/ph:caret-double-up-bold.svg') no-repeat center;
+            mask-size: contain;
+            -webkit-mask-size: contain;
         }
         
         #scrollTopBtn.visible { 
@@ -170,7 +173,7 @@
 </div>
 
 <div id="scrollTopBtn" onclick="scrollToTop()">
-    <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+    <div class="arrow-shape"></div>
 </div>
 
 <div class="bottom-nav">
