@@ -57,22 +57,48 @@
             position: absolute;
             inset: 0;
             display: flex;
+            align-items: center;
+            justify-content: center;
             z-index: 1;
+            background: #070d1a;
+        }
+
+        .tray-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 10px;
         }
 
         .tray-btn {
-            flex: 1;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 1px;
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
             cursor: pointer;
-            transition: filter 0.15s;
+            border: none;
+            gap: 3px;
+            transition: transform 0.15s var(--spring), filter 0.15s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
-        .tray-btn:active { filter: brightness(1.3); }
+        .tray-btn:active { transform: scale(0.88); filter: brightness(1.2); }
+
+        .tray-icon {
+            width: 18px;
+            height: 18px;
+            background: currentColor;
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            -webkit-mask-size: contain;
+            -webkit-mask-repeat: no-repeat;
+        }
 
         .item-card {
             position: relative;
@@ -254,10 +280,24 @@
                 
                 wrapper.innerHTML = `
                     <div class="action-tray">
-                        <div class="tray-btn" style="background:#ff4444" onclick="trayAction(${idx}, 'delete')">DELETE</div>
-                        <div class="tray-btn" style="background:#ffcc00; color:#000" onclick="trayAction(${idx}, 'watching')">WATCH</div>
-                        <div class="tray-btn" style="background:#78a9ff; color:#000" onclick="trayAction(${idx}, 'pulse')">PULSE</div>
-                        <div class="tray-btn" style="background:#4caf50; color:#000" onclick="trayAction(${idx}, 'watched')">DONE</div>
+                        <div class="tray-grid">
+                            <button class="tray-btn" style="background:#ff4444;" onclick="trayAction(${idx}, 'delete')">
+                                <div class="tray-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:trash-bold.svg'); mask-image:url('https://api.iconify.design/ph:trash-bold.svg'); background:#fff;"></div>
+                                DEL
+                            </button>
+                            <button class="tray-btn" style="background:#ffcc00;" onclick="trayAction(${idx}, 'watching')">
+                                <div class="tray-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:clock-bold.svg'); mask-image:url('https://api.iconify.design/ph:clock-bold.svg'); background:#000;"></div>
+                                <span style="color:#000">WATCH</span>
+                            </button>
+                            <button class="tray-btn" style="background:#78a9ff;" onclick="trayAction(${idx}, 'pulse')">
+                                <div class="tray-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:activity-bold.svg'); mask-image:url('https://api.iconify.design/ph:activity-bold.svg'); background:#000;"></div>
+                                <span style="color:#000">PULSE</span>
+                            </button>
+                            <button class="tray-btn" style="background:#4caf50;" onclick="trayAction(${idx}, 'watched')">
+                                <div class="tray-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:check-bold.svg'); mask-image:url('https://api.iconify.design/ph:check-bold.svg'); background:#fff;"></div>
+                                DONE
+                            </button>
+                        </div>
                     </div>
                     <div class="item-card" id="card-${idx}">
                         <div class="status-badge" style="color:${statusColor}; background:currentColor"></div>
@@ -277,7 +317,7 @@
         let isDragging = false, isHorizontal = null;
         const OPEN_THRESHOLD  = 80;   // px to commit to open
         const CLOSE_THRESHOLD = 40;   // px to commit to close when open
-        const TRAY_OPEN_X     = -160; // how far left to snap when opened
+        const TRAY_OPEN_X     = -(card.offsetWidth * 0.6); // slide enough to reveal centred 2x2 grid
 
         card.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
