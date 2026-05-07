@@ -238,6 +238,7 @@
 
     // Track which card index is currently open (tray revealed)
     let openCardIdx = null;
+    let _swipeAttached = false;
 
     const scrollArea = document.getElementById('mainScroll');
     const scrollBtn = document.getElementById('scrollTopBtn');
@@ -316,99 +317,101 @@
 
                 // Attach swipe listeners after inserting
                 grid.appendChild(wrapper);
-                attachSwipe(wrapper.querySelector('.item-card'), idx);
             }
         });
     }
 
-    // ─── SWIPE ENGINE ────────────────────────────────────────────────────────
-    function attachSwipe(card, idx) {
+    // ─── DELEGATED SWIPE ENGINE ──────────────────────────────────────────────
+    let _swipeAttached = false;
+    function attachDelegatedSwipe() {
+        if (_swipeAttached) return;
+        _swipeAttached = true;
+
         let startX = 0, startY = 0, currentX = 0, totalDY = 0;
         let isDragging = false, isHorizontal = null;
-        const OPEN_THRESHOLD  = 80;   // px to commit to open
-        const CLOSE_THRESHOLD = 10;   // any rightward nudge closes it
-        // Measured lazily after card is in the DOM
-        let trayOpenX = null;
-        const getTrayOpenX = () => {
-            if (!trayOpenX) trayOpenX = -card.closest('.swipe-wrapper').offsetWidth;
-            return trayOpenX;
-        };
+        let activeIdx = null, activeCard = null, trayOpenX = null;
 
-        card.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-            currentX = 0;
-            totalDY = 0;
-            isDragging = false;
-            isHorizontal = null;
-            card.classList.add('dragging');
+        const OPEN_THRESHOLD  = 80;
+        const CLOSE_THRESHOLD = 10;
+
+        function getCardAtTouch(e) {
+            const el = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+            const card = el?.closest('.item-card');
+            if (!card) return null;
+            const m = card.id.match(/card-(\d+)/);
+            return m ? { card, idx: parseInt(m[1]) } : null;
+        }
+
+        scrollArea.addEventListener('touchstart', (e) => {
+            const hit = getCardAtTouch(e);
+            if (!hit) return;
+            activeCard = hit.card;
+            activeIdx  = hit.idx;
+            startX  = e.touches[0].clientX;
+            startY  = e.touches[0].clientY;
+            currentX = 0; totalDY = 0;
+            isDragging = false; isHorizontal = null;
+            trayOpenX = -activeCard.closest('.swipe-wrapper').offsetWidth;
+            activeCard.classList.add('dragging');
         }, { passive: true });
 
-        card.addEventListener('touchmove', (e) => {
+        scrollArea.addEventListener('touchmove', (e) => {
+            if (!activeCard) return;
             const dx = e.touches[0].clientX - startX;
             const dy = e.touches[0].clientY - startY;
             totalDY = Math.max(totalDY, Math.abs(dy));
 
-            // Determine axis on first meaningful move
             if (isHorizontal === null && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
                 isHorizontal = Math.abs(dx) > Math.abs(dy);
             }
+            if (!isHorizontal) return;
 
-            if (!isHorizontal) return; // vertical scroll — bail
-
-            e.preventDefault(); // block page scroll during horizontal swipe
+            e.preventDefault();
             isDragging = true;
             currentX = dx;
 
-            const openX = getTrayOpenX();
-            // Rubber-band effect at edges
             let x = currentX;
-            if (x > 0) x = Math.pow(x, 0.7);           // right rubber band
-            if (x < openX) x = openX - Math.pow(Math.abs(x - openX), 0.7);
-
-            card.style.transform = `translateX(${x}px)`;
+            if (x > 0) x = Math.pow(x, 0.7);
+            if (x < trayOpenX) x = trayOpenX - Math.pow(Math.abs(x - trayOpenX), 0.7);
+            activeCard.style.transform = `translateX(${x}px)`;
         }, { passive: false });
 
-        card.addEventListener('touchend', () => {
-            card.classList.remove('dragging');
+        scrollArea.addEventListener('touchend', () => {
+            if (!activeCard) return;
+            activeCard.classList.remove('dragging');
 
             if (!isDragging) {
-                // Only treat as a tap if the finger barely moved vertically too
-                // (guards against scroll-lift being mistaken for a tap)
                 const totalMove = Math.abs(currentX) + totalDY;
-                if (totalMove > 10) return; // was a scroll, not a tap
-
-                if (openCardIdx === idx) {
-                    snapClose(idx);
-                    return;
+                if (totalMove <= 10) {
+                    if (openCardIdx === activeIdx) {
+                        snapClose(activeIdx);
+                    } else {
+                        openItem(activeIdx);
+                    }
                 }
-                openItem(idx);
+                activeCard = null; activeIdx = null;
                 return;
             }
 
-            const wasOpen = openCardIdx === idx;
-            const openX = getTrayOpenX();
-
+            const wasOpen = openCardIdx === activeIdx;
             if (wasOpen) {
-                // Card was open — close if swiped right enough
                 if (currentX > CLOSE_THRESHOLD) {
-                    snapClose(idx);
+                    snapClose(activeIdx);
                 } else {
-                    // Snap back to open
-                    card.style.transform = `translateX(${openX}px)`;
+                    activeCard.style.transform = `translateX(${trayOpenX}px)`;
                 }
             } else {
-                // Card was closed — open if swiped left enough
                 if (currentX < -OPEN_THRESHOLD) {
-                    closeAllCards(idx);
-                    card.style.transform = `translateX(${openX}px)`;
-                    openCardIdx = idx;
+                    closeAllCards(activeIdx);
+                    activeCard.style.transform = `translateX(${trayOpenX}px)`;
+                    openCardIdx = activeIdx;
                 } else {
-                    snapClose(idx);
+                    snapClose(activeIdx);
                 }
             }
+
+            activeCard = null; activeIdx = null;
         }, { passive: true });
-    }
 
     // ─── Tray button handler — always snaps card closed after action ─────────
     window.trayAction = async (idx, action) => {
@@ -480,6 +483,9 @@
         const available = window.mediaList.filter(item => currentFilter === 'all' || item.status === currentFilter);
         if(available.length) openItem(window.mediaList.indexOf(available[Math.floor(Math.random() * available.length)]));
     }
+
+    // Attach once — works for all cards regardless of scroll position
+    attachDelegatedSwipe();
 </script>
 </body>
 </html>
