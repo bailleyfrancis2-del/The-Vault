@@ -598,21 +598,16 @@
 
     function loginSuccess(username, displayName) {
         currentUser = { username: username, displayName: displayName };
-        localStorage.setItem('v_session', JSON.stringify(currentUser));
+        localStorage.setItem('v_last_user', username);
         document.getElementById('loginScreen').classList.add('hidden');
         startApp();
     }
 
     window.checkSavedSession = function() {
-        var saved = localStorage.getItem('v_session');
-        if (saved) {
-            try {
-                currentUser = JSON.parse(saved);
-                document.getElementById('loginScreen').classList.add('hidden');
-                startApp();
-            } catch(e) {
-                localStorage.removeItem('v_session');
-            }
+        // Always show login screen, but prefill the last username for convenience
+        var lastUser = localStorage.getItem('v_last_user');
+        if (lastUser) {
+            document.getElementById('loginUsername').value = lastUser;
         }
     };
 
@@ -640,16 +635,11 @@
         if (unsubscribe) { unsubscribe(); unsubscribe = null; }
         currentUser = null;
         window.mediaList = [];
-        localStorage.removeItem('v_session');
         document.getElementById('mainGrid').innerHTML = '';
         document.getElementById('loginScreen').classList.remove('hidden');
-        document.getElementById('loginUsername').value = '';
-        document.getElementById('loginDisplayName').value = '';
         document.getElementById('loginError').textContent = '';
         closeSettings();
         pinClear();
-        loginMode = 'signin';
-        toggleLoginMode(); toggleLoginMode(); // reset UI
     };
 
     // ── SAVE (per-user) ──────────────────────────────────────────────────────
