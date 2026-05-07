@@ -88,7 +88,6 @@
 
         .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; }
         
-        /* NEW SOLID YELLOW RANDOMIZE BUTTON */
         .btn-rand { 
             background: #ffcc00; 
             color: #050a15; 
@@ -105,11 +104,10 @@
             box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
             transition: transform 0.2s ease;
         }
-        .btn-rand:active { transform: scale(0.98); }
         
         input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important; }
 
-        /* Liquid Glass Scroll Top Button */
+        /* Liquid Glass Scroll Top Button FIX */
         #scrollTopBtn {
             position: fixed;
             bottom: calc(90px + var(--safe-bottom));
@@ -125,7 +123,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
             z-index: 4000;
             opacity: 0;
             pointer-events: none;
@@ -133,11 +130,15 @@
             transform: translateY(30px) scale(0.7);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 0 10px rgba(120, 169, 255, 0.2);
         }
+        
+        #scrollTopBtn svg { width: 24px; height: 24px; fill: currentColor; }
+        
         #scrollTopBtn.visible { 
             opacity: 1; 
             pointer-events: auto; 
             transform: translateY(0) scale(1);
         }
+        #scrollTopBtn:active { transform: scale(0.9); background: rgba(120, 169, 255, 0.2); }
 
         .intel-row { display: flex; gap: 10px; width: 100%; margin-bottom: 15px; }
         .btn-intel { flex: 1; font-size: 11px; padding: 12px; border-radius: 12px; font-weight: bold; text-decoration: none; text-align: center; border: 1px solid var(--border); color: #fff; background: rgba(255,255,255,0.05); }
@@ -163,7 +164,9 @@
     </div>
 </div>
 
-<div id="scrollTopBtn" onclick="scrollToTop()">↑</div>
+<div id="scrollTopBtn" onclick="scrollToTop()">
+    <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+</div>
 
 <div class="bottom-nav">
     <button class="nav-item active" onclick="setFilter('all', this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:stack-bold.svg')"></div>All</button>
