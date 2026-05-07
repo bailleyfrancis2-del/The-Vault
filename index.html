@@ -22,8 +22,15 @@
             margin: 0; padding: 0; height: 100%; width: 100%; 
             overflow: hidden; position: fixed;
             font-family: -apple-system, system-ui, sans-serif;
-            background: #050a15 url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2022&auto=format&fit=crop') center/cover fixed;
+            background: #050a15;
             color: #fff;
+        }
+
+        /* Moving the background to a separate layer to stop re-render flicker */
+        body::before {
+            content: ""; position: fixed; inset: 0;
+            background: url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2022&auto=format&fit=crop') center/cover;
+            z-index: -1;
         }
 
         .app-container {
@@ -57,11 +64,13 @@
         .title { font-size: 0.85em; font-weight: 600; text-align: center; min-height: 2.4em; color: rgba(255,255,255,0.9); }
 
         .controls { display: flex; gap: 4px; width: 100%; }
-        .btn-status { 
+        
+        /* Using SPAN instead of BUTTON to stop Chrome's refresh reflex */
+        .status-pill { 
             flex: 1; font-size: 8px; padding: 10px 0; border-radius: 9px; 
             background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: rgba(255,255,255,0.4);
             text-transform: uppercase; font-weight: 800; white-space: nowrap;
-            transition: none; cursor: pointer; border-style: solid;
+            text-align: center; cursor: pointer; user-select: none;
         }
         .active-watch { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(255,204,0,0.1) !important; }
         .active-pulse { border-color: var(--glow) !important; color: var(--glow) !important; background: rgba(120,169,255,0.1) !important; }
@@ -72,10 +81,7 @@
             z-index: 9000; display: none; align-items: center; justify-content: center;
         }
         .modal.active { display: flex; }
-        .modal-content { 
-            width: 92%; max-width: 450px; background: #0a111f; 
-            border: 1px solid var(--border); border-radius: 30px; padding: 30px; 
-        }
+        .modal-content { width: 92%; max-width: 450px; background: #0a111f; border: 1px solid var(--border); border-radius: 30px; padding: 30px; }
 
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
@@ -99,7 +105,7 @@
             <h2 style="margin: 0 0 15px 0; font-size: 1.4em; letter-spacing: 4px; font-weight: 300; text-align: center;">THE VAULT</h2>
             <div style="display:flex; gap:10px; margin-bottom:15px;">
                 <input type="text" id="showInput" placeholder="Initialize Entry...">
-                <button type="button" class="btn-main" id="engageBtn">ENGAGE</button>
+                <div class="btn-main" onclick="performFullSearch()">ENGAGE</div>
             </div>
             <input type="text" id="filterInput" placeholder="Search Archive...">
         </div>
@@ -111,7 +117,7 @@
     <div class="nav-item active" data-filter="all"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:stack-bold.svg')"></div>All</div>
     <div class="nav-item" data-filter="watching"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:clock-bold.svg')"></div>Watch</div>
     <div class="nav-item" data-filter="pulse"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:activity-bold.svg')"></div>Pulse</div>
-    <div class="nav-item" id="settingsBtn"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:gear-bold.svg')"></div>Settings</div>
+    <div class="nav-item" onclick="openSettings()"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:gear-bold.svg')"></div>Settings</div>
 </div>
 
 <div id="modal" class="modal">
@@ -136,7 +142,7 @@
     window.db = db;
     window.fLib = { doc, setDoc, getDoc };
 
-    async function startup() {
+    async function load() {
         const local = localStorage.getItem('v_cache');
         if(local) { window.mediaList = JSON.parse(local); render(); }
         const snap = await getDoc(doc(db, "archives", "user_bailey"));
@@ -146,23 +152,18 @@
             render();
         }
     }
-    startup();
+    load();
 </script>
 
 <script>
     window.mediaList = [];
     let tmdbKey = localStorage.getItem('tmdbKey') || '';
     let currentFilter = 'all';
-    let saveTimeout;
 
-    // DEBOUNCED SAVE: UI updates first, Cloud waits 2 seconds.
     function triggerSave() {
         localStorage.setItem('v_cache', JSON.stringify(window.mediaList));
-        clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(async () => {
-            await window.fLib.setDoc(window.fLib.doc(window.db, "archives", "user_bailey"), { list: window.mediaList });
-            console.log("Cloud Updated");
-        }, 2000);
+        // Silent async cloud save - no listeners to trigger a refresh
+        window.fLib.setDoc(window.fLib.doc(window.db, "archives", "user_bailey"), { list: window.mediaList });
     }
 
     function render() {
@@ -176,9 +177,9 @@
                 <img class="poster" src="${item.poster}" onclick="openItem(${idx})">
                 <div class="title">${item.name}</div>
                 <div class="controls">
-                    <div class="btn-status w-btn ${item.status==='watching'?'active-watch':''}" onclick="setStatus(${idx},'watching', this)">To Watch</div>
-                    <div class="btn-status p-btn ${item.status==='pulse'?'active-pulse':''}" onclick="setStatus(${idx},'pulse', this)">Pulse</div>
-                    <div class="btn-status d-btn ${item.status==='watched'?'active-done':''}" onclick="setStatus(${idx},'watched', this)">Done</div>
+                    <span class="status-pill w-btn ${item.status==='watching'?'active-watch':''}" onclick="setStatus(${idx},'watching', this)">To Watch</span>
+                    <span class="status-pill p-btn ${item.status==='pulse'?'active-pulse':''}" onclick="setStatus(${idx},'pulse', this)">Pulse</span>
+                    <span class="status-pill d-btn ${item.status==='watched'?'active-done':''}" onclick="setStatus(${idx},'watched', this)">Done</span>
                 </div>`;
             grid.appendChild(div);
         });
@@ -187,7 +188,7 @@
 
     function setStatus(idx, s, el) {
         window.mediaList[idx].status = s;
-        const btns = el.parentElement.querySelectorAll('.btn-status');
+        const btns = el.parentElement.querySelectorAll('.status-pill');
         btns.forEach(b => b.classList.remove('active-watch', 'active-pulse', 'active-done'));
         if(s==='watching') el.classList.add('active-watch');
         if(s==='pulse') el.classList.add('active-pulse');
@@ -216,25 +217,24 @@
         };
     });
 
-    document.getElementById('settingsBtn').onclick = () => {
+    function openSettings() {
         const modal = document.getElementById('modal');
         modal.classList.add('active');
         document.getElementById('modalBody').innerHTML = `
             <div style="text-align:center;">
                 <h3>SETTINGS</h3>
                 <input type="text" id="kIn" style="width:100%;" value="${tmdbKey}" placeholder="TMDB Key">
-                <button class="btn-main" style="width:100%; margin-top:10px;" onclick="saveK()">SAVE</button>
+                <div class="btn-main" style="margin-top:10px;" onclick="saveK()">SAVE</div>
             </div>`;
-    };
+    }
 
-    function saveK() {
+    window.saveK = () => {
         tmdbKey = document.getElementById('kIn').value;
         localStorage.setItem('tmdbKey', tmdbKey);
         location.reload();
-    }
+    };
 
-    function closeModal() { document.getElementById('modal').classList.remove('active'); }
-    window.onclick = (e) => { if(e.target.id === 'modal') closeModal(); };
+    window.onclick = (e) => { if(e.target.id === 'modal') document.getElementById('modal').classList.remove('active'); };
 
     async function performFullSearch() {
         const q = document.getElementById('showInput').value;
@@ -246,17 +246,15 @@
             <div class="item-card">
                 <img class="poster" src="https://image.tmdb.org/t/p/w500${item.poster_path}">
                 <div class="title">${item.title || item.name}</div>
-                <button class="btn-main" onclick='addItem(${JSON.stringify(item).replace(/'/g, "")})'>ADD</button>
+                <div class="btn-main" onclick='addItem(${JSON.stringify(item).replace(/'/g, "")})'>ADD</div>
             </div>`).join('');
     }
 
-    document.getElementById('engageBtn').onclick = performFullSearch;
-
-    function addItem(item) {
+    window.addItem = (item) => {
         window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`, type: item.media_type, tmdbId: item.id });
         triggerSave();
         render();
-    }
+    };
 </script>
 </body>
 </html>
