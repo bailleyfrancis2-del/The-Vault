@@ -91,27 +91,35 @@
         
         input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important; }
 
-        /* Scroll Top Button */
+        /* Liquid Glass Scroll Top Button */
         #scrollTopBtn {
             position: fixed;
             bottom: calc(90px + var(--safe-bottom));
             right: 20px;
-            width: 45px;
-            height: 45px;
-            background: var(--glow);
-            color: #05162d;
+            width: 50px;
+            height: 50px;
+            background: rgba(120, 169, 255, 0.1);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            border: 1px solid rgba(120, 169, 255, 0.3);
+            color: var(--glow);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            font-size: 24px;
             z-index: 4000;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s var(--glide);
+            transition: opacity 0.4s var(--glide), transform 0.4s var(--glide);
+            transform: translateY(20px) scale(0.8);
+            box-shadow: 0 4px 15px rgba(120, 169, 255, 0.1);
         }
-        #scrollTopBtn.visible { opacity: 1; pointer-events: auto; }
+        #scrollTopBtn.visible { 
+            opacity: 1; 
+            pointer-events: auto; 
+            transform: translateY(0) scale(1);
+        }
 
         .intel-row { display: flex; gap: 10px; width: 100%; margin-bottom: 15px; }
         .btn-intel { flex: 1; font-size: 11px; padding: 12px; border-radius: 12px; font-weight: bold; text-decoration: none; text-align: center; border: 1px solid var(--border); color: #fff; background: rgba(255,255,255,0.05); }
@@ -259,7 +267,7 @@
                     <p style="font-size:0.9em; line-height:1.6; opacity:0.7; margin:15px 0;">${data.overview || 'Summary unavailable.'}</p>
                     
                     <div class="intel-row">
-                        ${trailer ? `<a href="https://www.youtube.com/watch?v=${trailer.key}" target="_blank" class="btn-intel btn-trailer">TRAILER</a>` : ''}
+                        ${trailer ? `<a href="https://youtube.com/watch?v=${trailer.key}" target="_blank" class="btn-intel btn-trailer">TRAILER</a>` : ''}
                         <a href="${imdbId ? `https://www.imdb.com/title/${imdbId}` : fallbackLink}" target="_blank" class="btn-intel btn-imdb">IMDb</a>
                     </div>
 
