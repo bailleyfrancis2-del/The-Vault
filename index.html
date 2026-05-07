@@ -43,20 +43,38 @@
 
         .card { background: var(--glass); backdrop-filter: blur(35px); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 20px; }
 
+        /* Swipe Container */
+        .swipe-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            background: #000;
+        }
+
+        .swipe-bg {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; font-weight: 800; font-size: 10px; letter-spacing: 2px;
+            opacity: 0; transition: opacity 0.2s;
+        }
+
         .item-card {
+            position: relative;
             background: rgba(255,255,255,0.03); border-radius: 20px;
             padding: 10px; border: 1px solid var(--border);
             display: flex; flex-direction: column; gap: 10px;
+            z-index: 2; transition: transform 0.3s var(--glide);
+            backdrop-filter: blur(10px);
         }
         
-        .poster { width: 100%; aspect-ratio: 2/3; border-radius: 14px; object-fit: cover; background: #111; }
+        .poster { width: 100%; aspect-ratio: 2/3; border-radius: 14px; object-fit: cover; background: #111; pointer-events: none; }
         .title { font-size: 0.85em; font-weight: 600; text-align: center; min-height: 2.4em; color: rgba(255,255,255,0.9); }
 
         .controls { display: flex; gap: 4px; width: 100%; }
         .btn-status { 
             flex: 1; font-size: 8px; padding: 10px 0; border-radius: 9px; 
             background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: rgba(255,255,255,0.4);
-            text-transform: uppercase; font-weight: 800; white-space: nowrap;
+            text-transform: uppercase; font-weight: 800;
         }
         .active-watch { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(255,204,0,0.1) !important; }
         .active-pulse { border-color: var(--glow) !important; color: var(--glow) !important; background: rgba(120, 169, 255, 0.1) !important; }
@@ -87,71 +105,22 @@
         .nav-icon { width: 24px; height: 24px; background: currentColor; mask-size: contain; mask-repeat: no-repeat; -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; margin-bottom: 5px; }
 
         .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; }
-        
-        .btn-rand { 
-            background: #ffcc00; 
-            color: #050a15; 
-            border: none;
-            width: 100%; 
-            margin-top: 10px; 
-            padding: 14px; 
-            font-size: 13px; 
-            letter-spacing: 3px; 
-            border-radius: 14px;
-            font-weight: 900;
-            cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
-            transition: transform 0.2s ease;
-        }
+        .btn-rand { background: #ffcc00; color: #050a15; border: none; width: 100%; margin-top: 10px; padding: 14px; font-size: 13px; letter-spacing: 3px; border-radius: 14px; font-weight: 900; box-shadow: 0 0 20px rgba(255, 204, 0, 0.4); }
         
         input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important; }
 
-        /* LIQUID GLASS SCROLL BUTTON - MASK FIX */
         #scrollTopBtn {
-            position: fixed;
-            bottom: calc(90px + var(--safe-bottom));
-            right: 20px;
-            width: 58px;
-            height: 58px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(120, 169, 255, 0.4);
-            z-index: 4000;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.5s var(--glide);
-            transform: translateY(30px) scale(0.7);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: fixed; bottom: calc(90px + var(--safe-bottom)); right: 20px;
+            width: 58px; height: 58px; background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(120, 169, 255, 0.4);
+            z-index: 4000; opacity: 0; pointer-events: none; transition: all 0.5s var(--glide);
+            transform: translateY(30px) scale(0.7); border-radius: 18px; display: flex; align-items: center; justify-content: center;
         }
-        
-        /* The Actual Arrow Shape */
-        .arrow-shape {
-            width: 32px;
-            height: 32px;
-            background-color: var(--glow);
-            mask: url('https://api.iconify.design/ph:caret-double-up-bold.svg') no-repeat center;
-            -webkit-mask: url('https://api.iconify.design/ph:caret-double-up-bold.svg') no-repeat center;
-            mask-size: contain;
-            -webkit-mask-size: contain;
-        }
-        
-        #scrollTopBtn.visible { 
-            opacity: 1; 
-            pointer-events: auto; 
-            transform: translateY(0) scale(1);
-        }
-        #scrollTopBtn:active { transform: scale(0.9); background: rgba(120, 169, 255, 0.2); }
+        .arrow-shape { width: 32px; height: 32px; background-color: var(--glow); -webkit-mask: url('https://api.iconify.design/ph:caret-double-up-bold.svg') no-repeat center; mask-size: contain; }
+        #scrollTopBtn.visible { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
 
         .intel-row { display: flex; gap: 10px; width: 100%; margin-bottom: 15px; }
         .btn-intel { flex: 1; font-size: 11px; padding: 12px; border-radius: 12px; font-weight: bold; text-decoration: none; text-align: center; border: 1px solid var(--border); color: #fff; background: rgba(255,255,255,0.05); }
-        .btn-trailer { border-color: #ff0000; color: #ff0000; background: rgba(255,0,0,0.05); }
-        .btn-imdb { border-color: #f5c518; color: #f5c518; background: rgba(245, 197, 24, 0.05); }
     </style>
 </head>
 <body>
@@ -172,9 +141,7 @@
     </div>
 </div>
 
-<div id="scrollTopBtn" onclick="scrollToTop()">
-    <div class="arrow-shape"></div>
-</div>
+<div id="scrollTopBtn" onclick="scrollToTop()"><div class="arrow-shape"></div></div>
 
 <div class="bottom-nav">
     <button class="nav-item active" onclick="setFilter('all', this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:stack-bold.svg')"></div>All</button>
@@ -229,9 +196,7 @@
         else scrollBtn.classList.remove('visible');
     };
 
-    function scrollToTop() {
-        scrollArea.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    function scrollToTop() { scrollArea.scrollTo({ top: 0, behavior: 'smooth' }); }
 
     async function save() {
         localStorage.setItem('v_cache', JSON.stringify(window.mediaList));
@@ -245,32 +210,76 @@
         grid.innerHTML = '';
         window.mediaList.forEach((item, idx) => {
             if((currentFilter === 'all' || item.status === currentFilter) && item.name.toLowerCase().includes(filterStr)) {
-                const div = document.createElement('div');
-                div.className = 'item-card';
-                div.innerHTML = `
-                    <img class="poster" src="${item.poster}" onclick="openItem(${idx})">
-                    <div class="title" onclick="openItem(${idx})">${item.name}</div>
-                    <div class="controls">
-                        <button class="btn-status ${item.status==='watching'?'active-watch':''}" onclick="setStatus(${idx},'watching')">To Watch</button>
-                        <button class="btn-status ${item.status==='pulse'?'active-pulse':''}" onclick="setStatus(${idx},'pulse')">Pulse</button>
-                        <button class="btn-status ${item.status==='watched'?'active-done':''}" onclick="setStatus(${idx},'watched')">Done</button>
+                const container = document.createElement('div');
+                container.className = 'swipe-container';
+                container.innerHTML = `
+                    <div class="swipe-bg" id="bg-${idx}">
+                        <span style="color:#ff4444">DELETE</span>
+                        <span style="color:var(--accent)">STATUS</span>
+                    </div>
+                    <div class="item-card" id="card-${idx}" 
+                         ontouchstart="handleTouchStart(event, ${idx})" 
+                         ontouchmove="handleTouchMove(event, ${idx})" 
+                         ontouchend="handleTouchEnd(event, ${idx})"
+                         onclick="openItem(${idx})">
+                        <img class="poster" src="${item.poster}">
+                        <div class="title">${item.name}</div>
+                        <div class="controls">
+                            <div class="btn-status ${item.status==='watching'?'active-watch':''}">Watch</div>
+                            <div class="btn-status ${item.status==='pulse'?'active-pulse':''}">Pulse</div>
+                            <div class="btn-status ${item.status==='watched'?'active-done':''}">Done</div>
+                        </div>
                     </div>`;
-                grid.appendChild(div);
+                grid.appendChild(container);
             }
         });
     }
 
-    function randomize() {
-        const filterStr = document.getElementById('filterInput').value.toLowerCase();
-        const available = window.mediaList.filter(item => 
-            (currentFilter === 'all' || item.status === currentFilter) && 
-            item.name.toLowerCase().includes(filterStr)
-        );
-        if (available.length > 0) {
-            const chosen = available[Math.floor(Math.random() * available.length)];
-            const realIdx = window.mediaList.indexOf(chosen);
-            openItem(realIdx);
+    // Swipe Logic
+    let startX = 0;
+    let currentX = 0;
+
+    window.handleTouchStart = (e, idx) => {
+        startX = e.touches[0].clientX;
+        const card = document.getElementById(`card-${idx}`);
+        card.style.transition = 'none';
+        document.getElementById(`bg-${idx}`).style.opacity = '1';
+    };
+
+    window.handleTouchMove = (e, idx) => {
+        currentX = e.touches[0].clientX - startX;
+        const card = document.getElementById(`card-${idx}`);
+        const bg = document.getElementById(`bg-${idx}`);
+        
+        // Resistance
+        const transformX = currentX * 0.8;
+        card.style.transform = `translateX(${transformX}px)`;
+        
+        if (transformX > 50) bg.style.background = 'rgba(255, 204, 0, 0.15)';
+        else if (transformX < -50) bg.style.background = 'rgba(255, 68, 68, 0.15)';
+        else bg.style.background = 'transparent';
+    };
+
+    window.handleTouchEnd = (e, idx) => {
+        const card = document.getElementById(`card-${idx}`);
+        card.style.transition = 'transform 0.4s var(--glide)';
+        
+        if (currentX > 120) {
+            const cycle = { 'watching': 'pulse', 'pulse': 'watched', 'watched': 'watching' };
+            window.mediaList[idx].status = cycle[window.mediaList[idx].status];
+            save(); render();
+        } else if (currentX < -120) {
+            if(confirm("Erase?")) { window.mediaList.splice(idx, 1); save(); render(); }
         }
+        
+        card.style.transform = 'translateX(0px)';
+        document.getElementById(`bg-${idx}`).style.opacity = '0';
+        currentX = 0;
+    };
+
+    function randomize() {
+        const available = window.mediaList.filter(item => currentFilter === 'all' || item.status === currentFilter);
+        if (available.length > 0) openItem(window.mediaList.indexOf(available[Math.floor(Math.random() * available.length)]));
     }
 
     async function openItem(idx) {
@@ -283,40 +292,31 @@
         try {
             const res = await fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}?api_key=${tmdbKey}&append_to_response=videos,external_ids`);
             const data = await res.json();
-            
             const trailer = data.videos?.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
             const imdbId = data.imdb_id || data.external_ids?.imdb_id;
-            const fallbackLink = `https://www.imdb.com/find?q=${encodeURIComponent(item.name)}`;
             
             body.innerHTML = `
                 <div style="display:flex; flex-direction:column; align-items:center; text-align:center;">
                     <img src="${item.poster}" style="width:140px; border-radius:18px; margin-bottom:20px;">
                     <h3 style="color:var(--glow); margin:0;">${item.name}</h3>
-                    <p style="font-size:0.9em; line-height:1.6; opacity:0.7; margin:15px 0;">${data.overview || 'Summary unavailable.'}</p>
-                    
+                    <p style="font-size:0.9em; line-height:1.6; opacity:0.7; margin:15px 0;">${data.overview}</p>
                     <div class="intel-row">
-                        ${trailer ? `<a href="https://www.youtube.com/watch?v=${trailer.key}" target="_blank" class="btn-intel btn-trailer">TRAILER</a>` : ''}
-                        <a href="${imdbId ? `https://www.imdb.com/title/${imdbId}` : fallbackLink}" target="_blank" class="btn-intel btn-imdb">IMDb</a>
+                        ${trailer ? `<a href="https://youtube.com/watch?v=${trailer.key}" target="_blank" class="btn-intel" style="border-color:#ff0000; color:#ff0000">TRAILER</a>` : ''}
+                        <a href="https://www.imdb.com/title/${imdbId || 'find?q='+item.name}" target="_blank" class="btn-intel" style="border-color:#f5c518; color:#f5c518">IMDb</a>
                     </div>
-
-                    <button class="btn-main" style="background:rgba(255, 68, 68, 0.1); color:#ff4444; border:1px solid rgba(255, 68, 68, 0.3); width:100%;" onclick="deleteItem(${idx})">ERASE RECORD</button>
                 </div>`;
-        } catch(e) { 
-            body.innerHTML = '<div style="text-align:center; padding:20px;">INTEL RESTRICTED: Check TMDB Key.</div>'; 
-        }
+        } catch(e) { body.innerHTML = 'Intel restricted.'; }
     }
 
     async function performFullSearch() {
         const q = document.getElementById('showInput').value;
-        if(!q || !tmdbKey) return;
-        const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(q)}&include_adult=false`);
+        const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(q)}`);
         const data = await res.json();
-        const results = data.results.filter(i => i.media_type !== 'person' && i.poster_path);
         isSearch = true;
         document.getElementById('backBtn').style.display = 'block';
         const grid = document.getElementById('mainGrid');
         grid.innerHTML = '';
-        results.forEach(item => {
+        data.results.filter(i => i.poster_path).forEach(item => {
             const div = document.createElement('div');
             div.className = 'item-card';
             div.innerHTML = `<img class="poster" src="https://image.tmdb.org/t/p/w500${item.poster_path}"><div class="title">${item.title || item.name}</div><button class="btn-main" style="width:100%;" onclick='addItem(${JSON.stringify(item).replace(/'/g, "")})'>ADD</button>`;
@@ -324,18 +324,14 @@
         });
     }
 
-    function addItem(item) {
-        if(!window.mediaList.some(v => v.tmdbId === item.id)) {
-            window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`, type: item.media_type, tmdbId: item.id });
-            save(); exitSearch();
-        }
-    }
+    window.addItem = (item) => {
+        window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`, type: item.media_type, tmdbId: item.id });
+        save(); exitSearch();
+    };
 
-    function setStatus(idx, s) { window.mediaList[idx].status = s; save(); render(); }
     function exitSearch() { isSearch = false; document.getElementById('backBtn').style.display='none'; render(); }
-    function setFilter(f, btn) { if(isSearch) exitSearch(); currentFilter = f; document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(); }
+    function setFilter(f, btn) { isSearch = false; currentFilter = f; document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(); }
     function closeModal() { document.getElementById('modal').classList.remove('active'); }
-    function deleteItem(idx) { if(confirm("Erase?")) { window.mediaList.splice(idx, 1); save(); closeModal(); } }
     function openSystemPanel() { const k = prompt("TMDB Key:", tmdbKey); if(k) { tmdbKey = k; localStorage.setItem('tmdbKey', k); location.reload(); } }
 </script>
 </body>
