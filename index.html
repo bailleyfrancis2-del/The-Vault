@@ -849,12 +849,20 @@
         data.results.filter(function(i){ return i.poster_path; }).forEach(function(item) {
             var div = document.createElement('div');
             div.className = 'item-card';
-            div.innerHTML = '<img class="poster" src="https://image.tmdb.org/t/p/w500' + item.poster_path + '"><div style="padding:10px;font-size:12px;text-align:center;">' + (item.title || item.name) + '</div><button id="add-btn-' + item.id + '" class="btn-main" style="width:100%;border-radius:0;" onclick=\'addItem(' + JSON.stringify(item).replace(/'/g, "") + ')\'>ADD</button>';
+            var alreadyInVault = window.mediaList.some(function(m){ return m.tmdbId === item.id; });
+            var btnStyle = alreadyInVault
+                ? 'width:100%;border-radius:0;background:#4caf50;color:#fff;'
+                : 'width:100%;border-radius:0;';
+            var btnText = alreadyInVault ? '✓ IN VAULT' : 'ADD';
+            var btnClick = alreadyInVault ? '' : ' onclick=\'addItem(' + JSON.stringify(item).replace(/'/g, "") + ')\'';
+            div.innerHTML = '<img class="poster" src="https://image.tmdb.org/t/p/w500' + item.poster_path + '"><div style="padding:10px;font-size:12px;text-align:center;">' + (item.title || item.name) + '</div><button id="add-btn-' + item.id + '" class="btn-main" style="' + btnStyle + '"' + btnClick + (alreadyInVault ? ' disabled' : '') + '>' + btnText + '</button>';
             grid.appendChild(div);
         });
     }
 
     window.addItem = async function(item) {
+        // Prevent duplicates
+        if (window.mediaList.some(function(m){ return m.tmdbId === item.id; })) return;
         var year = item.release_date ? parseInt(item.release_date) : item.first_air_date ? parseInt(item.first_air_date) : 0;
         var genres = (item.genre_ids || []).map(function(id){ return GENRE_MAP[id]; }).filter(Boolean);
         window.mediaList.unshift({
