@@ -636,13 +636,6 @@
         }
     };
 
-    function startApp() {
-        var docId = 'user_' + currentUser.username;
-
-        // Load from cache first
-        var cache = localStorage.getItem('v_cache_' + currentUser.username);
-        if (cache) { window.mediaList = JSON.parse(cache); render(); }
-
     async function startApp() {
         var docId = 'user_' + currentUser.username;
 
