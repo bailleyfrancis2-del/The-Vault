@@ -772,6 +772,7 @@
         }
 
         scrollArea.addEventListener('touchstart', function(e) {
+            if (isSearch) return; // Don't intercept taps on search results
             var hit = hitCard(e);
             if (!hit) return;
             activeCard = hit.card;
