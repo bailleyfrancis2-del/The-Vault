@@ -1064,12 +1064,37 @@
         grid.innerHTML = '';
         searchResults.forEach(function(item, i) {
             var div = document.createElement('div');
-            div.className = 'item-card';
+            div.style.cssText = 'border-radius:22px;overflow:hidden;border:1px solid var(--border);background:#000;';
             var alreadyInVault = window.mediaList.some(function(m){ return m.tmdbId === item.id; });
-            var btnStyle = alreadyInVault ? 'width:100%;border-radius:0;background:#4caf50;color:#fff;' : 'width:100%;border-radius:0;';
-            var btnText = alreadyInVault ? '✓ IN VAULT' : 'ADD';
-            var btnClick = alreadyInVault ? '' : ' onclick="addFromSearch(' + i + ')"';
-            div.innerHTML = '<img class="poster" src="https://image.tmdb.org/t/p/w500' + item.poster_path + '"><div style="padding:10px;font-size:12px;text-align:center;">' + (item.title || item.name) + '</div><button id="add-btn-' + item.id + '" class="btn-main" style="' + btnStyle + '"' + btnClick + (alreadyInVault ? ' disabled' : '') + '>' + btnText + '</button>';
+
+            var img = document.createElement('img');
+            img.className = 'poster';
+            img.src = 'https://image.tmdb.org/t/p/w500' + item.poster_path;
+            div.appendChild(img);
+
+            var label = document.createElement('div');
+            label.style.cssText = 'padding:10px;font-size:12px;text-align:center;color:#fff;';
+            label.textContent = item.title || item.name;
+            div.appendChild(label);
+
+            var btn = document.createElement('button');
+            btn.id = 'add-btn-' + item.id;
+            btn.className = 'btn-main';
+            btn.style.cssText = 'width:100%;border-radius:0;' + (alreadyInVault ? 'background:#4caf50;color:#fff;' : '');
+            btn.textContent = alreadyInVault ? '✓ IN VAULT' : 'ADD';
+            btn.disabled = alreadyInVault;
+
+            if (!alreadyInVault) {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    window.addItem(searchResults[i]);
+                });
+                btn.addEventListener('touchend', function(e) {
+                    e.stopPropagation();
+                });
+            }
+
+            div.appendChild(btn);
             grid.appendChild(div);
         });
     }
