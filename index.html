@@ -2,56 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>The Vault</title>
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { 
-            margin: 0; font-family: sans-serif; background: #050a15; color: #fff; 
-            overflow-x: hidden;
-        }
-        .app-container { padding: 20px; padding-bottom: 100px; }
-        .card { background: rgba(10, 15, 25, 0.95); border: 1px solid rgba(120, 169, 255, 0.2); border-radius: 20px; padding: 20px; margin-bottom: 20px; }
-        .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
-        .item-card { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 10px; border: 1px solid rgba(120,169,255,0.1); }
-        .poster { width: 100%; aspect-ratio: 2/3; border-radius: 10px; object-fit: cover; cursor: pointer; }
-        .title { font-size: 13px; text-align: center; margin: 8px 0; min-height: 32px; }
-        .controls { display: flex; gap: 4px; }
+        body { margin: 0; font-family: sans-serif; background: #050a15; color: #fff; }
+        .container { padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .item { background: #111; border: 1px solid #333; border-radius: 10px; padding: 10px; }
+        .poster { width: 100%; aspect-ratio: 2/3; border-radius: 8px; object-fit: cover; }
+        .controls { display: flex; gap: 5px; margin-top: 10px; }
         .pill { 
-            flex: 1; font-size: 9px; padding: 8px 0; border-radius: 6px; text-align: center;
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(120,169,255,0.2); 
-            color: #888; cursor: pointer; text-transform: uppercase; font-weight: bold;
+            flex: 1; font-size: 10px; padding: 8px 0; border: 1px solid #444; 
+            text-align: center; cursor: pointer; border-radius: 4px; color: #666;
         }
-        .active-w { border-color: #ffcc00; color: #ffcc00; background: rgba(255,204,0,0.1); }
-        .active-p { border-color: #78a9ff; color: #78a9ff; background: rgba(120,169,255,0.1); }
-        .active-d { border-color: #4caf50; color: #4caf50; background: rgba(76,175,80,0.1); }
-        .bottom-nav { 
-            position: fixed; bottom: 0; left: 0; right: 0; height: 70px; 
-            background: #000; border-top: 1px solid #222; display: flex; align-items: center; z-index: 100;
-        }
-        .nav-item { flex: 1; text-align: center; font-size: 11px; color: #555; cursor: pointer; }
-        .nav-item.active { color: #78a9ff; }
-        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
-        .btn-main { background: #78a9ff; color: #000; border: none; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; }
+        .active-w { border-color: #ffcc00; color: #ffcc00; }
+        .active-p { border-color: #78a9ff; color: #78a9ff; }
+        .active-d { border-color: #4caf50; color: #4caf50; }
+        input { width: 100%; padding: 10px; margin-bottom: 10px; background: #000; color: #fff; border: 1px solid #333; }
+        .btn { background: #78a9ff; padding: 10px; text-align: center; color: #000; cursor: pointer; font-weight: bold; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="card">
-        <h2 style="text-align:center; letter-spacing:3px;">THE VAULT</h2>
-        <input type="text" id="qIn" placeholder="Search New...">
-        <button class="btn-main" onclick="search(); return false;">ENGAGE</button>
-        <input type="text" id="fIn" placeholder="Filter Archive..." onkeyup="filter(); return false;" style="margin-top:10px;">
-    </div>
-    <div class="media-grid" id="grid"></div>
-</div>
-
-<div class="bottom-nav">
-    <div class="nav-item active" onclick="setF('all', this)">ALL</div>
-    <div class="nav-item" onclick="setF('watching', this)">WATCH</div>
-    <div class="nav-item" onclick="setF('pulse', this)">PULSE</div>
-    <div class="nav-item" onclick="alert('Settings: Refresh page to update TMDB key in LocalStorage')">SET</div>
+<div class="container">
+    <input type="text" id="qIn" placeholder="Search...">
+    <div class="btn" onclick="search()">SEARCH</div>
+    <p></p>
+    <div class="grid" id="grid"></div>
 </div>
 
 <script type="module">
@@ -70,98 +47,64 @@
     const app = initializeApp(config);
     const db = getFirestore(app);
 
-    window.saveCloud = async () => {
+    window.sync = async () => {
         await setDoc(doc(db, "archives", "user_bailey"), { list: window.mediaList });
     };
 
-    window.loadCloud = async () => {
-        const snap = await getDoc(doc(db, "archives", "user_bailey"));
-        if(snap.exists()) {
-            window.mediaList = snap.data().list || [];
-            localStorage.setItem('v_cache', JSON.stringify(window.mediaList));
-            render();
-        }
-    };
-    
-    const local = localStorage.getItem('v_cache');
-    if(local) { window.mediaList = JSON.parse(local); render(); }
-    window.loadCloud();
+    const snap = await getDoc(doc(db, "archives", "user_bailey"));
+    if(snap.exists()) {
+        window.mediaList = snap.data().list || [];
+        render();
+    }
 </script>
 
 <script>
     window.mediaList = [];
-    let curF = 'all';
 
     function render() {
         const g = document.getElementById('grid');
         g.innerHTML = '';
         window.mediaList.forEach((item, i) => {
             const d = document.createElement('div');
-            d.className = 'item-card';
-            d.setAttribute('data-s', item.status);
+            d.className = 'item';
             d.innerHTML = `
                 <img class="poster" src="${item.poster}">
-                <div class="title">${item.name}</div>
                 <div class="controls">
-                    <div class="pill ${item.status==='watching'?'active-w':''}" onclick="setS(${i},'watching',this); return false;">WATCH</div>
-                    <div class="pill ${item.status==='pulse'?'active-p':''}" onclick="setS(${i},'pulse',this); return false;">PULSE</div>
-                    <div class="pill ${item.status==='watched'?'active-d':''}" onclick="setS(${i},'watched',this); return false;">DONE</div>
+                    <div class="pill ${item.status==='watching'?'active-w':''}" onclick="setS(${i},'watching',this)">W</div>
+                    <div class="pill ${item.status==='pulse'?'active-p':''}" onclick="setS(${i},'pulse',this)">P</div>
+                    <div class="pill ${item.status==='watched'?'active-d':''}" onclick="setS(${i},'watched',this)">D</div>
                 </div>`;
             g.appendChild(d);
         });
-        filter();
     }
 
-    function setS(idx, s, el) {
+    window.setS = (idx, s, el) => {
         window.mediaList[idx].status = s;
-        localStorage.setItem('v_cache', JSON.stringify(window.mediaList));
-        
         const ps = el.parentElement.querySelectorAll('.pill');
         ps.forEach(p => p.classList.remove('active-w', 'active-p', 'active-d'));
         if(s==='watching') el.classList.add('active-w');
         if(s==='pulse') el.classList.add('active-p');
         if(s==='watched') el.classList.add('active-d');
-        
-        window.saveCloud(); // Silent background call
-        return false;
-    }
-
-    function filter() {
-        const q = document.getElementById('fIn').value.toLowerCase();
-        document.querySelectorAll('.item-card').forEach((card, i) => {
-            const item = window.mediaList[i];
-            const show = (curF === 'all' || item.status === curF) && item.name.toLowerCase().includes(q);
-            card.style.display = show ? 'block' : 'none';
-        });
-    }
-
-    function setF(f, el) {
-        curF = f;
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
-        filter();
-        return false;
-    }
+        // We only sync to cloud on refresh or add to stop the flickering
+        localStorage.setItem('v_cache', JSON.stringify(window.mediaList));
+    };
 
     async function search() {
         const q = document.getElementById('qIn').value;
         const key = localStorage.getItem('tmdbKey');
-        if(!q || !key) return alert('Need Key in LocalStorage');
         const r = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${key}&query=${q}`);
         const d = await r.json();
         const g = document.getElementById('grid');
         g.innerHTML = d.results.filter(i => i.poster_path).map(item => `
-            <div class="item-card">
+            <div class="item">
                 <img class="poster" src="https://image.tmdb.org/t/p/w500${item.poster_path}">
-                <div class="title">${item.title || item.name}</div>
-                <button class="btn-main" onclick="add('${item.title || item.name}','https://image.tmdb.org/t/p/w500${item.poster_path}',${item.id}); return false;">ADD</button>
+                <div class="btn" onclick="add('${item.title || item.name}','https://image.tmdb.org/t/p/w500${item.poster_path}',${item.id})">ADD</div>
             </div>`).join('');
     }
 
     window.add = (n, p, id) => {
         window.mediaList.unshift({ name: n, poster: p, tmdbId: id, status: 'watching' });
-        localStorage.setItem('v_cache', JSON.stringify(window.mediaList));
-        window.saveCloud();
+        window.sync();
         render();
     };
 </script>
