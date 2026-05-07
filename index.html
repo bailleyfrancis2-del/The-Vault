@@ -317,7 +317,12 @@
         let isDragging = false, isHorizontal = null;
         const OPEN_THRESHOLD  = 80;   // px to commit to open
         const CLOSE_THRESHOLD = 40;   // px to commit to close when open
-        const TRAY_OPEN_X     = -(card.offsetWidth * 0.6); // slide enough to reveal centred 2x2 grid
+        // Measured lazily after card is in the DOM
+        let trayOpenX = null;
+        const getTrayOpenX = () => {
+            if (!trayOpenX) trayOpenX = -card.closest('.swipe-wrapper').offsetWidth;
+            return trayOpenX;
+        };
 
         card.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
@@ -330,7 +335,6 @@
         }, { passive: true });
 
         card.addEventListener('touchmove', (e) => {
-            window._lastTouchY = e.touches[0].clientY;
             const dx = e.touches[0].clientX - startX;
             const dy = e.touches[0].clientY - startY;
             totalDY = Math.max(totalDY, Math.abs(dy));
@@ -346,10 +350,11 @@
             isDragging = true;
             currentX = dx;
 
+            const openX = getTrayOpenX();
             // Rubber-band effect at edges
             let x = currentX;
             if (x > 0) x = Math.pow(x, 0.7);           // right rubber band
-            if (x < TRAY_OPEN_X) x = TRAY_OPEN_X - Math.pow(Math.abs(x - TRAY_OPEN_X), 0.7);
+            if (x < openX) x = openX - Math.pow(Math.abs(x - openX), 0.7);
 
             card.style.transform = `translateX(${x}px)`;
         }, { passive: false });
@@ -372,6 +377,7 @@
             }
 
             const wasOpen = openCardIdx === idx;
+            const openX = getTrayOpenX();
 
             if (wasOpen) {
                 // Card was open — close if swiped right enough
@@ -379,13 +385,13 @@
                     snapClose(idx);
                 } else {
                     // Snap back to open
-                    card.style.transform = `translateX(${TRAY_OPEN_X}px)`;
+                    card.style.transform = `translateX(${openX}px)`;
                 }
             } else {
                 // Card was closed — open if swiped left enough
                 if (currentX < -OPEN_THRESHOLD) {
                     closeAllCards(idx);
-                    card.style.transform = `translateX(${TRAY_OPEN_X}px)`;
+                    card.style.transform = `translateX(${openX}px)`;
                     openCardIdx = idx;
                 } else {
                     snapClose(idx);
