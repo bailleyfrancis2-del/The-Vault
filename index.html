@@ -88,21 +88,24 @@
 
         .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; }
         
-        /* YELLOW RANDOMIZE BUTTON */
+        /* NEW SOLID YELLOW RANDOMIZE BUTTON */
         .btn-rand { 
-            background: rgba(255, 204, 0, 0.25); 
-            color: var(--accent); 
-            border: 1px solid var(--accent); 
+            background: #ffcc00; 
+            color: #050a15; 
+            border: none;
             width: 100%; 
             margin-top: 10px; 
-            padding: 12px; 
-            font-size: 12px; 
-            letter-spacing: 2px; 
+            padding: 14px; 
+            font-size: 13px; 
+            letter-spacing: 3px; 
             border-radius: 14px;
-            font-weight: bold;
+            font-weight: 900;
             cursor: pointer;
-            box-shadow: 0 0 15px rgba(255, 204, 0, 0.1);
+            text-transform: uppercase;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
+            transition: transform 0.2s ease;
         }
+        .btn-rand:active { transform: scale(0.98); }
         
         input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important; }
 
