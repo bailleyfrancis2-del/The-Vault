@@ -273,7 +273,7 @@
 
     // ─── SWIPE ENGINE ────────────────────────────────────────────────────────
     function attachSwipe(card, idx) {
-        let startX = 0, startY = 0, currentX = 0;
+        let startX = 0, startY = 0, currentX = 0, totalDY = 0;
         let isDragging = false, isHorizontal = null;
         const OPEN_THRESHOLD  = 80;   // px to commit to open
         const CLOSE_THRESHOLD = 40;   // px to commit to close when open
@@ -283,14 +283,17 @@
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
             currentX = 0;
+            totalDY = 0;
             isDragging = false;
             isHorizontal = null;
             card.classList.add('dragging');
         }, { passive: true });
 
         card.addEventListener('touchmove', (e) => {
+            window._lastTouchY = e.touches[0].clientY;
             const dx = e.touches[0].clientX - startX;
             const dy = e.touches[0].clientY - startY;
+            totalDY = Math.max(totalDY, Math.abs(dy));
 
             // Determine axis on first meaningful move
             if (isHorizontal === null && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
@@ -315,7 +318,11 @@
             card.classList.remove('dragging');
 
             if (!isDragging) {
-                // Pure tap: if card is open, close it; else open item
+                // Only treat as a tap if the finger barely moved vertically too
+                // (guards against scroll-lift being mistaken for a tap)
+                const totalMove = Math.abs(currentX) + totalDY;
+                if (totalMove > 10) return; // was a scroll, not a tap
+
                 if (openCardIdx === idx) {
                     snapClose(idx);
                 } else {
