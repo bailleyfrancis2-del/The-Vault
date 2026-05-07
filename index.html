@@ -1087,6 +1087,10 @@
             if (!alreadyInVault) {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
+                    btn.textContent = '✓ ADDED';
+                    btn.style.background = '#4caf50';
+                    btn.style.color = '#fff';
+                    btn.disabled = true;
                     window.addItem(searchResults[i]);
                 });
                 btn.addEventListener('touchend', function(e) {
