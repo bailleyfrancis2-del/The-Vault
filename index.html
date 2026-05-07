@@ -28,6 +28,84 @@
             color: #fff;
         }
 
+        /* ── LOGIN SCREEN ────────────────────────────────────────────────── */
+        #loginScreen {
+            position: fixed; inset: 0; z-index: 10000;
+            display: flex; align-items: center; justify-content: center;
+            background: #050a15 url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2022&auto=format&fit=crop') center/cover fixed;
+            transition: opacity 0.5s var(--glide), transform 0.5s var(--glide);
+        }
+        #loginScreen.hidden {
+            opacity: 0; pointer-events: none; transform: scale(1.05);
+        }
+
+        .login-card {
+            width: 92%; max-width: 360px;
+            background: var(--glass); backdrop-filter: blur(40px);
+            border: 1px solid var(--border); border-radius: 32px;
+            padding: 36px 28px; text-align: center;
+        }
+
+        .login-title {
+            font-size: 1.4em; letter-spacing: 6px; font-weight: 300;
+            opacity: 0.8; margin-bottom: 6px;
+        }
+        .login-subtitle {
+            font-size: 12px; opacity: 0.35; letter-spacing: 2px;
+            margin-bottom: 28px; text-transform: uppercase;
+        }
+
+        .login-input {
+            width: 100%; background: rgba(0,0,0,0.6);
+            border: 1px solid var(--border); color: #fff;
+            padding: 14px; border-radius: 16px; font-size: 16px !important;
+            margin-bottom: 12px; text-align: center;
+        }
+
+        .pin-dots {
+            display: flex; justify-content: center; gap: 12px;
+            margin-bottom: 20px;
+        }
+        .pin-dot {
+            width: 14px; height: 14px; border-radius: 50%;
+            border: 2px solid var(--border); background: transparent;
+            transition: all 0.2s var(--spring);
+        }
+        .pin-dot.filled { background: var(--glow); border-color: var(--glow); }
+
+        .pin-pad {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 10px; margin-bottom: 20px; max-width: 260px; margin-left: auto; margin-right: auto;
+        }
+        .pin-key {
+            height: 56px; border-radius: 16px;
+            background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+            color: #fff; font-size: 22px; font-weight: 600;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.15s var(--spring);
+        }
+        .pin-key:active { transform: scale(0.9); background: rgba(255,255,255,0.15); }
+        .pin-key.fn { font-size: 12px; letter-spacing: 1px; font-weight: 700; }
+
+        .login-btn {
+            width: 100%; padding: 16px; border-radius: 16px;
+            font-weight: 800; font-size: 13px; letter-spacing: 2px;
+            border: none; cursor: pointer; transition: all 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .login-toggle {
+            font-size: 12px; opacity: 0.4; cursor: pointer;
+            text-decoration: underline; margin-top: 6px;
+        }
+        .login-toggle:active { opacity: 0.8; }
+
+        .login-error {
+            font-size: 12px; color: #ff4444; margin-bottom: 12px;
+            min-height: 18px;
+        }
+
+        /* ── MAIN APP (unchanged styles) ─────────────────────────────────── */
         .app-container {
             height: 100%; display: flex; flex-direction: column;
             padding-top: var(--safe-top);
@@ -108,7 +186,6 @@
             box-shadow: 0 0 10px currentColor;
         }
 
-        /* Progress bar on card */
         .card-progress {
             position: absolute; bottom: 0; left: 0; right: 0;
             height: 3px; background: rgba(255,255,255,0.1);
@@ -145,34 +222,18 @@
         .arrow-shape { width: 32px; height: 32px; background-color: var(--glow); -webkit-mask: url('https://api.iconify.design/ph:caret-double-up-bold.svg') no-repeat center; mask-size: contain; }
         #scrollTopBtn.visible { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
 
-        /* ── DETAIL PAGE ─────────────────────────────────────────────────── */
         #detailPage {
-            position: fixed; inset: 0;
-            background: #050a15;
-            z-index: 8000;
-            transform: translateX(100%);
+            position: fixed; inset: 0; background: #050a15;
+            z-index: 8000; transform: translateX(100%);
             transition: transform 0.4s var(--glide);
-            display: flex; flex-direction: column;
-            padding-top: var(--safe-top);
+            display: flex; flex-direction: column; padding-top: var(--safe-top);
         }
         #detailPage.open { transform: translateX(0); }
 
-        .detail-scroll {
-            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-            padding-bottom: 40px;
-        }
-
-        .detail-hero {
-            position: relative; width: 100%; aspect-ratio: 2/3;
-            max-height: 55vh; overflow: hidden;
-        }
-        .detail-hero img {
-            width: 100%; height: 100%; object-fit: cover; display: block;
-        }
-        .detail-hero-overlay {
-            position: absolute; inset: 0;
-            background: linear-gradient(to bottom, rgba(5,10,21,0.3) 0%, rgba(5,10,21,0) 40%, rgba(5,10,21,1) 100%);
-        }
+        .detail-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 40px; }
+        .detail-hero { position: relative; width: 100%; aspect-ratio: 2/3; max-height: 55vh; overflow: hidden; }
+        .detail-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .detail-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(5,10,21,0.3) 0%, rgba(5,10,21,0) 40%, rgba(5,10,21,1) 100%); }
         .detail-back {
             position: absolute; top: 16px; left: 16px;
             width: 44px; height: 44px; border-radius: 50%;
@@ -187,13 +248,10 @@
             mask: url('https://api.iconify.design/ph:arrow-left-bold.svg') no-repeat center;
             mask-size: contain;
         }
-
         .detail-body { padding: 0 20px 20px; margin-top: -30px; position: relative; }
-
         .detail-title { font-size: 1.5em; font-weight: 700; margin: 0 0 6px; }
         .detail-meta { font-size: 12px; opacity: 0.5; margin-bottom: 14px; letter-spacing: 1px; text-transform: uppercase; }
         .detail-overview { font-size: 13px; line-height: 1.6; opacity: 0.7; margin-bottom: 20px; }
-
         .detail-actions { display: flex; gap: 10px; margin-bottom: 24px; }
         .detail-actions a, .detail-actions button {
             flex: 1; padding: 14px; border-radius: 16px; font-weight: 800;
@@ -201,16 +259,12 @@
             display: flex; align-items: center; justify-content: center;
             border: none; cursor: pointer;
         }
-
-        /* Movie watched toggle */
         .movie-watched-btn {
             width: 100%; padding: 16px; border-radius: 16px;
             font-weight: 800; font-size: 13px; letter-spacing: 2px;
             border: none; cursor: pointer; margin-bottom: 24px;
             transition: background 0.3s, color 0.3s;
         }
-
-        /* Season tabs */
         .season-tabs {
             display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
             margin-bottom: 16px; scrollbar-width: none;
@@ -222,32 +276,22 @@
             background: rgba(255,255,255,0.07); border: 1px solid var(--border);
             color: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.2s;
         }
-        .season-tab.active {
-            background: var(--glow); color: #05162d; border-color: var(--glow);
-        }
-
-        /* Episode list */
+        .season-tab.active { background: var(--glow); color: #05162d; border-color: var(--glow); }
         .episode-list { display: flex; flex-direction: column; gap: 2px; }
-
         .episode-row {
             display: flex; align-items: center; gap: 12px;
             padding: 12px 14px; border-radius: 14px;
-            background: rgba(255,255,255,0.04);
-            transition: background 0.2s;
-            cursor: pointer;
+            background: rgba(255,255,255,0.04); transition: background 0.2s; cursor: pointer;
         }
         .episode-row.watched { background: rgba(120,169,255,0.08); }
         .episode-row:active { background: rgba(255,255,255,0.1); }
-
         .ep-check {
             width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
             border: 2px solid rgba(255,255,255,0.2);
             display: flex; align-items: center; justify-content: center;
             transition: all 0.2s var(--spring);
         }
-        .episode-row.watched .ep-check {
-            background: var(--glow); border-color: var(--glow);
-        }
+        .episode-row.watched .ep-check { background: var(--glow); border-color: var(--glow); }
         .ep-check-icon {
             width: 12px; height: 12px; background: #05162d;
             -webkit-mask: url('https://api.iconify.design/ph:check-bold.svg') no-repeat center;
@@ -255,95 +299,93 @@
             mask-size: contain; opacity: 0; transition: opacity 0.2s;
         }
         .episode-row.watched .ep-check-icon { opacity: 1; }
-
         .ep-info { flex: 1; min-width: 0; }
         .ep-num { font-size: 11px; opacity: 0.4; font-weight: 600; letter-spacing: 1px; }
         .ep-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ep-season-progress { font-size: 11px; opacity: 0.4; font-weight: 600; margin-bottom: 10px; letter-spacing: 1px; }
+        .section-title { font-size: 11px; font-weight: 800; letter-spacing: 3px; opacity: 0.4; text-transform: uppercase; margin-bottom: 12px; }
 
-        .ep-season-progress {
-            font-size: 11px; opacity: 0.4; font-weight: 600; margin-bottom: 10px; letter-spacing: 1px;
-        }
-
-        .section-title {
-            font-size: 11px; font-weight: 800; letter-spacing: 3px;
-            opacity: 0.4; text-transform: uppercase; margin-bottom: 12px;
-        }
-
-        /* ── SETTINGS / STATS PAGE ───────────────────────────────────────── */
+        /* Settings/Stats page */
         #settingsPage {
-            position: fixed; inset: 0;
-            background: #050a15;
-            z-index: 8000;
-            transform: translateX(100%);
+            position: fixed; inset: 0; background: #050a15;
+            z-index: 8000; transform: translateX(100%);
             transition: transform 0.4s var(--glide);
-            display: flex; flex-direction: column;
-            padding-top: var(--safe-top);
+            display: flex; flex-direction: column; padding-top: var(--safe-top);
         }
         #settingsPage.open { transform: translateX(0); }
-
-        .settings-scroll {
-            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-            padding: 20px 20px 60px;
-        }
-
-        .settings-header {
-            display: flex; align-items: center; gap: 14px;
-            margin-bottom: 28px; padding-top: 8px;
-        }
-
-        .stat-grid {
-            display: grid; grid-template-columns: 1fr 1fr;
-            gap: 12px; margin-bottom: 24px;
-        }
-
+        .settings-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 20px 60px; }
+        .settings-header { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; padding-top: 8px; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
         .stat-card {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border);
-            border-radius: 20px; padding: 18px;
-            display: flex; flex-direction: column; gap: 4px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 4px;
         }
         .stat-value { font-size: 2em; font-weight: 800; color: var(--glow); line-height: 1; }
         .stat-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; opacity: 0.4; text-transform: uppercase; }
-
         .status-bar-row { margin-bottom: 14px; }
-        .status-bar-label {
-            display: flex; justify-content: space-between;
-            font-size: 11px; font-weight: 700; letter-spacing: 1px;
-            text-transform: uppercase; margin-bottom: 6px; opacity: 0.7;
-        }
-        .status-bar-track {
-            height: 6px; border-radius: 3px;
-            background: rgba(255,255,255,0.08); overflow: hidden;
-        }
+        .status-bar-label { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; opacity: 0.7; }
+        .status-bar-track { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden; }
         .status-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s var(--glide); }
-
-        .genre-row {
-            display: flex; align-items: center; gap: 10px;
-            margin-bottom: 10px;
-        }
+        .genre-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
         .genre-name { font-size: 12px; font-weight: 600; width: 110px; flex-shrink: 0; opacity: 0.8; }
-        .genre-track {
-            flex: 1; height: 5px; border-radius: 3px;
-            background: rgba(255,255,255,0.08); overflow: hidden;
-        }
+        .genre-track { flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden; }
         .genre-fill { height: 100%; border-radius: 3px; background: var(--glow); }
         .genre-count { font-size: 11px; opacity: 0.4; width: 24px; text-align: right; flex-shrink: 0; }
-
-        .settings-section {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid var(--border);
-            border-radius: 20px; padding: 18px; margin-bottom: 16px;
-        }
-        .settings-row {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 4px 0;
-        }
+        .settings-section { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 16px; }
+        .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
         .settings-row-label { font-size: 13px; opacity: 0.8; }
         .settings-row-value { font-size: 12px; opacity: 0.4; font-family: monospace; }
     </style>
 </head>
 <body>
 
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- LOGIN SCREEN                                                          -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div id="loginScreen">
+    <div class="login-card">
+        <div class="login-title">THE VAULT</div>
+        <div class="login-subtitle" id="loginSubtitle">ENTER CREDENTIALS</div>
+
+        <input class="login-input" id="loginUsername" placeholder="Username" autocapitalize="off" autocorrect="off" spellcheck="false">
+
+        <div id="loginNameField" style="display:none;">
+            <input class="login-input" id="loginDisplayName" placeholder="Display Name">
+        </div>
+
+        <div class="pin-dots" id="pinDots">
+            <div class="pin-dot" id="dot0"></div>
+            <div class="pin-dot" id="dot1"></div>
+            <div class="pin-dot" id="dot2"></div>
+            <div class="pin-dot" id="dot3"></div>
+        </div>
+
+        <div class="pin-pad">
+            <div class="pin-key" onclick="pinPress('1')">1</div>
+            <div class="pin-key" onclick="pinPress('2')">2</div>
+            <div class="pin-key" onclick="pinPress('3')">3</div>
+            <div class="pin-key" onclick="pinPress('4')">4</div>
+            <div class="pin-key" onclick="pinPress('5')">5</div>
+            <div class="pin-key" onclick="pinPress('6')">6</div>
+            <div class="pin-key" onclick="pinPress('7')">7</div>
+            <div class="pin-key" onclick="pinPress('8')">8</div>
+            <div class="pin-key" onclick="pinPress('9')">9</div>
+            <div class="pin-key fn" onclick="pinClear()">CLR</div>
+            <div class="pin-key" onclick="pinPress('0')">0</div>
+            <div class="pin-key fn" onclick="pinBackspace()">←</div>
+        </div>
+
+        <div class="login-error" id="loginError"></div>
+
+        <button class="login-btn" id="loginBtn" style="background:var(--glow);color:#05162d;" onclick="attemptLogin()">SIGN IN</button>
+
+        <div class="login-toggle" id="loginToggle" onclick="toggleLoginMode()">Need an account? Create one</div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- MAIN APP                                                               -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
 <div class="app-container">
     <div class="scroll-view" id="mainScroll">
         <div class="header-card">
@@ -404,7 +446,15 @@
             <h2 style="margin:0;font-size:1.3em;letter-spacing:4px;font-weight:300;opacity:0.8;">SYSTEM</h2>
         </div>
 
-        <!-- Stats -->
+        <div class="section-title">LOGGED IN AS</div>
+        <div class="settings-section" style="margin-bottom:24px;">
+            <div class="settings-row">
+                <span class="settings-row-label" id="settingsUserDisplay">—</span>
+                <span class="settings-row-value" id="settingsUsernameDisplay">—</span>
+            </div>
+            <button class="login-btn" style="background:#ff4444;color:#fff;margin-top:14px;font-size:12px;letter-spacing:2px;" onclick="logout()">LOGOUT</button>
+        </div>
+
         <div class="section-title">VAULT STATS</div>
         <div class="stat-grid" id="statGrid"></div>
 
@@ -414,7 +464,6 @@
         <div class="section-title">TOP GENRES</div>
         <div id="genreChart" style="margin-bottom:28px;"></div>
 
-        <!-- Settings -->
         <div class="section-title">CONFIGURATION</div>
         <div class="settings-section">
             <div class="settings-row">
@@ -426,11 +475,14 @@
     </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- FIREBASE INIT                                                          -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const config = {
+    var config = {
         apiKey: "AIzaSyAf9NqhQ8iGoVWeCCCoZChF1RKY-HER678",
         authDomain: "the-vault-41656.firebaseapp.com",
         projectId: "the-vault-41656",
@@ -439,23 +491,18 @@
         appId: "1:8990033543:web:1579e3987a69f9ffcd1a22"
     };
 
-    const app = initializeApp(config);
-    const db  = getFirestore(app);
+    var app = initializeApp(config);
+    var db  = getFirestore(app);
     window.db   = db;
-    window.fLib = { doc, setDoc, onSnapshot };
+    window.fLib = { doc: doc, setDoc: setDoc, getDoc: getDoc, onSnapshot: onSnapshot };
 
-    const cache = localStorage.getItem('v_cache');
-    if (cache) { window.mediaList = JSON.parse(cache); render(); }
-
-    window.fLib.onSnapshot(window.fLib.doc(db, "archives", "user_bailey"), function(snap) {
-        if (snap.exists()) {
-            window.mediaList = snap.data().list || [];
-            localStorage.setItem('v_cache', JSON.stringify(window.mediaList));
-            render();
-        }
-    });
+    // Check for saved session
+    window.checkSavedSession();
 </script>
 
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- APP LOGIC                                                              -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
 <script>
     window.mediaList = [];
     var tmdbKey       = localStorage.getItem('tmdbKey') || '';
@@ -464,7 +511,159 @@
     var openCardIdx   = null;
     var currentDetailIdx = null;
     var currentSeason    = 1;
+    var currentUser      = null;  // { username, displayName }
+    var unsubscribe      = null;  // Firebase listener
 
+    // ── LOGIN SYSTEM ─────────────────────────────────────────────────────────
+    var loginMode = 'signin'; // 'signin' or 'signup'
+    var currentPin = '';
+
+    window.pinPress = function(n) {
+        if (currentPin.length >= 4) return;
+        currentPin += n;
+        updatePinDots();
+    };
+
+    window.pinClear = function() {
+        currentPin = '';
+        updatePinDots();
+    };
+
+    window.pinBackspace = function() {
+        currentPin = currentPin.slice(0, -1);
+        updatePinDots();
+    };
+
+    function updatePinDots() {
+        for (var i = 0; i < 4; i++) {
+            document.getElementById('dot' + i).classList.toggle('filled', i < currentPin.length);
+        }
+    }
+
+    window.toggleLoginMode = function() {
+        loginMode = loginMode === 'signin' ? 'signup' : 'signin';
+        document.getElementById('loginSubtitle').textContent = loginMode === 'signin' ? 'ENTER CREDENTIALS' : 'CREATE NEW ACCOUNT';
+        document.getElementById('loginBtn').textContent = loginMode === 'signin' ? 'SIGN IN' : 'CREATE ACCOUNT';
+        document.getElementById('loginToggle').textContent = loginMode === 'signin' ? 'Need an account? Create one' : 'Already have an account? Sign in';
+        document.getElementById('loginNameField').style.display = loginMode === 'signup' ? 'block' : 'none';
+        document.getElementById('loginError').textContent = '';
+        pinClear();
+    };
+
+    window.attemptLogin = async function() {
+        var username = document.getElementById('loginUsername').value.trim().toLowerCase().replace(/\s+/g, '_');
+        var error    = document.getElementById('loginError');
+        error.textContent = '';
+
+        if (!username) { error.textContent = 'Enter a username'; return; }
+        if (currentPin.length !== 4) { error.textContent = 'Enter a 4-digit PIN'; return; }
+
+        var docId  = 'user_' + username;
+        var docRef = window.fLib.doc(window.db, "archives", docId);
+
+        try {
+            var snap = await window.fLib.getDoc(docRef);
+
+            if (loginMode === 'signup') {
+                if (snap.exists()) {
+                    var existingData = snap.data();
+                    // Legacy account without PIN — migrate it
+                    if (!existingData.pin) {
+                        var displayName = document.getElementById('loginDisplayName').value.trim() || username;
+                        await window.fLib.setDoc(docRef, { pin: currentPin, displayName: displayName }, { merge: true });
+                        loginSuccess(username, displayName);
+                        return;
+                    }
+                    error.textContent = 'Username already taken'; return;
+                }
+                var displayName = document.getElementById('loginDisplayName').value.trim() || username;
+                await window.fLib.setDoc(docRef, { pin: currentPin, displayName: displayName, list: [] });
+                loginSuccess(username, displayName);
+            } else {
+                if (!snap.exists()) { error.textContent = 'User not found'; return; }
+                var data = snap.data();
+                // Legacy account without PIN — set their PIN on first sign-in
+                if (!data.pin) {
+                    await window.fLib.setDoc(docRef, { pin: currentPin, displayName: data.displayName || username }, { merge: true });
+                    loginSuccess(username, data.displayName || username);
+                    return;
+                }
+                if (data.pin !== currentPin) { error.textContent = 'Incorrect PIN'; return; }
+                loginSuccess(username, data.displayName || username);
+            }
+        } catch(err) {
+            error.textContent = 'Connection error — try again';
+        }
+    };
+
+    function loginSuccess(username, displayName) {
+        currentUser = { username: username, displayName: displayName };
+        localStorage.setItem('v_session', JSON.stringify(currentUser));
+        document.getElementById('loginScreen').classList.add('hidden');
+        startApp();
+    }
+
+    window.checkSavedSession = function() {
+        var saved = localStorage.getItem('v_session');
+        if (saved) {
+            try {
+                currentUser = JSON.parse(saved);
+                document.getElementById('loginScreen').classList.add('hidden');
+                startApp();
+            } catch(e) {
+                localStorage.removeItem('v_session');
+            }
+        }
+    };
+
+    function startApp() {
+        var docId = 'user_' + currentUser.username;
+
+        // Load from cache first
+        var cache = localStorage.getItem('v_cache_' + currentUser.username);
+        if (cache) { window.mediaList = JSON.parse(cache); render(); }
+
+        // Listen for live updates
+        if (unsubscribe) unsubscribe();
+        unsubscribe = window.fLib.onSnapshot(window.fLib.doc(window.db, "archives", docId), function(snap) {
+            if (snap.exists()) {
+                var data = snap.data();
+                window.mediaList = data.list || [];
+                localStorage.setItem('v_cache_' + currentUser.username, JSON.stringify(window.mediaList));
+                render();
+            }
+        });
+    }
+
+    window.logout = function() {
+        if (!confirm('Log out of ' + currentUser.displayName + '?')) return;
+        if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+        currentUser = null;
+        window.mediaList = [];
+        localStorage.removeItem('v_session');
+        document.getElementById('mainGrid').innerHTML = '';
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('loginUsername').value = '';
+        document.getElementById('loginDisplayName').value = '';
+        document.getElementById('loginError').textContent = '';
+        closeSettings();
+        pinClear();
+        loginMode = 'signin';
+        toggleLoginMode(); toggleLoginMode(); // reset UI
+    };
+
+    // ── SAVE (per-user) ──────────────────────────────────────────────────────
+    async function save() {
+        if (!currentUser) return;
+        var docId = 'user_' + currentUser.username;
+        localStorage.setItem('v_cache_' + currentUser.username, JSON.stringify(window.mediaList));
+        await window.fLib.setDoc(window.fLib.doc(window.db, "archives", docId), {
+            pin: undefined, // don't overwrite pin
+            list: window.mediaList
+        }, { merge: true });
+    }
+
+    // ── SCROLL / HELPERS ─────────────────────────────────────────────────────
     var scrollArea = document.getElementById('mainScroll');
     var scrollBtn  = document.getElementById('scrollTopBtn');
 
@@ -513,7 +712,6 @@
 
             var statusColor = item.status === 'watching' ? '#ffcc00' : item.status === 'pulse' ? '#78a9ff' : '#4caf50';
 
-            // Calculate progress for TV shows
             var progressBar = '';
             if (item.type === 'tv' && item.episodeProgress && item.totalEpisodes) {
                 var watched = Object.keys(item.episodeProgress).filter(function(k){ return item.episodeProgress[k]; }).length;
@@ -651,11 +849,6 @@
         }
     };
 
-    async function save() {
-        localStorage.setItem('v_cache', JSON.stringify(window.mediaList));
-        await window.fLib.setDoc(window.fLib.doc(window.db, "archives", "user_bailey"), { list: window.mediaList });
-    }
-
     // ── DETAIL PAGE ───────────────────────────────────────────────────────────
     async function openDetail(idx) {
         currentDetailIdx = idx;
@@ -663,10 +856,7 @@
         var item = window.mediaList[idx];
         var page = document.getElementById('detailPage');
 
-        // Reset scroll
         document.getElementById('detailScroll').scrollTop = 0;
-
-        // Populate static bits immediately
         document.getElementById('detailPoster').src = item.poster;
         document.getElementById('detailTitle').textContent = item.name;
         document.getElementById('detailMeta').textContent = 'LOADING...';
@@ -676,34 +866,26 @@
 
         page.classList.add('open');
 
-        // Fetch from TMDB
         try {
             var res  = await fetch('https://api.themoviedb.org/3/' + item.type + '/' + item.tmdbId + '?api_key=' + tmdbKey + '&append_to_response=videos,external_ids');
             var data = await res.json();
             var trailer = data.videos && data.videos.results.find(function(v){ return v.type === 'Trailer' && v.site === 'YouTube'; });
             var imdbId  = data.imdb_id || (data.external_ids && data.external_ids.imdb_id);
 
-            var year = item.type === 'movie'
-                ? (data.release_date || '').slice(0,4)
-                : (data.first_air_date || '').slice(0,4);
+            var year = item.type === 'movie' ? (data.release_date || '').slice(0,4) : (data.first_air_date || '').slice(0,4);
             var typeLabel = item.type === 'movie' ? 'MOVIE' : 'TV SERIES';
 
             document.getElementById('detailMeta').textContent = typeLabel + (year ? '  ·  ' + year : '');
             document.getElementById('detailOverview').textContent = data.overview || '';
 
-            // Action buttons
             var actionsHTML = '';
-            if (trailer) {
-                actionsHTML += '<a href="https://www.youtube.com/watch?v=' + trailer.key + '" target="_blank" style="background:#ff4444;color:#fff;">▶ TRAILER</a>';
-            }
+            if (trailer) actionsHTML += '<a href="https://www.youtube.com/watch?v=' + trailer.key + '" target="_blank" style="background:#ff4444;color:#fff;">▶ TRAILER</a>';
             actionsHTML += '<a href="https://imdb.com/title/' + (imdbId || 'find?q=' + item.name) + '" target="_blank" style="background:#f5c518;color:#000;">IMDb</a>';
             document.getElementById('detailActions').innerHTML = actionsHTML;
 
-            // Tracker section
             if (item.type === 'movie') {
                 renderMovieTracker(idx, item);
             } else {
-                // Store total seasons on item
                 var seasons = (data.seasons || []).filter(function(s){ return s.season_number > 0; });
                 window.mediaList[idx]._seasons = seasons;
                 renderTVTracker(idx, item, seasons, data);
@@ -716,14 +898,13 @@
     function closeDetail() {
         document.getElementById('detailPage').classList.remove('open');
         currentDetailIdx = null;
-        render(); // refresh progress bars on cards
+        render();
     }
 
-    // ── MOVIE TRACKER ────────────────────────────────────────────────────────
     function renderMovieTracker(idx, item) {
         var watched = item.status === 'watched';
         document.getElementById('detailTracker').innerHTML =
-            '<button class="movie-watched-btn" id="movieWatchedBtn" onclick="toggleMovieWatched(' + idx + ')" style="background:' + (watched ? 'var(--glow)' : 'rgba(255,255,255,0.07)') + ';color:' + (watched ? '#05162d' : '#fff') + ';border:1px solid ' + (watched ? 'var(--glow)' : 'var(--border)') + ';">' +
+            '<button class="movie-watched-btn" onclick="toggleMovieWatched(' + idx + ')" style="background:' + (watched ? 'var(--glow)' : 'rgba(255,255,255,0.07)') + ';color:' + (watched ? '#05162d' : '#fff') + ';border:1px solid ' + (watched ? 'var(--glow)' : 'var(--border)') + ';">' +
                 (watched ? '✓  WATCHED' : 'MARK AS WATCHED') +
             '</button>';
     }
@@ -735,19 +916,16 @@
         renderMovieTracker(idx, item);
     };
 
-    // ── TV TRACKER ───────────────────────────────────────────────────────────
-    function renderTVTracker(idx, item, seasons, showData) {
+    function renderTVTracker(idx, item, seasons) {
         if (!seasons || seasons.length === 0) {
             document.getElementById('detailTracker').innerHTML = '<div style="opacity:0.4;font-size:12px;text-align:center;padding:20px;">NO SEASON DATA</div>';
             return;
         }
 
-        // Build season tabs
         var tabsHTML = '<div class="section-title">EPISODES</div><div class="season-tabs" id="seasonTabs">';
         seasons.forEach(function(s) {
             tabsHTML += '<button class="season-tab' + (s.season_number === currentSeason ? ' active' : '') + '" onclick="selectSeason(' + idx + ',' + s.season_number + ',' + seasons.length + ')">' +
-                'S' + s.season_number +
-            '</button>';
+                'S' + s.season_number + '</button>';
         });
         tabsHTML += '</div><div id="episodeList"><div style="text-align:center;padding:20px;opacity:0.4;font-size:12px;letter-spacing:2px;">LOADING...</div></div>';
 
@@ -755,9 +933,8 @@
         loadSeason(idx, currentSeason);
     }
 
-    window.selectSeason = function(idx, seasonNum, totalSeasons) {
+    window.selectSeason = function(idx, seasonNum) {
         currentSeason = seasonNum;
-        // Update active tab
         document.querySelectorAll('.season-tab').forEach(function(tab, i) {
             tab.classList.toggle('active', i + 1 === seasonNum);
         });
@@ -775,26 +952,18 @@
             var data = await res.json();
             var episodes = data.episodes || [];
 
-            // Track total episodes across all seasons for progress bar
-            // We'll accumulate as user navigates seasons
-            if (!item.totalEpisodes || item.totalEpisodes < 1) {
-                // We'll set it when we know all seasons — for now use what we have
-            }
-
             if (!item.episodeProgress) item.episodeProgress = {};
 
             var watched = episodes.filter(function(ep){
                 return item.episodeProgress['s' + seasonNum + 'e' + ep.episode_number];
             }).length;
 
-            var progressText = watched + ' / ' + episodes.length + ' watched';
-
-            var html = '<div class="ep-season-progress">' + progressText + '</div><div class="episode-list">';
+            var html = '<div class="ep-season-progress">' + watched + ' / ' + episodes.length + ' watched</div><div class="episode-list">';
             episodes.forEach(function(ep) {
                 var key = 's' + seasonNum + 'e' + ep.episode_number;
                 var isWatched = !!item.episodeProgress[key];
                 html +=
-                    '<div class="episode-row' + (isWatched ? ' watched' : '') + '" onclick="toggleEpisode(' + idx + ',' + seasonNum + ',' + ep.episode_number + ',' + episodes.length + ')">' +
+                    '<div class="episode-row' + (isWatched ? ' watched' : '') + '" onclick="toggleEpisode(' + idx + ',' + seasonNum + ',' + ep.episode_number + ')">' +
                         '<div class="ep-check"><div class="ep-check-icon"></div></div>' +
                         '<div class="ep-info">' +
                             '<div class="ep-num">S' + seasonNum + ' · E' + ep.episode_number + '</div>' +
@@ -809,28 +978,21 @@
         }
     }
 
-    window.toggleEpisode = async function(idx, seasonNum, epNum, totalInSeason) {
+    window.toggleEpisode = async function(idx, seasonNum, epNum) {
         var item = window.mediaList[idx];
         if (!item.episodeProgress) item.episodeProgress = {};
         var key = 's' + seasonNum + 'e' + epNum;
         item.episodeProgress[key] = !item.episodeProgress[key];
 
-        // Update total episodes count (keep the max we've seen)
         var knownEps = Object.keys(item.episodeProgress).length;
-        if (!item.totalEpisodes || item.totalEpisodes < knownEps) {
-            item.totalEpisodes = knownEps;
-        }
+        if (!item.totalEpisodes || item.totalEpisodes < knownEps) item.totalEpisodes = knownEps;
 
         await save();
 
-        // Update UI without full reload
         var rows = document.querySelectorAll('.episode-row');
         var rowIdx = epNum - 1;
-        if (rows[rowIdx]) {
-            rows[rowIdx].classList.toggle('watched', item.episodeProgress[key]);
-        }
+        if (rows[rowIdx]) rows[rowIdx].classList.toggle('watched', item.episodeProgress[key]);
 
-        // Update progress text
         var episodes = document.querySelectorAll('.episode-row');
         var watchedCount = Array.from(episodes).filter(function(r){ return r.classList.contains('watched'); }).length;
         var progEl = document.querySelector('.ep-season-progress');
@@ -850,9 +1012,7 @@
             var div = document.createElement('div');
             div.className = 'item-card';
             var alreadyInVault = window.mediaList.some(function(m){ return m.tmdbId === item.id; });
-            var btnStyle = alreadyInVault
-                ? 'width:100%;border-radius:0;background:#4caf50;color:#fff;'
-                : 'width:100%;border-radius:0;';
+            var btnStyle = alreadyInVault ? 'width:100%;border-radius:0;background:#4caf50;color:#fff;' : 'width:100%;border-radius:0;';
             var btnText = alreadyInVault ? '✓ IN VAULT' : 'ADD';
             var btnClick = alreadyInVault ? '' : ' onclick=\'addItem(' + JSON.stringify(item).replace(/'/g, "") + ')\'';
             div.innerHTML = '<img class="poster" src="https://image.tmdb.org/t/p/w500' + item.poster_path + '"><div style="padding:10px;font-size:12px;text-align:center;">' + (item.title || item.name) + '</div><button id="add-btn-' + item.id + '" class="btn-main" style="' + btnStyle + '"' + btnClick + (alreadyInVault ? ' disabled' : '') + '>' + btnText + '</button>';
@@ -860,8 +1020,16 @@
         });
     }
 
+    var GENRE_MAP = {
+        28:'Action',12:'Adventure',16:'Animation',35:'Comedy',80:'Crime',
+        99:'Documentary',18:'Drama',10751:'Family',14:'Fantasy',36:'History',
+        27:'Horror',10402:'Music',9648:'Mystery',10749:'Romance',878:'Sci-Fi',
+        53:'Thriller',10752:'War',37:'Western',10759:'Action & Adventure',
+        10762:'Kids',10763:'News',10764:'Reality',10765:'Sci-Fi & Fantasy',
+        10768:'War & Politics'
+    };
+
     window.addItem = async function(item) {
-        // Prevent duplicates
         if (window.mediaList.some(function(m){ return m.tmdbId === item.id; })) return;
         var year = item.release_date ? parseInt(item.release_date) : item.first_air_date ? parseInt(item.first_air_date) : 0;
         var genres = (item.genre_ids || []).map(function(id){ return GENRE_MAP[id]; }).filter(Boolean);
@@ -877,7 +1045,6 @@
             totalEpisodes: 0
         });
         await save();
-        // Mark the button as added but stay on search results
         var btn = document.getElementById('add-btn-' + item.id);
         if (btn) {
             btn.textContent = '✓ ADDED';
@@ -888,80 +1055,52 @@
         }
     };
 
-    var GENRE_MAP = {
-        28:'Action',12:'Adventure',16:'Animation',35:'Comedy',80:'Crime',
-        99:'Documentary',18:'Drama',10751:'Family',14:'Fantasy',36:'History',
-        27:'Horror',10402:'Music',9648:'Mystery',10749:'Romance',878:'Sci-Fi',
-        53:'Thriller',10752:'War',37:'Western',10759:'Action & Adventure',
-        10762:'Kids',10763:'News',10764:'Reality',10765:'Sci-Fi & Fantasy',
-        10768:'War & Politics'
-    };
-
+    // ── SETTINGS / STATS ─────────────────────────────────────────────────────
     function openSettings() {
         var page = document.getElementById('settingsPage');
         page.classList.add('open');
 
-        // TMDB key display
         document.getElementById('tmdbKeyDisplay').textContent = tmdbKey ? tmdbKey.slice(0,4) + '••••' + tmdbKey.slice(-4) : 'NOT SET';
+        document.getElementById('settingsUserDisplay').textContent = currentUser ? currentUser.displayName : '—';
+        document.getElementById('settingsUsernameDisplay').textContent = currentUser ? '@' + currentUser.username : '—';
 
         var list = window.mediaList;
         var total = list.length;
         var movies = list.filter(function(i){ return i.type === 'movie'; }).length;
         var shows  = list.filter(function(i){ return i.type === 'tv'; }).length;
 
-        // Count episodes watched
         var epsWatched = 0;
         list.forEach(function(i) {
-            if (i.episodeProgress) {
-                epsWatched += Object.values(i.episodeProgress).filter(Boolean).length;
-            }
+            if (i.episodeProgress) epsWatched += Object.values(i.episodeProgress).filter(Boolean).length;
         });
 
-        // Status counts
         var watching = list.filter(function(i){ return i.status === 'watching'; }).length;
         var pulse    = list.filter(function(i){ return i.status === 'pulse'; }).length;
         var watched  = list.filter(function(i){ return i.status === 'watched'; }).length;
 
-        // Stat cards
         document.getElementById('statGrid').innerHTML =
-            statCard(total,     'Total Titles') +
-            statCard(movies,    'Movies') +
-            statCard(shows,     'TV Shows') +
-            statCard(epsWatched,'Episodes Watched');
+            statCard(total, 'Total Titles') + statCard(movies, 'Movies') + statCard(shows, 'TV Shows') + statCard(epsWatched, 'Episodes Watched');
 
-        // Status bars
+        var maxStatus = Math.max(watching, pulse, watched, 1);
         var statusData = [
             { label: 'Watchlist', count: watching, color: '#ffcc00' },
             { label: 'Watching',  count: pulse,    color: '#78a9ff' },
             { label: 'Watched',   count: watched,  color: '#4caf50' }
         ];
-        var maxStatus = Math.max(watching, pulse, watched, 1);
         document.getElementById('statusBars').innerHTML = statusData.map(function(s) {
-            return '<div class="status-bar-row">' +
-                '<div class="status-bar-label"><span>' + s.label + '</span><span>' + s.count + '</span></div>' +
-                '<div class="status-bar-track"><div class="status-bar-fill" style="width:' + Math.round((s.count/maxStatus)*100) + '%;background:' + s.color + ';"></div></div>' +
-            '</div>';
+            return '<div class="status-bar-row"><div class="status-bar-label"><span>' + s.label + '</span><span>' + s.count + '</span></div><div class="status-bar-track"><div class="status-bar-fill" style="width:' + Math.round((s.count/maxStatus)*100) + '%;background:' + s.color + ';"></div></div></div>';
         }).join('');
 
-        // Genre chart
         var genreCounts = {};
         list.forEach(function(i) {
-            if (i.genres) {
-                i.genres.forEach(function(g) {
-                    genreCounts[g] = (genreCounts[g] || 0) + 1;
-                });
-            }
+            if (i.genres) i.genres.forEach(function(g) { genreCounts[g] = (genreCounts[g] || 0) + 1; });
         });
         var genreEntries = Object.entries(genreCounts).sort(function(a,b){ return b[1]-a[1]; }).slice(0,8);
         var maxGenre = genreEntries.length ? genreEntries[0][1] : 1;
 
         document.getElementById('genreChart').innerHTML = genreEntries.length
             ? genreEntries.map(function(g) {
-                return '<div class="genre-row">' +
-                    '<div class="genre-name">' + g[0] + '</div>' +
-                    '<div class="genre-track"><div class="genre-fill" style="width:' + Math.round((g[1]/maxGenre)*100) + '%"></div></div>' +
-                    '<div class="genre-count">' + g[1] + '</div>' +
-                '</div>';
+                return '<div class="genre-row"><div class="genre-name">' + g[0] + '</div><div class="genre-track"><div class="genre-fill" style="width:' + Math.round((g[1]/maxGenre)*100) + '%"></div></div><div class="genre-count">' + g[1] + '</div></div>';
             }).join('')
             : '<div style="opacity:0.3;font-size:12px;padding:10px 0;">Genres will appear as you add new titles</div>';
     }
@@ -970,22 +1109,22 @@
         return '<div class="stat-card"><div class="stat-value">' + val + '</div><div class="stat-label">' + label + '</div></div>';
     }
 
-    function closeSettings() {
-        document.getElementById('settingsPage').classList.remove('open');
-    }
+    function closeSettings() { document.getElementById('settingsPage').classList.remove('open'); }
 
     function changeTmdbKey() {
         var k = prompt("TMDB Key:", tmdbKey);
         if (k) { tmdbKey = k; localStorage.setItem('tmdbKey', k); location.reload(); }
     }
 
-    function exitSearch()   { isSearch = false; document.getElementById('backBtn').style.display = 'none'; render(); }
+    function exitSearch() { isSearch = false; document.getElementById('backBtn').style.display = 'none'; render(); }
+
     function setFilter(f, btn) {
         currentFilter = f;
         document.querySelectorAll('.nav-item').forEach(function(b){ b.classList.remove('active'); });
         btn.classList.add('active');
         render();
     }
+
     function randomize() {
         var available = window.mediaList.filter(function(item){ return currentFilter === 'all' || item.status === currentFilter; });
         if (available.length) openDetail(window.mediaList.indexOf(available[Math.floor(Math.random() * available.length)]));
