@@ -107,7 +107,7 @@
         
         input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important; }
 
-        /* Liquid Glass Scroll Top Button FIX */
+        /* LIQUID GLASS SCROLL BUTTON - CENTERED FOR ANDROID */
         #scrollTopBtn {
             position: fixed;
             bottom: calc(90px + var(--safe-bottom));
@@ -120,9 +120,8 @@
             border: 1px solid rgba(120, 169, 255, 0.4);
             color: var(--glow);
             border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: grid;
+            place-items: center; /* Stronger centering for Android */
             z-index: 4000;
             opacity: 0;
             pointer-events: none;
@@ -131,7 +130,13 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 0 10px rgba(120, 169, 255, 0.2);
         }
         
-        #scrollTopBtn svg { width: 24px; height: 24px; fill: currentColor; }
+        #scrollTopBtn svg { 
+            width: 32px; 
+            height: 32px; 
+            fill: currentColor; 
+            /* Manually nudging the arrow up slightly to compensate for Android padding quirks */
+            transform: translateY(-2px); 
+        }
         
         #scrollTopBtn.visible { 
             opacity: 1; 
