@@ -268,6 +268,78 @@
             font-size: 11px; font-weight: 800; letter-spacing: 3px;
             opacity: 0.4; text-transform: uppercase; margin-bottom: 12px;
         }
+
+        /* ── SETTINGS / STATS PAGE ───────────────────────────────────────── */
+        #settingsPage {
+            position: fixed; inset: 0;
+            background: #050a15;
+            z-index: 8000;
+            transform: translateX(100%);
+            transition: transform 0.4s var(--glide);
+            display: flex; flex-direction: column;
+            padding-top: var(--safe-top);
+        }
+        #settingsPage.open { transform: translateX(0); }
+
+        .settings-scroll {
+            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            padding: 20px 20px 60px;
+        }
+
+        .settings-header {
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 28px; padding-top: 8px;
+        }
+
+        .stat-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 12px; margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 20px; padding: 18px;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .stat-value { font-size: 2em; font-weight: 800; color: var(--glow); line-height: 1; }
+        .stat-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; opacity: 0.4; text-transform: uppercase; }
+
+        .status-bar-row { margin-bottom: 14px; }
+        .status-bar-label {
+            display: flex; justify-content: space-between;
+            font-size: 11px; font-weight: 700; letter-spacing: 1px;
+            text-transform: uppercase; margin-bottom: 6px; opacity: 0.7;
+        }
+        .status-bar-track {
+            height: 6px; border-radius: 3px;
+            background: rgba(255,255,255,0.08); overflow: hidden;
+        }
+        .status-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s var(--glide); }
+
+        .genre-row {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 10px;
+        }
+        .genre-name { font-size: 12px; font-weight: 600; width: 110px; flex-shrink: 0; opacity: 0.8; }
+        .genre-track {
+            flex: 1; height: 5px; border-radius: 3px;
+            background: rgba(255,255,255,0.08); overflow: hidden;
+        }
+        .genre-fill { height: 100%; border-radius: 3px; background: var(--glow); }
+        .genre-count { font-size: 11px; opacity: 0.4; width: 24px; text-align: right; flex-shrink: 0; }
+
+        .settings-section {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 20px; padding: 18px; margin-bottom: 16px;
+        }
+        .settings-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 4px 0;
+        }
+        .settings-row-label { font-size: 13px; opacity: 0.8; }
+        .settings-row-value { font-size: 12px; opacity: 0.4; font-family: monospace; }
     </style>
 </head>
 <body>
@@ -320,6 +392,36 @@
             <div class="detail-overview" id="detailOverview"></div>
             <div class="detail-actions" id="detailActions"></div>
             <div id="detailTracker"></div>
+        </div>
+    </div>
+</div>
+
+<!-- SETTINGS / STATS PAGE -->
+<div id="settingsPage">
+    <div class="settings-scroll">
+        <div class="settings-header">
+            <div class="detail-back" style="position:relative;top:auto;left:auto;flex-shrink:0;" onclick="closeSettings()"><div class="detail-back-icon"></div></div>
+            <h2 style="margin:0;font-size:1.3em;letter-spacing:4px;font-weight:300;opacity:0.8;">SYSTEM</h2>
+        </div>
+
+        <!-- Stats -->
+        <div class="section-title">VAULT STATS</div>
+        <div class="stat-grid" id="statGrid"></div>
+
+        <div class="section-title">STATUS BREAKDOWN</div>
+        <div id="statusBars" style="margin-bottom:24px;"></div>
+
+        <div class="section-title">TOP GENRES</div>
+        <div id="genreChart" style="margin-bottom:28px;"></div>
+
+        <!-- Settings -->
+        <div class="section-title">CONFIGURATION</div>
+        <div class="settings-section">
+            <div class="settings-row">
+                <span class="settings-row-label">TMDB API Key</span>
+                <span class="settings-row-value" id="tmdbKeyDisplay">••••••••</span>
+            </div>
+            <button class="btn-main" style="width:100%;margin-top:14px;font-size:12px;letter-spacing:2px;" onclick="changeTmdbKey()">CHANGE KEY</button>
         </div>
     </div>
 </div>
@@ -754,6 +856,7 @@
 
     window.addItem = async function(item) {
         var year = item.release_date ? parseInt(item.release_date) : item.first_air_date ? parseInt(item.first_air_date) : 0;
+        var genres = (item.genre_ids || []).map(function(id){ return GENRE_MAP[id]; }).filter(Boolean);
         window.mediaList.unshift({
             name: item.title || item.name,
             status: 'watching',
@@ -761,15 +864,105 @@
             type: item.media_type,
             tmdbId: item.id,
             year: year,
+            genres: genres,
             episodeProgress: {},
             totalEpisodes: 0
         });
         await save(); exitSearch();
     };
 
+    var GENRE_MAP = {
+        28:'Action',12:'Adventure',16:'Animation',35:'Comedy',80:'Crime',
+        99:'Documentary',18:'Drama',10751:'Family',14:'Fantasy',36:'History',
+        27:'Horror',10402:'Music',9648:'Mystery',10749:'Romance',878:'Sci-Fi',
+        53:'Thriller',10752:'War',37:'Western',10759:'Action & Adventure',
+        10762:'Kids',10763:'News',10764:'Reality',10765:'Sci-Fi & Fantasy',
+        10768:'War & Politics'
+    };
+
+    function openSettings() {
+        var page = document.getElementById('settingsPage');
+        page.classList.add('open');
+
+        // TMDB key display
+        document.getElementById('tmdbKeyDisplay').textContent = tmdbKey ? tmdbKey.slice(0,4) + '••••' + tmdbKey.slice(-4) : 'NOT SET';
+
+        var list = window.mediaList;
+        var total = list.length;
+        var movies = list.filter(function(i){ return i.type === 'movie'; }).length;
+        var shows  = list.filter(function(i){ return i.type === 'tv'; }).length;
+
+        // Count episodes watched
+        var epsWatched = 0;
+        list.forEach(function(i) {
+            if (i.episodeProgress) {
+                epsWatched += Object.values(i.episodeProgress).filter(Boolean).length;
+            }
+        });
+
+        // Status counts
+        var watching = list.filter(function(i){ return i.status === 'watching'; }).length;
+        var pulse    = list.filter(function(i){ return i.status === 'pulse'; }).length;
+        var watched  = list.filter(function(i){ return i.status === 'watched'; }).length;
+
+        // Stat cards
+        document.getElementById('statGrid').innerHTML =
+            statCard(total,     'Total Titles') +
+            statCard(movies,    'Movies') +
+            statCard(shows,     'TV Shows') +
+            statCard(epsWatched,'Episodes Watched');
+
+        // Status bars
+        var statusData = [
+            { label: 'Watchlist', count: watching, color: '#ffcc00' },
+            { label: 'Watching',  count: pulse,    color: '#78a9ff' },
+            { label: 'Watched',   count: watched,  color: '#4caf50' }
+        ];
+        var maxStatus = Math.max(watching, pulse, watched, 1);
+        document.getElementById('statusBars').innerHTML = statusData.map(function(s) {
+            return '<div class="status-bar-row">' +
+                '<div class="status-bar-label"><span>' + s.label + '</span><span>' + s.count + '</span></div>' +
+                '<div class="status-bar-track"><div class="status-bar-fill" style="width:' + Math.round((s.count/maxStatus)*100) + '%;background:' + s.color + ';"></div></div>' +
+            '</div>';
+        }).join('');
+
+        // Genre chart
+        var genreCounts = {};
+        list.forEach(function(i) {
+            if (i.genres) {
+                i.genres.forEach(function(g) {
+                    genreCounts[g] = (genreCounts[g] || 0) + 1;
+                });
+            }
+        });
+        var genreEntries = Object.entries(genreCounts).sort(function(a,b){ return b[1]-a[1]; }).slice(0,8);
+        var maxGenre = genreEntries.length ? genreEntries[0][1] : 1;
+
+        document.getElementById('genreChart').innerHTML = genreEntries.length
+            ? genreEntries.map(function(g) {
+                return '<div class="genre-row">' +
+                    '<div class="genre-name">' + g[0] + '</div>' +
+                    '<div class="genre-track"><div class="genre-fill" style="width:' + Math.round((g[1]/maxGenre)*100) + '%"></div></div>' +
+                    '<div class="genre-count">' + g[1] + '</div>' +
+                '</div>';
+            }).join('')
+            : '<div style="opacity:0.3;font-size:12px;padding:10px 0;">Genres will appear as you add new titles</div>';
+    }
+
+    function statCard(val, label) {
+        return '<div class="stat-card"><div class="stat-value">' + val + '</div><div class="stat-label">' + label + '</div></div>';
+    }
+
+    function closeSettings() {
+        document.getElementById('settingsPage').classList.remove('open');
+    }
+
+    function changeTmdbKey() {
+        var k = prompt("TMDB Key:", tmdbKey);
+        if (k) { tmdbKey = k; localStorage.setItem('tmdbKey', k); location.reload(); }
+    }
+
     function exitSearch()   { isSearch = false; document.getElementById('backBtn').style.display = 'none'; render(); }
-    function closeModal()   { document.getElementById('modal') && document.getElementById('modal').classList.remove('active'); }
-    function openSettings() { var k = prompt("TMDB Key:", tmdbKey); if (k) { tmdbKey = k; localStorage.setItem('tmdbKey', k); location.reload(); } }
     function setFilter(f, btn) {
         currentFilter = f;
         document.querySelectorAll('.nav-item').forEach(function(b){ b.classList.remove('active'); });
