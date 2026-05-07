@@ -526,7 +526,6 @@
     var currentDetailIdx = null;
     var currentSeason    = 1;
     var currentUser      = null;  // { username, displayName }
-    var unsubscribe      = null;  // Firebase listener
 
     // ── LOGIN SYSTEM ─────────────────────────────────────────────────────────
     var loginMode = 'signin'; // 'signin' or 'signup'
@@ -644,26 +643,37 @@
         var cache = localStorage.getItem('v_cache_' + currentUser.username);
         if (cache) { window.mediaList = JSON.parse(cache); render(); }
 
-        // Listen for live updates
-        if (unsubscribe) unsubscribe();
-        unsubscribe = window.fLib.onSnapshot(window.fLib.doc(window.db, "archives", docId), function(snap) {
-            if (isSaving) return; // Don't overwrite local data during a save
+    async function startApp() {
+        var docId = 'user_' + currentUser.username;
+
+        // Load from cache immediately
+        var cache = localStorage.getItem('v_cache_' + currentUser.username);
+        if (cache) { window.mediaList = JSON.parse(cache); render(); }
+
+        // Fetch latest from Firebase once
+        try {
+            var snap = await window.fLib.getDoc(window.fLib.doc(window.db, "archives", docId));
             if (snap.exists()) {
                 var data = snap.data();
-                window.mediaList = data.list || [];
                 if (data.tmdbKey) {
                     tmdbKey = data.tmdbKey;
                     localStorage.setItem('tmdbKey', tmdbKey);
                 }
-                localStorage.setItem('v_cache_' + currentUser.username, JSON.stringify(window.mediaList));
-                render();
+                // Only accept server data if we don't have local data,
+                // or server has same/more items (not stale)
+                if (!cache || (data.list && data.list.length >= window.mediaList.length)) {
+                    window.mediaList = data.list || [];
+                    localStorage.setItem('v_cache_' + currentUser.username, JSON.stringify(window.mediaList));
+                    render();
+                }
             }
-        });
+        } catch(err) {
+            // Offline — cache is fine
+        }
     }
 
     window.logout = function() {
         if (!confirm('Log out of ' + currentUser.displayName + '?')) return;
-        if (unsubscribe) { unsubscribe(); unsubscribe = null; }
         currentUser = null;
         window.mediaList = [];
         document.getElementById('mainGrid').innerHTML = '';
@@ -674,11 +684,8 @@
     };
 
     // ── SAVE (per-user) ──────────────────────────────────────────────────────
-    var isSaving = false;
-
     async function save() {
         if (!currentUser) return;
-        isSaving = true;
         var docId = 'user_' + currentUser.username;
         localStorage.setItem('v_cache_' + currentUser.username, JSON.stringify(window.mediaList));
         try {
@@ -688,7 +695,6 @@
         } catch(err) {
             // Write failed but local cache is saved
         }
-        isSaving = false;
     }
 
     // ── SCROLL / HELPERS ─────────────────────────────────────────────────────
