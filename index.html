@@ -32,14 +32,24 @@
             height: 100%; display: flex; flex-direction: column;
             padding-top: var(--safe-top);
             padding-bottom: calc(75px + var(--safe-bottom));
+            overflow: hidden;
         }
 
-        .scroll-view { flex: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+        .scroll-view { 
+            flex: 1; overflow-y: auto; overflow-x: hidden;
+            padding: 15px; 
+            -webkit-overflow-scrolling: touch; 
+            scroll-behavior: smooth; 
+            /* Ensure partial rows at edges aren't clipped by the container */
+            scroll-padding: 15px;
+        }
 
         .media-grid {
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 15px; width: 100%;
+            overflow: visible;
+            padding-bottom: 20px;
         }
 
         .header-card { background: var(--glass); backdrop-filter: blur(40px); border: 1px solid var(--border); border-radius: 28px; padding: 20px; margin-bottom: 20px; }
@@ -316,7 +326,7 @@
         let startX = 0, startY = 0, currentX = 0, totalDY = 0;
         let isDragging = false, isHorizontal = null;
         const OPEN_THRESHOLD  = 80;   // px to commit to open
-        const CLOSE_THRESHOLD = 40;   // px to commit to close when open
+        const CLOSE_THRESHOLD = 10;   // any rightward nudge closes it
         // Measured lazily after card is in the DOM
         let trayOpenX = null;
         const getTrayOpenX = () => {
@@ -370,9 +380,9 @@
 
                 if (openCardIdx === idx) {
                     snapClose(idx);
-                } else {
-                    openItem(idx);
+                    return;
                 }
+                openItem(idx);
                 return;
             }
 
