@@ -638,6 +638,11 @@
             if (snap.exists()) {
                 var data = snap.data();
                 window.mediaList = data.list || [];
+                // Load TMDB key from user's Firebase data
+                if (data.tmdbKey) {
+                    tmdbKey = data.tmdbKey;
+                    localStorage.setItem('tmdbKey', tmdbKey);
+                }
                 localStorage.setItem('v_cache_' + currentUser.username, JSON.stringify(window.mediaList));
                 render();
             }
@@ -1156,9 +1161,18 @@
 
     function closeSettings() { document.getElementById('settingsPage').classList.remove('open'); }
 
-    function changeTmdbKey() {
+    async function changeTmdbKey() {
         var k = prompt("TMDB Key:", tmdbKey);
-        if (k) { tmdbKey = k; localStorage.setItem('tmdbKey', k); location.reload(); }
+        if (k) {
+            tmdbKey = k;
+            localStorage.setItem('tmdbKey', k);
+            // Save to Firebase so it persists across devices/updates
+            if (currentUser) {
+                var docId = 'user_' + currentUser.username;
+                await window.fLib.setDoc(window.fLib.doc(window.db, "archives", docId), { tmdbKey: k }, { merge: true });
+            }
+            document.getElementById('tmdbKeyDisplay').textContent = k.slice(0,4) + '••••' + k.slice(-4);
+        }
     }
 
     function exitSearch() { isSearch = false; document.getElementById('backBtn').style.display = 'none'; render(); }
