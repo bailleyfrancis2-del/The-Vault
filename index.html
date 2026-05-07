@@ -267,37 +267,36 @@
 
         filtered.forEach(function(e) {
             var item = e.item, idx = e.idx;
-            if ((currentFilter === 'all' || item.status === currentFilter) && item.name.toLowerCase().includes(query)) {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'swipe-wrapper';
+            const wrapper = document.createElement('div');
+            wrapper.className = 'swipe-wrapper';
 
-                const statusColor = item.status === 'watching' ? '#ffcc00' : item.status === 'pulse' ? '#78a9ff' : '#4caf50';
+            const statusColor = item.status === 'watching' ? '#ffcc00' : item.status === 'pulse' ? '#78a9ff' : '#4caf50';
 
-                wrapper.innerHTML =
-                    '<div class="action-tray">' +
-                        '<div class="tray-grid">' +
-                            '<button class="tray-btn" style="background:#ff4444;" onclick="trayAction(' + idx + ',\'delete\')">' +
-                                '<div class="tray-icon" style="-webkit-mask-image:url(\'https://api.iconify.design/ph:trash-bold.svg\');mask-image:url(\'https://api.iconify.design/ph:trash-bold.svg\');background:#fff;"></div>DEL' +
-                            '</button>' +
-                            '<button class="tray-btn" style="background:#ffcc00;" onclick="trayAction(' + idx + ',\'watching\')">' +
-                                '<div class="tray-icon" style="-webkit-mask-image:url(\'https://api.iconify.design/ph:clock-bold.svg\');mask-image:url(\'https://api.iconify.design/ph:clock-bold.svg\');background:#000;"></div>' +
-                                '<span style="color:#000">WATCH</span>' +
-                            '</button>' +
-                            '<button class="tray-btn" style="background:#78a9ff;" onclick="trayAction(' + idx + ',\'pulse\')">' +
-                                '<div class="tray-icon" style="-webkit-mask-image:url(\'https://api.iconify.design/ph:activity-bold.svg\');mask-image:url(\'https://api.iconify.design/ph:activity-bold.svg\');background:#000;"></div>' +
-                                '<span style="color:#000">PULSE</span>' +
-                            '</button>' +
-                            '<button class="tray-btn" style="background:#4caf50;" onclick="trayAction(' + idx + ',\'watched\')">' +
-                                '<div class="tray-icon" style="-webkit-mask-image:url(\'https://api.iconify.design/ph:check-bold.svg\');mask-image:url(\'https://api.iconify.design/ph:check-bold.svg\');background:#fff;"></div>DONE' +
-                            '</button>' +
-                        '</div>' +
+            wrapper.innerHTML =
+                '<div class="action-tray">' +
+                    '<div class="tray-grid">' +
+                        '<button class="tray-btn" style="background:#ff4444;" onclick="trayAction(' + idx + ',\'delete\')">' +
+                            '<div class="tray-icon" style="-webkit-mask-image:url(\'https://api.iconify.design/ph:trash-bold.svg\');mask-image:url(\'https://api.iconify.design/ph:trash-bold.svg\');background:#fff;"></div>DEL' +
+                        '</button>' +
+                        '<button class="tray-btn" style="background:#ffcc00;" onclick="trayAction(' + idx + ',\'watching\')">' +
+                            '<div class="tray-icon" style="-webkit-mask-image:url(\'https://api.iconify.design/ph:clock-bold.svg\');mask-image:url(\'https://api.iconify.design/ph:clock-bold.svg\');background:#000;"></div>' +
+                            '<span style="color:#000">WATCH</span>' +
+                        '</button>' +
+                        '<button class="tray-btn" style="background:#78a9ff;" onclick="trayAction(' + idx + ',\'pulse\')">' +
+                            '<div class="tray-icon" style="-webkit-mask-image:url(\'https://api.iconify.design/ph:activity-bold.svg\');mask-image:url(\'https://api.iconify.design/ph:activity-bold.svg\');background:#000;"></div>' +
+                            '<span style="color:#000">PULSE</span>' +
+                        '</button>' +
+                        '<button class="tray-btn" style="background:#4caf50;" onclick="trayAction(' + idx + ',\'watched\')">' +
+                            '<div class="tray-icon" style="-webkit-mask-image:url(\'https://api.iconify.design/ph:check-bold.svg\');mask-image:url(\'https://api.iconify.design/ph:check-bold.svg\');background:#fff;"></div>DONE' +
+                        '</button>' +
                     '</div>' +
-                    '<div class="item-card" id="card-' + idx + '">' +
-                        '<div class="status-badge" style="color:' + statusColor + ';background:currentColor"></div>' +
-                        '<img class="poster" src="' + item.poster + '">' +
-                    '</div>';
+                '</div>' +
+                '<div class="item-card" id="card-' + idx + '">' +
+                    '<div class="status-badge" style="color:' + statusColor + ';background:currentColor"></div>' +
+                    '<img class="poster" src="' + item.poster + '">' +
+                '</div>';
 
-                grid.appendChild(wrapper);
+            grid.appendChild(wrapper);
         });
     }
 
