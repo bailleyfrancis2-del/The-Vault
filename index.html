@@ -305,6 +305,19 @@
         .ep-season-progress { font-size: 11px; opacity: 0.4; font-weight: 600; margin-bottom: 10px; letter-spacing: 1px; }
         .section-title { font-size: 11px; font-weight: 800; letter-spacing: 3px; opacity: 0.4; text-transform: uppercase; margin-bottom: 12px; }
 
+        .provider-section { margin-bottom: 20px; }
+        .provider-row {
+            display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;
+        }
+        .provider-logo {
+            width: 44px; height: 44px; border-radius: 12px;
+            object-fit: cover; border: 1px solid var(--border);
+        }
+        .provider-label {
+            font-size: 10px; font-weight: 700; letter-spacing: 1px;
+            opacity: 0.35; text-transform: uppercase; margin-bottom: 8px;
+        }
+
         /* Settings/Stats page */
         #settingsPage {
             position: fixed; inset: 0; background: #050a15;
@@ -433,6 +446,7 @@
             <div class="detail-meta" id="detailMeta"></div>
             <div class="detail-overview" id="detailOverview"></div>
             <div class="detail-actions" id="detailActions"></div>
+            <div id="detailProviders"></div>
             <div id="detailTracker"></div>
         </div>
     </div>
@@ -850,6 +864,7 @@
         document.getElementById('detailMeta').textContent = 'LOADING...';
         document.getElementById('detailOverview').textContent = '';
         document.getElementById('detailActions').innerHTML = '';
+        document.getElementById('detailProviders').innerHTML = '';
         document.getElementById('detailTracker').innerHTML = '<div style="text-align:center;padding:30px;opacity:0.4;font-size:13px;letter-spacing:2px;">LOADING INTEL...</div>';
 
         page.classList.add('open');
@@ -871,6 +886,9 @@
             actionsHTML += '<a href="https://imdb.com/title/' + (imdbId || 'find?q=' + item.name) + '" target="_blank" style="background:#f5c518;color:#000;">IMDb</a>';
             document.getElementById('detailActions').innerHTML = actionsHTML;
 
+            // Fetch streaming providers
+            loadProviders(item.type, item.tmdbId);
+
             if (item.type === 'movie') {
                 renderMovieTracker(idx, item);
             } else {
@@ -887,6 +905,45 @@
         document.getElementById('detailPage').classList.remove('open');
         currentDetailIdx = null;
         render();
+    }
+
+    async function loadProviders(type, tmdbId) {
+        var container = document.getElementById('detailProviders');
+        try {
+            var res  = await fetch('https://api.themoviedb.org/3/' + type + '/' + tmdbId + '/watch/providers?api_key=' + tmdbKey);
+            var data = await res.json();
+            var region = data.results && data.results.AU;
+            if (!region) {
+                container.innerHTML = '';
+                return;
+            }
+
+            var html = '<div class="provider-section"><div class="section-title">WHERE TO WATCH</div>';
+
+            var sections = [
+                { key: 'flatrate', label: 'Stream' },
+                { key: 'rent',     label: 'Rent' },
+                { key: 'buy',      label: 'Buy' }
+            ];
+
+            var hasAny = false;
+            sections.forEach(function(s) {
+                var providers = region[s.key];
+                if (providers && providers.length) {
+                    hasAny = true;
+                    html += '<div class="provider-label">' + s.label + '</div><div class="provider-row">';
+                    providers.forEach(function(p) {
+                        html += '<img class="provider-logo" src="https://image.tmdb.org/t/p/w92' + p.logo_path + '" alt="' + p.provider_name + '" title="' + p.provider_name + '">';
+                    });
+                    html += '</div>';
+                }
+            });
+
+            html += '</div>';
+            container.innerHTML = hasAny ? html : '';
+        } catch(err) {
+            container.innerHTML = '';
+        }
     }
 
     function renderMovieTracker(idx, item) {
