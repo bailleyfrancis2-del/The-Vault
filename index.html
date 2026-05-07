@@ -647,10 +647,10 @@
         // Listen for live updates
         if (unsubscribe) unsubscribe();
         unsubscribe = window.fLib.onSnapshot(window.fLib.doc(window.db, "archives", docId), function(snap) {
+            if (isSaving) return; // Don't overwrite local data during a save
             if (snap.exists()) {
                 var data = snap.data();
                 window.mediaList = data.list || [];
-                // Load TMDB key from user's Firebase data
                 if (data.tmdbKey) {
                     tmdbKey = data.tmdbKey;
                     localStorage.setItem('tmdbKey', tmdbKey);
@@ -674,14 +674,21 @@
     };
 
     // ── SAVE (per-user) ──────────────────────────────────────────────────────
+    var isSaving = false;
+
     async function save() {
         if (!currentUser) return;
+        isSaving = true;
         var docId = 'user_' + currentUser.username;
         localStorage.setItem('v_cache_' + currentUser.username, JSON.stringify(window.mediaList));
-        await window.fLib.setDoc(window.fLib.doc(window.db, "archives", docId), {
-            pin: undefined, // don't overwrite pin
-            list: window.mediaList
-        }, { merge: true });
+        try {
+            await window.fLib.setDoc(window.fLib.doc(window.db, "archives", docId), {
+                list: window.mediaList
+            }, { merge: true });
+        } catch(err) {
+            // Write failed but local cache is saved
+        }
+        isSaving = false;
     }
 
     // ── SCROLL / HELPERS ─────────────────────────────────────────────────────
@@ -861,11 +868,13 @@
         if (action === 'delete') {
             if (confirm('Erase from Vault?')) {
                 window.mediaList.splice(idx, 1);
-                await save(); render();
+                render();
+                await save();
             }
         } else {
             window.mediaList[idx].status = action;
-            await save(); render();
+            render();
+            await save();
         }
     };
 
@@ -1097,13 +1106,13 @@
             btn.disabled = alreadyInVault;
 
             if (!alreadyInVault) {
-                btn.addEventListener('click', function(e) {
+                btn.addEventListener('click', async function(e) {
                     e.stopPropagation();
                     btn.textContent = '✓ ADDED';
                     btn.style.background = '#4caf50';
                     btn.style.color = '#fff';
                     btn.disabled = true;
-                    window.addItem(searchResults[i]);
+                    await window.addItem(searchResults[i]);
                 });
                 btn.addEventListener('touchend', function(e) {
                     e.stopPropagation();
