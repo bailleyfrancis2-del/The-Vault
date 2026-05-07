@@ -157,7 +157,15 @@
                 <input type="text" id="showInput" placeholder="Initialize..." onkeydown="if(event.key==='Enter') performSearch()">
                 <button class="btn-main" onclick="performSearch()">ENGAGE</button>
             </div>
-            <input type="text" id="filterInput" style="width:100%;height:45px;" placeholder="Search Archive..." onkeyup="render()">
+            <div style="display:flex;gap:10px;margin-bottom:12px;">
+                <input type="text" id="filterInput" style="flex:1;height:45px;" placeholder="Search Archive..." onkeyup="render()">
+                <select id="sortPicker" onchange="render()" style="background:rgba(0,0,0,0.6);border:1px solid var(--border);color:#fff;padding:0 12px;border-radius:16px;font-size:13px;font-weight:700;letter-spacing:1px;appearance:none;-webkit-appearance:none;cursor:pointer;min-width:100px;text-align:center;">
+                    <option value="added">RECENT</option>
+                    <option value="alpha">A – Z</option>
+                    <option value="year">YEAR</option>
+                    <option value="type">TYPE</option>
+                </select>
+            </div>
             <button class="btn-rand" onclick="randomize()">RANDOMIZE MISSION</button>
         </div>
         <button id="backBtn" class="btn-main" style="display:none;width:100%;margin-bottom:20px;padding:18px;" onclick="exitSearch()">← BACK TO VAULT</button>
@@ -242,10 +250,23 @@
         if (isSearch) return;
         const grid  = document.getElementById('mainGrid');
         const query = document.getElementById('filterInput').value.toLowerCase();
+        const sort  = document.getElementById('sortPicker').value;
         grid.innerHTML = '';
         openCardIdx = null;
 
-        window.mediaList.forEach(function(item, idx) {
+        var filtered = window.mediaList.map(function(item, idx) { return { item: item, idx: idx }; }).filter(function(e) {
+            return (currentFilter === 'all' || e.item.status === currentFilter) && e.item.name.toLowerCase().includes(query);
+        });
+
+        filtered.sort(function(a, b) {
+            if (sort === 'alpha') return a.item.name.localeCompare(b.item.name);
+            if (sort === 'year')  return (b.item.year || 0) - (a.item.year || 0);
+            if (sort === 'type')  return (a.item.type || '').localeCompare(b.item.type || '');
+            return a.idx - b.idx; // 'added' — preserve insertion order (unshift = newest first)
+        });
+
+        filtered.forEach(function(e) {
+            var item = e.item, idx = e.idx;
             if ((currentFilter === 'all' || item.status === currentFilter) && item.name.toLowerCase().includes(query)) {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'swipe-wrapper';
@@ -277,7 +298,6 @@
                     '</div>';
 
                 grid.appendChild(wrapper);
-            }
         });
     }
 
@@ -432,7 +452,8 @@
     }
 
     window.addItem = function(item) {
-        window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: 'https://image.tmdb.org/t/p/w500' + item.poster_path, type: item.media_type, tmdbId: item.id });
+        var year = item.release_date ? parseInt(item.release_date) : item.first_air_date ? parseInt(item.first_air_date) : 0;
+        window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: 'https://image.tmdb.org/t/p/w500' + item.poster_path, type: item.media_type, tmdbId: item.id, year: year });
         save(); exitSearch();
     };
 
