@@ -198,6 +198,7 @@
             
             const trailer = data.videos?.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
             const imdbId = data.imdb_id || data.external_ids?.imdb_id;
+            const fallbackLink = `https://www.imdb.com/find?q=${encodeURIComponent(item.name)}`;
             
             body.innerHTML = `
                 <div style="display:flex; flex-direction:column; align-items:center; text-align:center;">
@@ -207,7 +208,7 @@
                     
                     <div class="intel-row">
                         ${trailer ? `<a href="https://www.youtube.com/watch?v=${trailer.key}" target="_blank" class="btn-intel btn-trailer">TRAILER</a>` : ''}
-                        ${imdbId ? `<a href="https://www.imdb.com/title/${imdbId}" target="_blank" class="btn-intel btn-imdb">IMDb</a>` : ''}
+                        <a href="${imdbId ? `https://www.imdb.com/title/${imdbId}` : fallbackLink}" target="_blank" class="btn-intel btn-imdb">IMDb</a>
                     </div>
 
                     <button class="btn-main" style="background:rgba(255, 68, 68, 0.1); color:#ff4444; border:1px solid rgba(255, 68, 68, 0.3); width:100%;" onclick="deleteItem(${idx})">ERASE RECORD</button>
