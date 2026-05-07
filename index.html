@@ -88,19 +88,20 @@
 
         .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; }
         
-        /* Updated Yellow Randomize Button */
+        /* YELLOW RANDOMIZE BUTTON */
         .btn-rand { 
-            background: rgba(255, 204, 0, 0.1); 
+            background: rgba(255, 204, 0, 0.25); 
             color: var(--accent); 
-            border: 1px solid rgba(255, 204, 0, 0.4); 
+            border: 1px solid var(--accent); 
             width: 100%; 
             margin-top: 10px; 
-            padding: 10px; 
+            padding: 12px; 
             font-size: 12px; 
             letter-spacing: 2px; 
             border-radius: 14px;
             font-weight: bold;
             cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.1);
         }
         
         input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important; }
@@ -117,7 +118,7 @@
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid rgba(120, 169, 255, 0.4);
             color: var(--glow);
-            border-radius: 18px; /* Squircle shape for more 'liquid' feel */
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -207,7 +208,6 @@
     let currentFilter = 'all';
     let isSearch = false;
 
-    // Scroll Logic
     const scrollArea = document.getElementById('mainScroll');
     const scrollBtn = document.getElementById('scrollTopBtn');
     scrollArea.onscroll = () => {
@@ -281,7 +281,7 @@
                     <p style="font-size:0.9em; line-height:1.6; opacity:0.7; margin:15px 0;">${data.overview || 'Summary unavailable.'}</p>
                     
                     <div class="intel-row">
-                        ${trailer ? `<a href="http://googleusercontent.com/youtube.com/4{trailer.key}" target="_blank" class="btn-intel btn-trailer">TRAILER</a>` : ''}
+                        ${trailer ? `<a href="https://www.youtube.com/watch?v=${trailer.key}" target="_blank" class="btn-intel btn-trailer">TRAILER</a>` : ''}
                         <a href="${imdbId ? `https://www.imdb.com/title/${imdbId}` : fallbackLink}" target="_blank" class="btn-intel btn-imdb">IMDb</a>
                     </div>
 
