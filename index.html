@@ -91,29 +91,29 @@
         
         input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important; }
 
-        /* Liquid Glass Scroll Top Button */
+        /* LIQUID GLASS SCROLL BUTTON */
         #scrollTopBtn {
             position: fixed;
             bottom: calc(90px + var(--safe-bottom));
             right: 20px;
-            width: 50px;
-            height: 50px;
-            background: rgba(120, 169, 255, 0.1);
-            backdrop-filter: blur(15px) saturate(180%);
-            -webkit-backdrop-filter: blur(15px) saturate(180%);
-            border: 1px solid rgba(120, 169, 255, 0.3);
+            width: 55px;
+            height: 55px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(120, 169, 255, 0.4);
             color: var(--glow);
-            border-radius: 50%;
+            border-radius: 18px; /* Squircle shape for more 'liquid' feel */
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 28px;
             z-index: 4000;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.4s var(--glide), transform 0.4s var(--glide);
-            transform: translateY(20px) scale(0.8);
-            box-shadow: 0 4px 15px rgba(120, 169, 255, 0.1);
+            transition: all 0.5s var(--glide);
+            transform: translateY(30px) scale(0.7);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 0 10px rgba(120, 169, 255, 0.2);
         }
         #scrollTopBtn.visible { 
             opacity: 1; 
@@ -267,7 +267,7 @@
                     <p style="font-size:0.9em; line-height:1.6; opacity:0.7; margin:15px 0;">${data.overview || 'Summary unavailable.'}</p>
                     
                     <div class="intel-row">
-                        ${trailer ? `<a href="https://youtube.com/watch?v=${trailer.key}" target="_blank" class="btn-intel btn-trailer">TRAILER</a>` : ''}
+                        ${trailer ? `<a href="http://googleusercontent.com/youtube.com/4{trailer.key}" target="_blank" class="btn-intel btn-trailer">TRAILER</a>` : ''}
                         <a href="${imdbId ? `https://www.imdb.com/title/${imdbId}` : fallbackLink}" target="_blank" class="btn-intel btn-imdb">IMDb</a>
                     </div>
 
