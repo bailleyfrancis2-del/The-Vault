@@ -849,7 +849,7 @@
         data.results.filter(function(i){ return i.poster_path; }).forEach(function(item) {
             var div = document.createElement('div');
             div.className = 'item-card';
-            div.innerHTML = '<img class="poster" src="https://image.tmdb.org/t/p/w500' + item.poster_path + '"><div style="padding:10px;font-size:12px;text-align:center;">' + (item.title || item.name) + '</div><button class="btn-main" style="width:100%;border-radius:0;" onclick=\'addItem(' + JSON.stringify(item).replace(/'/g, "") + ')\'>ADD</button>';
+            div.innerHTML = '<img class="poster" src="https://image.tmdb.org/t/p/w500' + item.poster_path + '"><div style="padding:10px;font-size:12px;text-align:center;">' + (item.title || item.name) + '</div><button id="add-btn-' + item.id + '" class="btn-main" style="width:100%;border-radius:0;" onclick=\'addItem(' + JSON.stringify(item).replace(/'/g, "") + ')\'>ADD</button>';
             grid.appendChild(div);
         });
     }
@@ -868,7 +868,16 @@
             episodeProgress: {},
             totalEpisodes: 0
         });
-        await save(); exitSearch();
+        await save();
+        // Mark the button as added but stay on search results
+        var btn = document.getElementById('add-btn-' + item.id);
+        if (btn) {
+            btn.textContent = '✓ ADDED';
+            btn.style.background = '#4caf50';
+            btn.style.color = '#fff';
+            btn.disabled = true;
+            btn.onclick = null;
+        }
     };
 
     var GENRE_MAP = {
