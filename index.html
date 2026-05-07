@@ -11,7 +11,7 @@
             --glass: rgba(10, 15, 25, 0.98);
             --border: rgba(120, 169, 255, 0.2);
             --glow: #78a9ff;
-            --accent: #ffcc00; 
+            --accent: #ffcc00;
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
             --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -19,9 +19,9 @@
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        html, body { 
-            margin: 0; padding: 0; height: 100%; width: 100%; 
+
+        html, body {
+            margin: 0; padding: 0; height: 100%; width: 100%;
             overflow: hidden; position: fixed;
             font-family: -apple-system, system-ui, sans-serif;
             background: #050a15 url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2022&auto=format&fit=crop') center/cover fixed;
@@ -35,101 +35,76 @@
             overflow: hidden;
         }
 
-        .scroll-view { 
+        .scroll-view {
             flex: 1; overflow-y: auto; overflow-x: hidden;
-            padding: 15px; 
-            -webkit-overflow-scrolling: touch; 
-            scroll-behavior: smooth; 
-            /* Ensure partial rows at edges aren't clipped by the container */
-            scroll-padding: 15px;
+            padding: 15px;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
         }
 
         .media-grid {
-            display: grid; 
+            display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 15px; width: 100%;
-            overflow: visible;
             padding-bottom: 20px;
         }
 
-        .header-card { background: var(--glass); backdrop-filter: blur(40px); border: 1px solid var(--border); border-radius: 28px; padding: 20px; margin-bottom: 20px; }
+        .header-card {
+            background: var(--glass); backdrop-filter: blur(40px);
+            border: 1px solid var(--border); border-radius: 28px;
+            padding: 20px; margin-bottom: 20px;
+        }
 
-        /* Swipe container */
         .swipe-wrapper {
             position: relative;
             border-radius: 22px;
             overflow: hidden;
             background: #070d1a;
-            touch-action: pan-y; 
+            touch-action: pan-y;
         }
 
         .action-tray {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1;
-            background: #070d1a;
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1; background: #070d1a;
         }
 
         .tray-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            padding: 10px;
+            gap: 10px; padding: 10px;
         }
 
         .tray-btn {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 8px;
-            font-weight: 900;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            cursor: pointer;
-            border: none;
-            gap: 3px;
+            width: 52px; height: 52px; border-radius: 50%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            font-size: 8px; font-weight: 900;
+            letter-spacing: 0.5px; text-transform: uppercase;
+            cursor: pointer; border: none; gap: 3px;
             transition: transform 0.15s var(--spring), filter 0.15s;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
         .tray-btn:active { transform: scale(0.88); filter: brightness(1.2); }
 
         .tray-icon {
-            width: 18px;
-            height: 18px;
-            background: currentColor;
-            mask-size: contain;
-            mask-repeat: no-repeat;
-            -webkit-mask-size: contain;
-            -webkit-mask-repeat: no-repeat;
+            width: 18px; height: 18px;
+            mask-size: contain; mask-repeat: no-repeat;
+            -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat;
         }
 
         .item-card {
-            position: relative;
-            z-index: 2;
-            background: #000;
-            border-radius: 22px;
-            overflow: hidden;
+            position: relative; z-index: 2;
+            background: #000; border-radius: 22px; overflow: hidden;
             border: 1px solid var(--border);
-            /* Default: smooth spring snap-back */
             transition: transform 0.45s var(--spring);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            will-change: transform; 
+            will-change: transform;
         }
+        .item-card.dragging { transition: none !important; }
 
-        /* While actively dragging, no transition */
-        .item-card.dragging {
-            transition: none !important;
-        }
-        
         .poster { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; pointer-events: none; }
-        
+
         .status-badge {
             position: absolute; top: 12px; right: 12px;
             width: 10px; height: 10px; border-radius: 50%;
@@ -139,8 +114,10 @@
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: calc(75px + var(--safe-bottom));
-            background: rgba(0,0,0,0.96); backdrop-filter: blur(40px); border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around; align-items: center; padding-bottom: var(--safe-bottom); z-index: 5000;
+            background: rgba(0,0,0,0.96); backdrop-filter: blur(40px);
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; align-items: center;
+            padding-bottom: var(--safe-bottom); z-index: 5000;
         }
         .nav-item { background: none; border: none; color: rgba(255,255,255,0.25); display: flex; flex-direction: column; align-items: center; font-size: 10px; flex: 1; }
         .nav-item.active { color: var(--glow); }
@@ -148,13 +125,13 @@
 
         .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 16px; font-weight: bold; cursor: pointer; }
         .btn-rand { background: var(--accent); color: #000; border: none; width: 100%; margin-top: 12px; padding: 14px; font-size: 12px; font-weight: 900; letter-spacing: 2px; border-radius: 16px; }
-        
+
         input { flex: 1; background: rgba(0,0,0,0.6); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 16px; font-size: 16px !important; }
 
         #scrollTopBtn {
             position: fixed; bottom: calc(90px + var(--safe-bottom)); right: 20px;
-            width: 58px; height: 58px; background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(20px); border: 1px solid rgba(120, 169, 255, 0.4);
+            width: 58px; height: 58px; background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(20px); border: 1px solid rgba(120,169,255,0.4);
             z-index: 4000; opacity: 0; pointer-events: none; transition: all 0.5s var(--glide);
             transform: translateY(30px) scale(0.7); border-radius: 20px; display: flex; align-items: center; justify-content: center;
         }
@@ -175,15 +152,15 @@
 <div class="app-container">
     <div class="scroll-view" id="mainScroll">
         <div class="header-card">
-            <h2 style="margin: 0 0 15px 0; font-size: 1.3em; letter-spacing: 5px; font-weight: 300; text-align: center; opacity: 0.8;">THE VAULT</h2>
-            <div style="display:flex; gap:10px; margin-bottom:12px;">
+            <h2 style="margin:0 0 15px 0;font-size:1.3em;letter-spacing:5px;font-weight:300;text-align:center;opacity:0.8;">THE VAULT</h2>
+            <div style="display:flex;gap:10px;margin-bottom:12px;">
                 <input type="text" id="showInput" placeholder="Initialize..." onkeydown="if(event.key==='Enter') performSearch()">
                 <button class="btn-main" onclick="performSearch()">ENGAGE</button>
             </div>
-            <input type="text" id="filterInput" style="width:100%; height:45px;" placeholder="Search Archive..." onkeyup="render()">
+            <input type="text" id="filterInput" style="width:100%;height:45px;" placeholder="Search Archive..." onkeyup="render()">
             <button class="btn-rand" onclick="randomize()">RANDOMIZE MISSION</button>
         </div>
-        <button id="backBtn" class="btn-main" style="display:none; width:100%; margin-bottom:20px; padding:18px;" onclick="exitSearch()">← BACK TO VAULT</button>
+        <button id="backBtn" class="btn-main" style="display:none;width:100%;margin-bottom:20px;padding:18px;" onclick="exitSearch()">← BACK TO VAULT</button>
         <div class="media-grid" id="mainGrid"></div>
     </div>
 </div>
@@ -191,9 +168,9 @@
 <div id="scrollTopBtn" onclick="scrollToTop()"><div class="arrow-shape"></div></div>
 
 <div class="bottom-nav">
-    <button class="nav-item active" onclick="setFilter('all', this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:stack-bold.svg')"></div>Vault</button>
-    <button class="nav-item" onclick="setFilter('watching', this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:clock-bold.svg')"></div>Watching</button>
-    <button class="nav-item" onclick="setFilter('pulse', this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:activity-bold.svg')"></div>Pulse</button>
+    <button class="nav-item active" onclick="setFilter('all',this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:stack-bold.svg')"></div>Vault</button>
+    <button class="nav-item" onclick="setFilter('watching',this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:clock-bold.svg')"></div>Watching</button>
+    <button class="nav-item" onclick="setFilter('pulse',this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:activity-bold.svg')"></div>Pulse</button>
     <button class="nav-item" onclick="openSettings()"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:gear-bold.svg')"></div>System</button>
 </div>
 
@@ -215,15 +192,16 @@
     };
 
     const app = initializeApp(config);
-    const db = getFirestore(app);
-    window.db = db; window.fLib = { doc, setDoc, onSnapshot };
-    
-    const cache = localStorage.getItem('v_cache');
-    if(cache) { window.mediaList = JSON.parse(cache); render(); }
+    const db  = getFirestore(app);
+    window.db   = db;
+    window.fLib = { doc, setDoc, onSnapshot };
 
-    window.fLib.onSnapshot(window.fLib.doc(db, "archives", "user_bailey"), (doc) => {
-        if(doc.exists()) {
-            window.mediaList = doc.data().list || [];
+    const cache = localStorage.getItem('v_cache');
+    if (cache) { window.mediaList = JSON.parse(cache); render(); }
+
+    window.fLib.onSnapshot(window.fLib.doc(db, "archives", "user_bailey"), (snap) => {
+        if (snap.exists()) {
+            window.mediaList = snap.data().list || [];
             localStorage.setItem('v_cache', JSON.stringify(window.mediaList));
             render();
         }
@@ -232,133 +210,111 @@
 
 <script>
     window.mediaList = [];
-    let tmdbKey = localStorage.getItem('tmdbKey') || '';
+    let tmdbKey       = localStorage.getItem('tmdbKey') || '';
     let currentFilter = 'all';
-    let isSearch = false;
-
-    // Track which card index is currently open (tray revealed)
-    let openCardIdx = null;
-    let _swipeAttached = false;
+    let isSearch      = false;
+    let openCardIdx   = null;
 
     const scrollArea = document.getElementById('mainScroll');
-    const scrollBtn = document.getElementById('scrollTopBtn');
+    const scrollBtn  = document.getElementById('scrollTopBtn');
+
     scrollArea.onscroll = () => {
         scrollBtn.classList.toggle('visible', scrollArea.scrollTop > 300);
-        // Snap back any open card when the user scrolls
         snapClose(openCardIdx);
     };
 
     function scrollToTop() { scrollArea.scrollTo({ top: 0, behavior: 'smooth' }); }
 
-    // ─── Close a card by index ───────────────────────────────────────────────
     function snapClose(idx) {
         if (idx === null) return;
-        const card = document.getElementById(`card-${idx}`);
-        if (card) {
-            card.classList.remove('dragging');
-            card.style.transform = 'translateX(0)';
-        }
+        const card = document.getElementById('card-' + idx);
+        if (card) { card.classList.remove('dragging'); card.style.transform = 'translateX(0)'; }
         openCardIdx = null;
     }
 
-    // ─── Close all open cards (call before opening a new one) ────────────────
     function closeAllCards(exceptIdx) {
-        if (openCardIdx !== null && openCardIdx !== exceptIdx) {
-            snapClose(openCardIdx);
-        }
+        if (openCardIdx !== null && openCardIdx !== exceptIdx) snapClose(openCardIdx);
     }
 
-    // ─── Tap on scroll backdrop closes open card ─────────────────────────────
-    document.getElementById('mainScroll').addEventListener('click', (e) => {
-        if (openCardIdx !== null && !e.target.closest('.swipe-wrapper')) {
-            snapClose(openCardIdx);
-        }
-    }, true);
-
+    // ── RENDER ───────────────────────────────────────────────────────────────
     function render() {
-        if(isSearch) return;
-        const grid = document.getElementById('mainGrid');
+        if (isSearch) return;
+        const grid  = document.getElementById('mainGrid');
         const query = document.getElementById('filterInput').value.toLowerCase();
         grid.innerHTML = '';
         openCardIdx = null;
-        
-        window.mediaList.forEach((item, idx) => {
-            if((currentFilter === 'all' || item.status === currentFilter) && item.name.toLowerCase().includes(query)) {
+
+        window.mediaList.forEach(function(item, idx) {
+            if ((currentFilter === 'all' || item.status === currentFilter) && item.name.toLowerCase().includes(query)) {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'swipe-wrapper';
-                
-                const statusColor = item.status === 'watching' ? '#ffcc00' : (item.status === 'pulse' ? '#78a9ff' : '#4caf50');
-                
-                wrapper.innerHTML = `
-                    <div class="action-tray">
-                        <div class="tray-grid">
-                            <button class="tray-btn" style="background:#ff4444;" onclick="trayAction(${idx}, 'delete')">
-                                <div class="tray-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:trash-bold.svg'); mask-image:url('https://api.iconify.design/ph:trash-bold.svg'); background:#fff;"></div>
-                                DEL
-                            </button>
-                            <button class="tray-btn" style="background:#ffcc00;" onclick="trayAction(${idx}, 'watching')">
-                                <div class="tray-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:clock-bold.svg'); mask-image:url('https://api.iconify.design/ph:clock-bold.svg'); background:#000;"></div>
-                                <span style="color:#000">WATCH</span>
-                            </button>
-                            <button class="tray-btn" style="background:#78a9ff;" onclick="trayAction(${idx}, 'pulse')">
-                                <div class="tray-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:activity-bold.svg'); mask-image:url('https://api.iconify.design/ph:activity-bold.svg'); background:#000;"></div>
-                                <span style="color:#000">PULSE</span>
-                            </button>
-                            <button class="tray-btn" style="background:#4caf50;" onclick="trayAction(${idx}, 'watched')">
-                                <div class="tray-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:check-bold.svg'); mask-image:url('https://api.iconify.design/ph:check-bold.svg'); background:#fff;"></div>
-                                DONE
-                            </button>
-                        </div>
-                    </div>
-                    <div class="item-card" id="card-${idx}">
-                        <div class="status-badge" style="color:${statusColor}; background:currentColor"></div>
-                        <img class="poster" src="${item.poster}">
-                    </div>`;
 
-                // Attach swipe listeners after inserting
+                const statusColor = item.status === 'watching' ? '#ffcc00' : item.status === 'pulse' ? '#78a9ff' : '#4caf50';
+
+                wrapper.innerHTML =
+                    '<div class="action-tray">' +
+                        '<div class="tray-grid">' +
+                            '<button class="tray-btn" style="background:#ff4444;" onclick="trayAction(' + idx + ',\'delete\')">' +
+                                '<div class="tray-icon" style="-webkit-mask-image:url(\'https://api.iconify.design/ph:trash-bold.svg\');mask-image:url(\'https://api.iconify.design/ph:trash-bold.svg\');background:#fff;"></div>DEL' +
+                            '</button>' +
+                            '<button class="tray-btn" style="background:#ffcc00;" onclick="trayAction(' + idx + ',\'watching\')">' +
+                                '<div class="tray-icon" style="-webkit-mask-image:url(\'https://api.iconify.design/ph:clock-bold.svg\');mask-image:url(\'https://api.iconify.design/ph:clock-bold.svg\');background:#000;"></div>' +
+                                '<span style="color:#000">WATCH</span>' +
+                            '</button>' +
+                            '<button class="tray-btn" style="background:#78a9ff;" onclick="trayAction(' + idx + ',\'pulse\')">' +
+                                '<div class="tray-icon" style="-webkit-mask-image:url(\'https://api.iconify.design/ph:activity-bold.svg\');mask-image:url(\'https://api.iconify.design/ph:activity-bold.svg\');background:#000;"></div>' +
+                                '<span style="color:#000">PULSE</span>' +
+                            '</button>' +
+                            '<button class="tray-btn" style="background:#4caf50;" onclick="trayAction(' + idx + ',\'watched\')">' +
+                                '<div class="tray-icon" style="-webkit-mask-image:url(\'https://api.iconify.design/ph:check-bold.svg\');mask-image:url(\'https://api.iconify.design/ph:check-bold.svg\');background:#fff;"></div>DONE' +
+                            '</button>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="item-card" id="card-' + idx + '">' +
+                        '<div class="status-badge" style="color:' + statusColor + ';background:currentColor"></div>' +
+                        '<img class="poster" src="' + item.poster + '">' +
+                    '</div>';
+
                 grid.appendChild(wrapper);
             }
         });
     }
 
-    // ─── DELEGATED SWIPE ENGINE ──────────────────────────────────────────────
-    let _swipeAttached = false;
-    function attachDelegatedSwipe() {
-        if (_swipeAttached) return;
-        _swipeAttached = true;
+    // ── DELEGATED SWIPE ENGINE ────────────────────────────────────────────────
+    // One listener on the scroll container — works for all cards regardless
+    // of whether they're partially clipped at the top or bottom of the screen.
+    (function() {
+        var startX = 0, startY = 0, currentX = 0, totalDY = 0;
+        var isDragging = false, isHorizontal = null;
+        var activeCard = null, activeIdx = null, trayOpenX = 0;
+        var OPEN_THRESHOLD  = 80;
+        var CLOSE_THRESHOLD = 10;
 
-        let startX = 0, startY = 0, currentX = 0, totalDY = 0;
-        let isDragging = false, isHorizontal = null;
-        let activeIdx = null, activeCard = null, trayOpenX = null;
-
-        const OPEN_THRESHOLD  = 80;
-        const CLOSE_THRESHOLD = 10;
-
-        function getCardAtTouch(e) {
-            const el = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-            const card = el?.closest('.item-card');
+        function hitCard(e) {
+            var el   = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+            var card = el && el.closest('.item-card');
             if (!card) return null;
-            const m = card.id.match(/card-(\d+)/);
-            return m ? { card, idx: parseInt(m[1]) } : null;
+            var m = card.id.match(/card-(\d+)/);
+            return m ? { card: card, idx: parseInt(m[1]) } : null;
         }
 
-        scrollArea.addEventListener('touchstart', (e) => {
-            const hit = getCardAtTouch(e);
+        scrollArea.addEventListener('touchstart', function(e) {
+            var hit = hitCard(e);
             if (!hit) return;
             activeCard = hit.card;
             activeIdx  = hit.idx;
-            startX  = e.touches[0].clientX;
-            startY  = e.touches[0].clientY;
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
             currentX = 0; totalDY = 0;
             isDragging = false; isHorizontal = null;
             trayOpenX = -activeCard.closest('.swipe-wrapper').offsetWidth;
             activeCard.classList.add('dragging');
         }, { passive: true });
 
-        scrollArea.addEventListener('touchmove', (e) => {
+        scrollArea.addEventListener('touchmove', function(e) {
             if (!activeCard) return;
-            const dx = e.touches[0].clientX - startX;
-            const dy = e.touches[0].clientY - startY;
+            var dx = e.touches[0].clientX - startX;
+            var dy = e.touches[0].clientY - startY;
             totalDY = Math.max(totalDY, Math.abs(dy));
 
             if (isHorizontal === null && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
@@ -370,19 +326,18 @@
             isDragging = true;
             currentX = dx;
 
-            let x = currentX;
+            var x = currentX;
             if (x > 0) x = Math.pow(x, 0.7);
             if (x < trayOpenX) x = trayOpenX - Math.pow(Math.abs(x - trayOpenX), 0.7);
-            activeCard.style.transform = `translateX(${x}px)`;
+            activeCard.style.transform = 'translateX(' + x + 'px)';
         }, { passive: false });
 
-        scrollArea.addEventListener('touchend', () => {
+        scrollArea.addEventListener('touchend', function() {
             if (!activeCard) return;
             activeCard.classList.remove('dragging');
 
             if (!isDragging) {
-                const totalMove = Math.abs(currentX) + totalDY;
-                if (totalMove <= 10) {
+                if (Math.abs(currentX) + totalDY <= 10) {
                     if (openCardIdx === activeIdx) {
                         snapClose(activeIdx);
                     } else {
@@ -393,17 +348,17 @@
                 return;
             }
 
-            const wasOpen = openCardIdx === activeIdx;
+            var wasOpen = openCardIdx === activeIdx;
             if (wasOpen) {
                 if (currentX > CLOSE_THRESHOLD) {
                     snapClose(activeIdx);
                 } else {
-                    activeCard.style.transform = `translateX(${trayOpenX}px)`;
+                    activeCard.style.transform = 'translateX(' + trayOpenX + 'px)';
                 }
             } else {
                 if (currentX < -OPEN_THRESHOLD) {
                     closeAllCards(activeIdx);
-                    activeCard.style.transform = `translateX(${trayOpenX}px)`;
+                    activeCard.style.transform = 'translateX(' + trayOpenX + 'px)';
                     openCardIdx = activeIdx;
                 } else {
                     snapClose(activeIdx);
@@ -412,80 +367,87 @@
 
             activeCard = null; activeIdx = null;
         }, { passive: true });
+    })();
 
-    // ─── Tray button handler — always snaps card closed after action ─────────
-    window.trayAction = async (idx, action) => {
+    // ── TRAY ACTIONS ─────────────────────────────────────────────────────────
+    window.trayAction = async function(idx, action) {
         snapClose(idx);
         if (action === 'delete') {
             if (confirm('Erase from Vault?')) {
                 window.mediaList.splice(idx, 1);
-                await save();
-                render();
+                await save(); render();
             }
         } else {
-            await updateStatus(idx, action);
+            window.mediaList[idx].status = action;
+            await save(); render();
         }
     };
 
-    async function updateStatus(i, s) { window.mediaList[i].status = s; await save(); render(); }
-    async function save() { localStorage.setItem('v_cache', JSON.stringify(window.mediaList)); await window.fLib.setDoc(window.fLib.doc(window.db, "archives", "user_bailey"), { list: window.mediaList }); }
-
-    async function openItem(idx) {
-        const item = window.mediaList[idx];
-        const modal = document.getElementById('modal');
-        const body = document.getElementById('modalBody');
-        modal.classList.add('active');
-        body.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">LOADING INTEL...</div>';
-        
-        const res = await fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}?api_key=${tmdbKey}&append_to_response=videos,external_ids`);
-        const data = await res.json();
-        const trailer = data.videos?.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
-        const imdbId = data.imdb_id || data.external_ids?.imdb_id;
-
-        body.innerHTML = `
-            <div style="text-align:center;">
-                <img src="${item.poster}" style="width:120px; border-radius:20px; margin-bottom:15px;">
-                <h3 style="margin:0 0 10px 0; color:var(--glow);">${item.name}</h3>
-                <p style="font-size:13px; opacity:0.7; line-height:1.5; margin-bottom:20px;">${data.overview}</p>
-                <div style="display:flex; gap:10px;">
-                    ${trailer ? `<a href="https://www.youtube.com/watch?v=${trailer.key}" target="_blank" class="btn-main" style="flex:1; background:#ff4444; color:#fff; text-decoration:none; display:flex; align-items:center; justify-content:center;">TRAILER</a>` : ''}
-                    <a href="https://imdb.com/title/${imdbId || 'find?q='+item.name}" target="_blank" class="btn-main" style="flex:1; background:#f5c518; color:#000; text-decoration:none; display:flex; align-items:center; justify-content:center;">IMDb</a>
-                </div>
-            </div>`;
+    async function save() {
+        localStorage.setItem('v_cache', JSON.stringify(window.mediaList));
+        await window.fLib.setDoc(window.fLib.doc(window.db, "archives", "user_bailey"), { list: window.mediaList });
     }
 
+    // ── ITEM DETAIL MODAL ────────────────────────────────────────────────────
+    async function openItem(idx) {
+        var item  = window.mediaList[idx];
+        var modal = document.getElementById('modal');
+        var body  = document.getElementById('modalBody');
+        modal.classList.add('active');
+        body.innerHTML = '<div style="text-align:center;padding:50px;opacity:0.5;">LOADING INTEL...</div>';
+
+        var res  = await fetch('https://api.themoviedb.org/3/' + item.type + '/' + item.tmdbId + '?api_key=' + tmdbKey + '&append_to_response=videos,external_ids');
+        var data = await res.json();
+        var trailer = data.videos && data.videos.results.find(function(v){ return v.type === 'Trailer' && v.site === 'YouTube'; });
+        var imdbId  = data.imdb_id || (data.external_ids && data.external_ids.imdb_id);
+
+        body.innerHTML =
+            '<div style="text-align:center;">' +
+                '<img src="' + item.poster + '" style="width:120px;border-radius:20px;margin-bottom:15px;">' +
+                '<h3 style="margin:0 0 10px 0;color:var(--glow);">' + item.name + '</h3>' +
+                '<p style="font-size:13px;opacity:0.7;line-height:1.5;margin-bottom:20px;">' + data.overview + '</p>' +
+                '<div style="display:flex;gap:10px;">' +
+                    (trailer ? '<a href="https://www.youtube.com/watch?v=' + trailer.key + '" target="_blank" class="btn-main" style="flex:1;background:#ff4444;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;">TRAILER</a>' : '') +
+                    '<a href="https://imdb.com/title/' + (imdbId || 'find?q=' + item.name) + '" target="_blank" class="btn-main" style="flex:1;background:#f5c518;color:#000;text-decoration:none;display:flex;align-items:center;justify-content:center;">IMDb</a>' +
+                '</div>' +
+            '</div>';
+    }
+
+    // ── SEARCH ───────────────────────────────────────────────────────────────
     async function performSearch() {
-        const q = document.getElementById('showInput').value;
-        const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(q)}`);
-        const data = await res.json();
+        var q    = document.getElementById('showInput').value;
+        var res  = await fetch('https://api.themoviedb.org/3/search/multi?api_key=' + tmdbKey + '&query=' + encodeURIComponent(q));
+        var data = await res.json();
         isSearch = true;
         document.getElementById('backBtn').style.display = 'block';
-        const grid = document.getElementById('mainGrid');
+        var grid = document.getElementById('mainGrid');
         grid.innerHTML = '';
-        data.results.filter(i => i.poster_path).forEach(item => {
-            const div = document.createElement('div');
+        data.results.filter(function(i){ return i.poster_path; }).forEach(function(item) {
+            var div = document.createElement('div');
             div.className = 'item-card';
-            div.innerHTML = `<img class="poster" src="https://image.tmdb.org/t/p/w500${item.poster_path}"><div style="padding:10px; font-size:12px; text-align:center;">${item.title || item.name}</div><button class="btn-main" style="width:100%; border-radius:0;" onclick='addItem(${JSON.stringify(item).replace(/'/g, "")})'>ADD</button>`;
+            div.innerHTML = '<img class="poster" src="https://image.tmdb.org/t/p/w500' + item.poster_path + '"><div style="padding:10px;font-size:12px;text-align:center;">' + (item.title || item.name) + '</div><button class="btn-main" style="width:100%;border-radius:0;" onclick=\'addItem(' + JSON.stringify(item).replace(/'/g, "") + ')\'>ADD</button>';
             grid.appendChild(div);
         });
     }
 
-    window.addItem = (item) => {
-        window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`, type: item.media_type, tmdbId: item.id });
+    window.addItem = function(item) {
+        window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: 'https://image.tmdb.org/t/p/w500' + item.poster_path, type: item.media_type, tmdbId: item.id });
         save(); exitSearch();
     };
 
-    function exitSearch() { isSearch = false; document.getElementById('backBtn').style.display='none'; render(); }
-    function setFilter(f, btn) { currentFilter = f; document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(); }
-    function closeModal() { document.getElementById('modal').classList.remove('active'); }
-    function openSettings() { const k = prompt("TMDB Key:", tmdbKey); if(k) { tmdbKey = k; localStorage.setItem('tmdbKey', k); location.reload(); } }
-    function randomize() { 
-        const available = window.mediaList.filter(item => currentFilter === 'all' || item.status === currentFilter);
-        if(available.length) openItem(window.mediaList.indexOf(available[Math.floor(Math.random() * available.length)]));
+    function exitSearch()   { isSearch = false; document.getElementById('backBtn').style.display = 'none'; render(); }
+    function closeModal()   { document.getElementById('modal').classList.remove('active'); }
+    function openSettings() { var k = prompt("TMDB Key:", tmdbKey); if (k) { tmdbKey = k; localStorage.setItem('tmdbKey', k); location.reload(); } }
+    function setFilter(f, btn) {
+        currentFilter = f;
+        document.querySelectorAll('.nav-item').forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        render();
     }
-
-    // Attach once — works for all cards regardless of scroll position
-    attachDelegatedSwipe();
+    function randomize() {
+        var available = window.mediaList.filter(function(item){ return currentFilter === 'all' || item.status === currentFilter; });
+        if (available.length) openItem(window.mediaList.indexOf(available[Math.floor(Math.random() * available.length)]));
+    }
 </script>
 </body>
 </html>
