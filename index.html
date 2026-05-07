@@ -1050,21 +1050,24 @@
     };
 
     // ── SEARCH ───────────────────────────────────────────────────────────────
+    var searchResults = [];
+
     async function performSearch() {
         var q    = document.getElementById('showInput').value;
         var res  = await fetch('https://api.themoviedb.org/3/search/multi?api_key=' + tmdbKey + '&query=' + encodeURIComponent(q));
         var data = await res.json();
         isSearch = true;
+        searchResults = data.results.filter(function(i){ return i.poster_path; });
         document.getElementById('backBtn').style.display = 'block';
         var grid = document.getElementById('mainGrid');
         grid.innerHTML = '';
-        data.results.filter(function(i){ return i.poster_path; }).forEach(function(item) {
+        searchResults.forEach(function(item, i) {
             var div = document.createElement('div');
             div.className = 'item-card';
             var alreadyInVault = window.mediaList.some(function(m){ return m.tmdbId === item.id; });
             var btnStyle = alreadyInVault ? 'width:100%;border-radius:0;background:#4caf50;color:#fff;' : 'width:100%;border-radius:0;';
             var btnText = alreadyInVault ? '✓ IN VAULT' : 'ADD';
-            var btnClick = alreadyInVault ? '' : ' onclick=\'addItem(' + JSON.stringify(item).replace(/'/g, "") + ')\'';
+            var btnClick = alreadyInVault ? '' : ' onclick="addFromSearch(' + i + ')"';
             div.innerHTML = '<img class="poster" src="https://image.tmdb.org/t/p/w500' + item.poster_path + '"><div style="padding:10px;font-size:12px;text-align:center;">' + (item.title || item.name) + '</div><button id="add-btn-' + item.id + '" class="btn-main" style="' + btnStyle + '"' + btnClick + (alreadyInVault ? ' disabled' : '') + '>' + btnText + '</button>';
             grid.appendChild(div);
         });
@@ -1077,6 +1080,11 @@
         53:'Thriller',10752:'War',37:'Western',10759:'Action & Adventure',
         10762:'Kids',10763:'News',10764:'Reality',10765:'Sci-Fi & Fantasy',
         10768:'War & Politics'
+    };
+
+    window.addFromSearch = function(i) {
+        var item = searchResults[i];
+        if (item) window.addItem(item);
     };
 
     window.addItem = async function(item) {
