@@ -648,21 +648,22 @@
             var snap = await window.fLib.getDoc(window.fLib.doc(window.db, "archives", docId));
             if (snap.exists()) {
                 var data = snap.data();
-                if (data.tmdbKey) {
-                    tmdbKey = data.tmdbKey;
-                    localStorage.setItem('tmdbKey', tmdbKey);
-                }
-                // Only accept server data if we don't have local data,
-                // or server has same/more items (not stale)
                 if (!cache || (data.list && data.list.length >= window.mediaList.length)) {
                     window.mediaList = data.list || [];
                     localStorage.setItem('v_cache_' + currentUser.username, JSON.stringify(window.mediaList));
                     render();
                 }
             }
-        } catch(err) {
-            // Offline — cache is fine
-        }
+        } catch(err) {}
+
+        // Load shared TMDB key
+        try {
+            var configSnap = await window.fLib.getDoc(window.fLib.doc(window.db, "config", "shared"));
+            if (configSnap.exists() && configSnap.data().tmdbKey) {
+                tmdbKey = configSnap.data().tmdbKey;
+                localStorage.setItem('tmdbKey', tmdbKey);
+            }
+        } catch(err) {}
     }
 
     window.logout = function() {
@@ -1049,7 +1050,7 @@
         }
     }
 
-    window.toggleEpisode = async function(idx, seasonNum, epNum) {
+    window.toggleEpisode = function(idx, seasonNum, epNum) {
         var item = window.mediaList[idx];
         if (!item.episodeProgress) item.episodeProgress = {};
         var key = 's' + seasonNum + 'e' + epNum;
@@ -1058,8 +1059,7 @@
         var knownEps = Object.keys(item.episodeProgress).length;
         if (!item.totalEpisodes || item.totalEpisodes < knownEps) item.totalEpisodes = knownEps;
 
-        await save();
-
+        // Update UI instantly
         var rows = document.querySelectorAll('.episode-row');
         var rowIdx = epNum - 1;
         if (rows[rowIdx]) rows[rowIdx].classList.toggle('watched', item.episodeProgress[key]);
@@ -1068,6 +1068,9 @@
         var watchedCount = Array.from(episodes).filter(function(r){ return r.classList.contains('watched'); }).length;
         var progEl = document.querySelector('.ep-season-progress');
         if (progEl) progEl.textContent = watchedCount + ' / ' + episodes.length + ' watched';
+
+        // Save in background
+        save();
     };
 
     // ── SEARCH ───────────────────────────────────────────────────────────────
@@ -1224,11 +1227,8 @@
         if (k) {
             tmdbKey = k;
             localStorage.setItem('tmdbKey', k);
-            // Save to Firebase so it persists across devices/updates
-            if (currentUser) {
-                var docId = 'user_' + currentUser.username;
-                await window.fLib.setDoc(window.fLib.doc(window.db, "archives", docId), { tmdbKey: k }, { merge: true });
-            }
+            // Save to shared config so all users get it
+            await window.fLib.setDoc(window.fLib.doc(window.db, "config", "shared"), { tmdbKey: k }, { merge: true });
             document.getElementById('tmdbKeyDisplay').textContent = k.slice(0,4) + '••••' + k.slice(-4);
         }
     }
