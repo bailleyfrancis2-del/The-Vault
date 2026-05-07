@@ -169,9 +169,10 @@
 
 <div class="bottom-nav">
     <button class="nav-item active" onclick="setFilter('all',this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:stack-bold.svg')"></div>Vault</button>
-    <button class="nav-item" onclick="setFilter('watching',this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:clock-bold.svg')"></div>Watching</button>
+    <button class="nav-item" onclick="setFilter('watching',this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:bookmark-bold.svg')"></div>Watch</button>
     <button class="nav-item" onclick="setFilter('pulse',this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:activity-bold.svg')"></div>Pulse</button>
-    <button class="nav-item" onclick="openSettings()"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:gear-bold.svg')"></div>System</button>
+    <button class="nav-item" onclick="setFilter('watched',this)"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:check-circle-bold.svg')"></div>Done</button>
+    <button class="nav-item" onclick="openSettings()"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:gear-bold.svg')"></div>Settings</button>
 </div>
 
 <div id="modal" class="modal" onclick="if(event.target===this) closeModal()">
