@@ -56,10 +56,8 @@
         }
 
         .swipe-wrapper {
-            position: relative;
-            border-radius: 22px;
-            overflow: hidden;
-            background: #070d1a;
+            position: relative; border-radius: 22px;
+            overflow: hidden; background: #070d1a;
             touch-action: pan-y;
         }
 
@@ -70,8 +68,7 @@
         }
 
         .tray-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: grid; grid-template-columns: 1fr 1fr;
             gap: 10px; padding: 10px;
         }
 
@@ -111,6 +108,16 @@
             box-shadow: 0 0 10px currentColor;
         }
 
+        /* Progress bar on card */
+        .card-progress {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            height: 3px; background: rgba(255,255,255,0.1);
+        }
+        .card-progress-fill {
+            height: 100%; background: var(--glow);
+            transition: width 0.4s var(--glide);
+        }
+
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             height: calc(75px + var(--safe-bottom));
@@ -119,12 +126,12 @@
             display: flex; justify-content: space-around; align-items: center;
             padding-bottom: var(--safe-bottom); z-index: 5000;
         }
-        .nav-item { background: none; border: none; color: rgba(255,255,255,0.25); display: flex; flex-direction: column; align-items: center; font-size: 10px; flex: 1; }
+        .nav-item { background: none; border: none; color: rgba(255,255,255,0.25); display: flex; flex-direction: column; align-items: center; font-size: 10px; flex: 1; cursor: pointer; }
         .nav-item.active { color: var(--glow); }
         .nav-icon { width: 24px; height: 24px; background: currentColor; mask-size: contain; mask-repeat: no-repeat; -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; margin-bottom: 5px; }
 
         .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 16px; font-weight: bold; cursor: pointer; }
-        .btn-rand { background: var(--accent); color: #000; border: none; width: 100%; margin-top: 12px; padding: 14px; font-size: 12px; font-weight: 900; letter-spacing: 2px; border-radius: 16px; }
+        .btn-rand { background: var(--accent); color: #000; border: none; width: 100%; margin-top: 12px; padding: 14px; font-size: 12px; font-weight: 900; letter-spacing: 2px; border-radius: 16px; cursor: pointer; }
 
         input { flex: 1; background: rgba(0,0,0,0.6); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 16px; font-size: 16px !important; }
 
@@ -133,18 +140,134 @@
             width: 58px; height: 58px; background: rgba(255,255,255,0.08);
             backdrop-filter: blur(20px); border: 1px solid rgba(120,169,255,0.4);
             z-index: 4000; opacity: 0; pointer-events: none; transition: all 0.5s var(--glide);
-            transform: translateY(30px) scale(0.7); border-radius: 20px; display: flex; align-items: center; justify-content: center;
+            transform: translateY(30px) scale(0.7); border-radius: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
         .arrow-shape { width: 32px; height: 32px; background-color: var(--glow); -webkit-mask: url('https://api.iconify.design/ph:caret-double-up-bold.svg') no-repeat center; mask-size: contain; }
         #scrollTopBtn.visible { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
 
-        .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px);
-            z-index: 9000; display: none; align-items: center; justify-content: center;
-            opacity: 0; transition: opacity 0.5s var(--glide);
+        /* ── DETAIL PAGE ─────────────────────────────────────────────────── */
+        #detailPage {
+            position: fixed; inset: 0;
+            background: #050a15;
+            z-index: 8000;
+            transform: translateX(100%);
+            transition: transform 0.4s var(--glide);
+            display: flex; flex-direction: column;
+            padding-top: var(--safe-top);
         }
-        .modal.active { display: flex; opacity: 1; }
-        .modal-content { width: 92%; max-width: 400px; background: #0a111f; border-radius: 35px; padding: 30px; border: 1px solid var(--border); }
+        #detailPage.open { transform: translateX(0); }
+
+        .detail-scroll {
+            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            padding-bottom: 40px;
+        }
+
+        .detail-hero {
+            position: relative; width: 100%; aspect-ratio: 2/3;
+            max-height: 55vh; overflow: hidden;
+        }
+        .detail-hero img {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+        }
+        .detail-hero-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, rgba(5,10,21,0.3) 0%, rgba(5,10,21,0) 40%, rgba(5,10,21,1) 100%);
+        }
+        .detail-back {
+            position: absolute; top: 16px; left: 16px;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 10;
+        }
+        .detail-back-icon {
+            width: 20px; height: 20px; background: #fff;
+            -webkit-mask: url('https://api.iconify.design/ph:arrow-left-bold.svg') no-repeat center;
+            mask: url('https://api.iconify.design/ph:arrow-left-bold.svg') no-repeat center;
+            mask-size: contain;
+        }
+
+        .detail-body { padding: 0 20px 20px; margin-top: -30px; position: relative; }
+
+        .detail-title { font-size: 1.5em; font-weight: 700; margin: 0 0 6px; }
+        .detail-meta { font-size: 12px; opacity: 0.5; margin-bottom: 14px; letter-spacing: 1px; text-transform: uppercase; }
+        .detail-overview { font-size: 13px; line-height: 1.6; opacity: 0.7; margin-bottom: 20px; }
+
+        .detail-actions { display: flex; gap: 10px; margin-bottom: 24px; }
+        .detail-actions a, .detail-actions button {
+            flex: 1; padding: 14px; border-radius: 16px; font-weight: 800;
+            font-size: 12px; letter-spacing: 1px; text-decoration: none;
+            display: flex; align-items: center; justify-content: center;
+            border: none; cursor: pointer;
+        }
+
+        /* Movie watched toggle */
+        .movie-watched-btn {
+            width: 100%; padding: 16px; border-radius: 16px;
+            font-weight: 800; font-size: 13px; letter-spacing: 2px;
+            border: none; cursor: pointer; margin-bottom: 24px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Season tabs */
+        .season-tabs {
+            display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+            margin-bottom: 16px; scrollbar-width: none;
+        }
+        .season-tabs::-webkit-scrollbar { display: none; }
+        .season-tab {
+            flex-shrink: 0; padding: 8px 16px; border-radius: 20px;
+            font-size: 12px; font-weight: 700; letter-spacing: 1px;
+            background: rgba(255,255,255,0.07); border: 1px solid var(--border);
+            color: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.2s;
+        }
+        .season-tab.active {
+            background: var(--glow); color: #05162d; border-color: var(--glow);
+        }
+
+        /* Episode list */
+        .episode-list { display: flex; flex-direction: column; gap: 2px; }
+
+        .episode-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 14px; border-radius: 14px;
+            background: rgba(255,255,255,0.04);
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .episode-row.watched { background: rgba(120,169,255,0.08); }
+        .episode-row:active { background: rgba(255,255,255,0.1); }
+
+        .ep-check {
+            width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+            border: 2px solid rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s var(--spring);
+        }
+        .episode-row.watched .ep-check {
+            background: var(--glow); border-color: var(--glow);
+        }
+        .ep-check-icon {
+            width: 12px; height: 12px; background: #05162d;
+            -webkit-mask: url('https://api.iconify.design/ph:check-bold.svg') no-repeat center;
+            mask: url('https://api.iconify.design/ph:check-bold.svg') no-repeat center;
+            mask-size: contain; opacity: 0; transition: opacity 0.2s;
+        }
+        .episode-row.watched .ep-check-icon { opacity: 1; }
+
+        .ep-info { flex: 1; min-width: 0; }
+        .ep-num { font-size: 11px; opacity: 0.4; font-weight: 600; letter-spacing: 1px; }
+        .ep-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .ep-season-progress {
+            font-size: 11px; opacity: 0.4; font-weight: 600; margin-bottom: 10px; letter-spacing: 1px;
+        }
+
+        .section-title {
+            font-size: 11px; font-weight: 800; letter-spacing: 3px;
+            opacity: 0.4; text-transform: uppercase; margin-bottom: 12px;
+        }
     </style>
 </head>
 <body>
@@ -183,8 +306,22 @@
     <button class="nav-item" onclick="openSettings()"><div class="nav-icon" style="-webkit-mask-image:url('https://api.iconify.design/ph:gear-bold.svg')"></div>Settings</button>
 </div>
 
-<div id="modal" class="modal" onclick="if(event.target===this) closeModal()">
-    <div class="modal-content" id="modalBody"></div>
+<!-- DETAIL PAGE -->
+<div id="detailPage">
+    <div class="detail-scroll" id="detailScroll">
+        <div class="detail-hero">
+            <img id="detailPoster" src="" alt="">
+            <div class="detail-hero-overlay"></div>
+            <div class="detail-back" onclick="closeDetail()"><div class="detail-back-icon"></div></div>
+        </div>
+        <div class="detail-body">
+            <div class="detail-title" id="detailTitle"></div>
+            <div class="detail-meta" id="detailMeta"></div>
+            <div class="detail-overview" id="detailOverview"></div>
+            <div class="detail-actions" id="detailActions"></div>
+            <div id="detailTracker"></div>
+        </div>
+    </div>
 </div>
 
 <script type="module">
@@ -208,7 +345,7 @@
     const cache = localStorage.getItem('v_cache');
     if (cache) { window.mediaList = JSON.parse(cache); render(); }
 
-    window.fLib.onSnapshot(window.fLib.doc(db, "archives", "user_bailey"), (snap) => {
+    window.fLib.onSnapshot(window.fLib.doc(db, "archives", "user_bailey"), function(snap) {
         if (snap.exists()) {
             window.mediaList = snap.data().list || [];
             localStorage.setItem('v_cache', JSON.stringify(window.mediaList));
@@ -219,15 +356,17 @@
 
 <script>
     window.mediaList = [];
-    let tmdbKey       = localStorage.getItem('tmdbKey') || '';
-    let currentFilter = 'all';
-    let isSearch      = false;
-    let openCardIdx   = null;
+    var tmdbKey       = localStorage.getItem('tmdbKey') || '';
+    var currentFilter = 'all';
+    var isSearch      = false;
+    var openCardIdx   = null;
+    var currentDetailIdx = null;
+    var currentSeason    = 1;
 
-    const scrollArea = document.getElementById('mainScroll');
-    const scrollBtn  = document.getElementById('scrollTopBtn');
+    var scrollArea = document.getElementById('mainScroll');
+    var scrollBtn  = document.getElementById('scrollTopBtn');
 
-    scrollArea.onscroll = () => {
+    scrollArea.onscroll = function() {
         scrollBtn.classList.toggle('visible', scrollArea.scrollTop > 300);
         snapClose(openCardIdx);
     };
@@ -236,7 +375,7 @@
 
     function snapClose(idx) {
         if (idx === null) return;
-        const card = document.getElementById('card-' + idx);
+        var card = document.getElementById('card-' + idx);
         if (card) { card.classList.remove('dragging'); card.style.transform = 'translateX(0)'; }
         openCardIdx = null;
     }
@@ -248,9 +387,9 @@
     // ── RENDER ───────────────────────────────────────────────────────────────
     function render() {
         if (isSearch) return;
-        const grid  = document.getElementById('mainGrid');
-        const query = document.getElementById('filterInput').value.toLowerCase();
-        const sort  = document.getElementById('sortPicker').value;
+        var grid  = document.getElementById('mainGrid');
+        var query = document.getElementById('filterInput').value.toLowerCase();
+        var sort  = document.getElementById('sortPicker').value;
         grid.innerHTML = '';
         openCardIdx = null;
 
@@ -262,15 +401,23 @@
             if (sort === 'alpha') return a.item.name.localeCompare(b.item.name);
             if (sort === 'year')  return (b.item.year || 0) - (a.item.year || 0);
             if (sort === 'type')  return (a.item.type || '').localeCompare(b.item.type || '');
-            return a.idx - b.idx; // 'added' — preserve insertion order (unshift = newest first)
+            return a.idx - b.idx;
         });
 
         filtered.forEach(function(e) {
             var item = e.item, idx = e.idx;
-            const wrapper = document.createElement('div');
+            var wrapper = document.createElement('div');
             wrapper.className = 'swipe-wrapper';
 
-            const statusColor = item.status === 'watching' ? '#ffcc00' : item.status === 'pulse' ? '#78a9ff' : '#4caf50';
+            var statusColor = item.status === 'watching' ? '#ffcc00' : item.status === 'pulse' ? '#78a9ff' : '#4caf50';
+
+            // Calculate progress for TV shows
+            var progressBar = '';
+            if (item.type === 'tv' && item.episodeProgress && item.totalEpisodes) {
+                var watched = Object.keys(item.episodeProgress).filter(function(k){ return item.episodeProgress[k]; }).length;
+                var pct = Math.round((watched / item.totalEpisodes) * 100);
+                progressBar = '<div class="card-progress"><div class="card-progress-fill" style="width:' + pct + '%"></div></div>';
+            }
 
             wrapper.innerHTML =
                 '<div class="action-tray">' +
@@ -279,7 +426,7 @@
                             '<div class="tray-icon" style="-webkit-mask-image:url(\'https://api.iconify.design/ph:trash-bold.svg\');mask-image:url(\'https://api.iconify.design/ph:trash-bold.svg\');background:#fff;"></div>DEL' +
                         '</button>' +
                         '<button class="tray-btn" style="background:#ffcc00;" onclick="trayAction(' + idx + ',\'watching\')">' +
-                            '<div class="tray-icon" style="-webkit-mask-image:url(\'https://api.iconify.design/ph:clock-bold.svg\');mask-image:url(\'https://api.iconify.design/ph:clock-bold.svg\');background:#000;"></div>' +
+                            '<div class="tray-icon" style="-webkit-mask-image:url(\'https://api.iconify.design/ph:bookmark-bold.svg\');mask-image:url(\'https://api.iconify.design/ph:bookmark-bold.svg\');background:#000;"></div>' +
                             '<span style="color:#000">WATCH</span>' +
                         '</button>' +
                         '<button class="tray-btn" style="background:#78a9ff;" onclick="trayAction(' + idx + ',\'pulse\')">' +
@@ -294,6 +441,7 @@
                 '<div class="item-card" id="card-' + idx + '">' +
                     '<div class="status-badge" style="color:' + statusColor + ';background:currentColor"></div>' +
                     '<img class="poster" src="' + item.poster + '">' +
+                    progressBar +
                 '</div>';
 
             grid.appendChild(wrapper);
@@ -301,8 +449,6 @@
     }
 
     // ── DELEGATED SWIPE ENGINE ────────────────────────────────────────────────
-    // One listener on the scroll container — works for all cards regardless
-    // of whether they're partially clipped at the top or bottom of the screen.
     (function() {
         var startX = 0, startY = 0, currentX = 0, totalDY = 0;
         var isDragging = false, isHorizontal = null;
@@ -361,7 +507,7 @@
                     if (openCardIdx === activeIdx) {
                         snapClose(activeIdx);
                     } else {
-                        openItem(activeIdx);
+                        openDetail(activeIdx);
                     }
                 }
                 activeCard = null; activeIdx = null;
@@ -408,30 +554,186 @@
         await window.fLib.setDoc(window.fLib.doc(window.db, "archives", "user_bailey"), { list: window.mediaList });
     }
 
-    // ── ITEM DETAIL MODAL ────────────────────────────────────────────────────
-    async function openItem(idx) {
-        var item  = window.mediaList[idx];
-        var modal = document.getElementById('modal');
-        var body  = document.getElementById('modalBody');
-        modal.classList.add('active');
-        body.innerHTML = '<div style="text-align:center;padding:50px;opacity:0.5;">LOADING INTEL...</div>';
+    // ── DETAIL PAGE ───────────────────────────────────────────────────────────
+    async function openDetail(idx) {
+        currentDetailIdx = idx;
+        currentSeason = 1;
+        var item = window.mediaList[idx];
+        var page = document.getElementById('detailPage');
 
-        var res  = await fetch('https://api.themoviedb.org/3/' + item.type + '/' + item.tmdbId + '?api_key=' + tmdbKey + '&append_to_response=videos,external_ids');
-        var data = await res.json();
-        var trailer = data.videos && data.videos.results.find(function(v){ return v.type === 'Trailer' && v.site === 'YouTube'; });
-        var imdbId  = data.imdb_id || (data.external_ids && data.external_ids.imdb_id);
+        // Reset scroll
+        document.getElementById('detailScroll').scrollTop = 0;
 
-        body.innerHTML =
-            '<div style="text-align:center;">' +
-                '<img src="' + item.poster + '" style="width:120px;border-radius:20px;margin-bottom:15px;">' +
-                '<h3 style="margin:0 0 10px 0;color:var(--glow);">' + item.name + '</h3>' +
-                '<p style="font-size:13px;opacity:0.7;line-height:1.5;margin-bottom:20px;">' + data.overview + '</p>' +
-                '<div style="display:flex;gap:10px;">' +
-                    (trailer ? '<a href="https://www.youtube.com/watch?v=' + trailer.key + '" target="_blank" class="btn-main" style="flex:1;background:#ff4444;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;">TRAILER</a>' : '') +
-                    '<a href="https://imdb.com/title/' + (imdbId || 'find?q=' + item.name) + '" target="_blank" class="btn-main" style="flex:1;background:#f5c518;color:#000;text-decoration:none;display:flex;align-items:center;justify-content:center;">IMDb</a>' +
-                '</div>' +
-            '</div>';
+        // Populate static bits immediately
+        document.getElementById('detailPoster').src = item.poster;
+        document.getElementById('detailTitle').textContent = item.name;
+        document.getElementById('detailMeta').textContent = 'LOADING...';
+        document.getElementById('detailOverview').textContent = '';
+        document.getElementById('detailActions').innerHTML = '';
+        document.getElementById('detailTracker').innerHTML = '<div style="text-align:center;padding:30px;opacity:0.4;font-size:13px;letter-spacing:2px;">LOADING INTEL...</div>';
+
+        page.classList.add('open');
+
+        // Fetch from TMDB
+        try {
+            var res  = await fetch('https://api.themoviedb.org/3/' + item.type + '/' + item.tmdbId + '?api_key=' + tmdbKey + '&append_to_response=videos,external_ids');
+            var data = await res.json();
+            var trailer = data.videos && data.videos.results.find(function(v){ return v.type === 'Trailer' && v.site === 'YouTube'; });
+            var imdbId  = data.imdb_id || (data.external_ids && data.external_ids.imdb_id);
+
+            var year = item.type === 'movie'
+                ? (data.release_date || '').slice(0,4)
+                : (data.first_air_date || '').slice(0,4);
+            var typeLabel = item.type === 'movie' ? 'MOVIE' : 'TV SERIES';
+
+            document.getElementById('detailMeta').textContent = typeLabel + (year ? '  ·  ' + year : '');
+            document.getElementById('detailOverview').textContent = data.overview || '';
+
+            // Action buttons
+            var actionsHTML = '';
+            if (trailer) {
+                actionsHTML += '<a href="https://www.youtube.com/watch?v=' + trailer.key + '" target="_blank" style="background:#ff4444;color:#fff;">▶ TRAILER</a>';
+            }
+            actionsHTML += '<a href="https://imdb.com/title/' + (imdbId || 'find?q=' + item.name) + '" target="_blank" style="background:#f5c518;color:#000;">IMDb</a>';
+            document.getElementById('detailActions').innerHTML = actionsHTML;
+
+            // Tracker section
+            if (item.type === 'movie') {
+                renderMovieTracker(idx, item);
+            } else {
+                // Store total seasons on item
+                var seasons = (data.seasons || []).filter(function(s){ return s.season_number > 0; });
+                window.mediaList[idx]._seasons = seasons;
+                renderTVTracker(idx, item, seasons, data);
+            }
+        } catch(err) {
+            document.getElementById('detailTracker').innerHTML = '<div style="text-align:center;padding:20px;opacity:0.4;font-size:12px;">COULD NOT LOAD DATA</div>';
+        }
     }
+
+    function closeDetail() {
+        document.getElementById('detailPage').classList.remove('open');
+        currentDetailIdx = null;
+        render(); // refresh progress bars on cards
+    }
+
+    // ── MOVIE TRACKER ────────────────────────────────────────────────────────
+    function renderMovieTracker(idx, item) {
+        var watched = item.status === 'watched';
+        document.getElementById('detailTracker').innerHTML =
+            '<button class="movie-watched-btn" id="movieWatchedBtn" onclick="toggleMovieWatched(' + idx + ')" style="background:' + (watched ? 'var(--glow)' : 'rgba(255,255,255,0.07)') + ';color:' + (watched ? '#05162d' : '#fff') + ';border:1px solid ' + (watched ? 'var(--glow)' : 'var(--border)') + ';">' +
+                (watched ? '✓  WATCHED' : 'MARK AS WATCHED') +
+            '</button>';
+    }
+
+    window.toggleMovieWatched = async function(idx) {
+        var item = window.mediaList[idx];
+        item.status = item.status === 'watched' ? 'watching' : 'watched';
+        await save();
+        renderMovieTracker(idx, item);
+    };
+
+    // ── TV TRACKER ───────────────────────────────────────────────────────────
+    function renderTVTracker(idx, item, seasons, showData) {
+        if (!seasons || seasons.length === 0) {
+            document.getElementById('detailTracker').innerHTML = '<div style="opacity:0.4;font-size:12px;text-align:center;padding:20px;">NO SEASON DATA</div>';
+            return;
+        }
+
+        // Build season tabs
+        var tabsHTML = '<div class="section-title">EPISODES</div><div class="season-tabs" id="seasonTabs">';
+        seasons.forEach(function(s) {
+            tabsHTML += '<button class="season-tab' + (s.season_number === currentSeason ? ' active' : '') + '" onclick="selectSeason(' + idx + ',' + s.season_number + ',' + seasons.length + ')">' +
+                'S' + s.season_number +
+            '</button>';
+        });
+        tabsHTML += '</div><div id="episodeList"><div style="text-align:center;padding:20px;opacity:0.4;font-size:12px;letter-spacing:2px;">LOADING...</div></div>';
+
+        document.getElementById('detailTracker').innerHTML = tabsHTML;
+        loadSeason(idx, currentSeason);
+    }
+
+    window.selectSeason = function(idx, seasonNum, totalSeasons) {
+        currentSeason = seasonNum;
+        // Update active tab
+        document.querySelectorAll('.season-tab').forEach(function(tab, i) {
+            tab.classList.toggle('active', i + 1 === seasonNum);
+        });
+        loadSeason(idx, seasonNum);
+    };
+
+    async function loadSeason(idx, seasonNum) {
+        var item = window.mediaList[idx];
+        var epList = document.getElementById('episodeList');
+        if (!epList) return;
+        epList.innerHTML = '<div style="text-align:center;padding:20px;opacity:0.4;font-size:12px;letter-spacing:2px;">LOADING...</div>';
+
+        try {
+            var res  = await fetch('https://api.themoviedb.org/3/tv/' + item.tmdbId + '/season/' + seasonNum + '?api_key=' + tmdbKey);
+            var data = await res.json();
+            var episodes = data.episodes || [];
+
+            // Track total episodes across all seasons for progress bar
+            // We'll accumulate as user navigates seasons
+            if (!item.totalEpisodes || item.totalEpisodes < 1) {
+                // We'll set it when we know all seasons — for now use what we have
+            }
+
+            if (!item.episodeProgress) item.episodeProgress = {};
+
+            var watched = episodes.filter(function(ep){
+                return item.episodeProgress['s' + seasonNum + 'e' + ep.episode_number];
+            }).length;
+
+            var progressText = watched + ' / ' + episodes.length + ' watched';
+
+            var html = '<div class="ep-season-progress">' + progressText + '</div><div class="episode-list">';
+            episodes.forEach(function(ep) {
+                var key = 's' + seasonNum + 'e' + ep.episode_number;
+                var isWatched = !!item.episodeProgress[key];
+                html +=
+                    '<div class="episode-row' + (isWatched ? ' watched' : '') + '" onclick="toggleEpisode(' + idx + ',' + seasonNum + ',' + ep.episode_number + ',' + episodes.length + ')">' +
+                        '<div class="ep-check"><div class="ep-check-icon"></div></div>' +
+                        '<div class="ep-info">' +
+                            '<div class="ep-num">S' + seasonNum + ' · E' + ep.episode_number + '</div>' +
+                            '<div class="ep-name">' + (ep.name || 'Episode ' + ep.episode_number) + '</div>' +
+                        '</div>' +
+                    '</div>';
+            });
+            html += '</div>';
+            epList.innerHTML = html;
+        } catch(err) {
+            epList.innerHTML = '<div style="text-align:center;padding:20px;opacity:0.4;font-size:12px;">COULD NOT LOAD EPISODES</div>';
+        }
+    }
+
+    window.toggleEpisode = async function(idx, seasonNum, epNum, totalInSeason) {
+        var item = window.mediaList[idx];
+        if (!item.episodeProgress) item.episodeProgress = {};
+        var key = 's' + seasonNum + 'e' + epNum;
+        item.episodeProgress[key] = !item.episodeProgress[key];
+
+        // Update total episodes count (keep the max we've seen)
+        var knownEps = Object.keys(item.episodeProgress).length;
+        if (!item.totalEpisodes || item.totalEpisodes < knownEps) {
+            item.totalEpisodes = knownEps;
+        }
+
+        await save();
+
+        // Update UI without full reload
+        var rows = document.querySelectorAll('.episode-row');
+        var rowIdx = epNum - 1;
+        if (rows[rowIdx]) {
+            rows[rowIdx].classList.toggle('watched', item.episodeProgress[key]);
+        }
+
+        // Update progress text
+        var episodes = document.querySelectorAll('.episode-row');
+        var watchedCount = Array.from(episodes).filter(function(r){ return r.classList.contains('watched'); }).length;
+        var progEl = document.querySelector('.ep-season-progress');
+        if (progEl) progEl.textContent = watchedCount + ' / ' + episodes.length + ' watched';
+    };
 
     // ── SEARCH ───────────────────────────────────────────────────────────────
     async function performSearch() {
@@ -450,14 +752,23 @@
         });
     }
 
-    window.addItem = function(item) {
+    window.addItem = async function(item) {
         var year = item.release_date ? parseInt(item.release_date) : item.first_air_date ? parseInt(item.first_air_date) : 0;
-        window.mediaList.unshift({ name: item.title || item.name, status: 'watching', poster: 'https://image.tmdb.org/t/p/w500' + item.poster_path, type: item.media_type, tmdbId: item.id, year: year });
-        save(); exitSearch();
+        window.mediaList.unshift({
+            name: item.title || item.name,
+            status: 'watching',
+            poster: 'https://image.tmdb.org/t/p/w500' + item.poster_path,
+            type: item.media_type,
+            tmdbId: item.id,
+            year: year,
+            episodeProgress: {},
+            totalEpisodes: 0
+        });
+        await save(); exitSearch();
     };
 
     function exitSearch()   { isSearch = false; document.getElementById('backBtn').style.display = 'none'; render(); }
-    function closeModal()   { document.getElementById('modal').classList.remove('active'); }
+    function closeModal()   { document.getElementById('modal') && document.getElementById('modal').classList.remove('active'); }
     function openSettings() { var k = prompt("TMDB Key:", tmdbKey); if (k) { tmdbKey = k; localStorage.setItem('tmdbKey', k); location.reload(); } }
     function setFilter(f, btn) {
         currentFilter = f;
@@ -467,7 +778,7 @@
     }
     function randomize() {
         var available = window.mediaList.filter(function(item){ return currentFilter === 'all' || item.status === currentFilter; });
-        if (available.length) openItem(window.mediaList.indexOf(available[Math.floor(Math.random() * available.length)]));
+        if (available.length) openDetail(window.mediaList.indexOf(available[Math.floor(Math.random() * available.length)]));
     }
 </script>
 </body>
