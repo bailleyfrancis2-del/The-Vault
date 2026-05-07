@@ -89,7 +89,6 @@
         .btn-main { background: var(--glow); color: #05162d; border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; }
         input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-size: 16px !important; }
 
-        /* Trailer/Link styling */
         .intel-row { display: flex; gap: 10px; width: 100%; margin-bottom: 15px; }
         .btn-intel { flex: 1; font-size: 11px; padding: 12px; border-radius: 12px; font-weight: bold; text-decoration: none; text-align: center; border: 1px solid var(--border); color: #fff; background: rgba(255,255,255,0.05); }
         .btn-trailer { border-color: #ff0000; color: #ff0000; background: rgba(255,0,0,0.05); }
@@ -205,14 +204,14 @@
                     
                     <div class="intel-row">
                         ${trailer ? `<a href="https://www.youtube.com/watch?v=${trailer.key}" target="_blank" class="btn-intel btn-trailer">WATCH TRAILER</a>` : ''}
-                        <a href="https://www.imdb.com/title/${data.imdb_id}" target="_blank" class="btn-intel">IMDb</a>
+                        ${data.imdb_id ? `<a href="https://www.imdb.com/title/${data.imdb_id}" target="_blank" class="btn-intel">IMDb</a>` : ''}
                     </div>
 
                     <button class="btn-main" style="background:rgba(255, 68, 68, 0.1); color:#ff4444; border:1px solid rgba(255, 68, 68, 0.3); width:100%;" onclick="deleteItem(${idx})">ERASE RECORD</button>
-                    <div id="epArea" style="width:100%;"></div>
                 </div>`;
-            if(item.type === 'tv') loadEpisodes(idx);
-        } catch(e) { body.innerHTML = 'Intel restricted.'; }
+        } catch(e) { 
+            body.innerHTML = '<div style="text-align:center; padding:20px;">INTEL RESTRICTED: Check TMDB Key.</div>'; 
+        }
     }
 
     async function performFullSearch() {
